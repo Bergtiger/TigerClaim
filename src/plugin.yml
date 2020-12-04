@@ -1,0 +1,12 @@
+name: TigerClaim
+version: 1.0
+author: Bergtiger
+main: de.bergtiger.claim.TigerClaim
+api-version: 1.16
+description: Easy to Claim Regions.
+depend: [WorldGuard]
+
+commands:
+  claim:
+    aliases: [tclaim]
+    description: creates a new Claim
