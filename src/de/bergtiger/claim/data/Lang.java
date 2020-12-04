@@ -20,15 +20,11 @@ public enum Lang {
 	
 	NOPERMISSION		("&cYou have no Permission"),
 	
-	NOVALIDID			("&cNot a valid ButtonId &e'&4" + VALUE + "&e'"),
-	NOVALIDMATERIAL		("&cNot a valid Material &e'&4" + VALUE + "&e'"),
-	NOBUTTONFOUND		("&cCould not find Button&e[&6" + VALUE + "&e]"),
-	NOBUTTONS			("&cNo Buttons found."),
-	NOOPTION			("&cNot a valid Option &e'&4" + VALUE + "&e'"),
-	NOSUCHWORLD			("&e'&4" + VALUE + "&e' &cis not a World"),
+	NOARGUMENT			("&cNot a valid Option &e'&4" + VALUE + "&e'"),
 	NONUMBER			("&cNot a Number"),
 	NONUMBERVALUE		("&e'&4" + VALUE + "&e' &cis not a Number"),
-	
+	NOSUCHFLAG			("&e'&4" + VALUE + "&e' &cis not a Flag"),
+	NOPLAYER			("&cYou have to be a Player to perform this command."),
 	
 	FORMAT_TIME			("dd-MM-yyyy_HH:mm"),
 	
@@ -38,6 +34,12 @@ public enum Lang {
 	
 	CONFIG_SAVE_START	("Saving Config"),
 	CONFIG_SAVE_FINISH	("Finished saving"),
+	// Set
+	SET_SAVED			("&aSaved &6" + TYPE + "&f: &e" + VALUE),
+	SET_MISSING			("&cMissing values"),
+	SET_FLAG_SAVED		("&aSaved &eFlag &f(&6" + TYPE + "&f): &e" + VALUE),
+	SET_FLAG_REMOVED	("&cRemoved &eFlag &f(&6" + TYPE + "&f)"),
+	SET_FLAG_MISSING	("&cMissing flag value."),
 	// Commands
 	CMD_HEADER			("&a----<(&eTigerClaim&a)>----"),
 	CMD_FOOTER			("&a---------------------------"),
@@ -51,10 +53,16 @@ public enum Lang {
 	CMD_HOVER_RELOAD	("reloads TigerClaimPlugin(config and cache)"),
 	CMD_HOVER_PLUGIN	("shows plugin info"),
 	// Insert
-	INSERT_EXIST		("&cThere is already &4Button&e[&6" + VALUE + "&e] at this Block."),
-	INSERT_ERROR		("&cCould not create Button."),
-	INSERT_SUCCESS		("&aButton&f[&6" + VALUE + "&f] &acreated successfully."),
-	INSERT_HOVER		("&aShow Button&f[&6" + VALUE + "&f] &aoverview"),
+	INSERT_OVERLAPPING	("&cOverlapping Regions."),
+	INSERT_SUCCESS		("&aCreated Claim successfully."),
+	INSERT_CANCEL		("&cClaim canceled."),
+	INSERT_TEXT			("&eConfirm Claim&f: "),
+	INSERT_YES			("&aYes"),
+	INSERT_NO			(" &cNo"),
+	INSERT_HOVER_SUCCESS("&aShow Claim."),
+	INSERT_HOVER_TEXT	("&eClaim at your position."),
+	INSERT_HOVER_YES	("&ecreates Claim."),
+	INSERT_HOVER_NO		("&eabort Claim."),
 	// Reload
 	RELOAD_FINISHED		("&aReload finished."),
 	// PluginInfo

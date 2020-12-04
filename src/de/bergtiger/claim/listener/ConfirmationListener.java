@@ -38,7 +38,6 @@ public class ConfirmationListener implements Listener {
 	
 	@EventHandler
 	public void onConfirmation(PlayerCommandPreprocessEvent e) {
-		System.out.println("confirmation: " + e.getPlayer().getName() + ", " + e.getMessage());
 		// is something there
 		if(!e.isCancelled() && queue != null && !queue.isEmpty() && queue.containsKey(e.getPlayer())) {
 			if(e.getMessage().equalsIgnoreCase("/yes")) {
@@ -51,6 +50,7 @@ public class ConfirmationListener implements Listener {
 				queue.remove(e.getPlayer());
 				if(queue.isEmpty())
 					queue = null;
+				e.getPlayer().spigot().sendMessage(Lang.buildTC(Lang.INSERT_CANCEL.get()));
 				e.setCancelled(true);
 			}
 		}
@@ -62,6 +62,16 @@ public class ConfirmationListener implements Listener {
 				queue = new HashMap<Player, Confirmation>();
 			queue.put(con.getPlayer(), con);
 		}
+	}
+	
+	public void clearQueue() {
+		if(queue != null && !queue.isEmpty())
+			queue.clear();
+	}
+	
+	public void clearQueue(Player p) {
+		if(queue != null && !queue.isEmpty())
+			queue.remove(p);
 	}
 	
 	private void createRegion(Confirmation con) {
@@ -87,10 +97,10 @@ public class ConfirmationListener implements Listener {
 					region.setFlags(con.getFlags());
 				// Add Region to Manager - save
 				regions.addRegion(region);
-				con.getPlayer().spigot().sendMessage(Lang.buildTC("Saved Claim"));
+				con.getPlayer().spigot().sendMessage(Lang.buildTC(Lang.INSERT_SUCCESS.get(), "/rg i " + region.getId(), Lang.INSERT_HOVER_SUCCESS.get(), null));
 			} else {
 				// is overlapping
-				con.getPlayer().spigot().sendMessage(Lang.buildTC("Overlapping Regions"));
+				con.getPlayer().spigot().sendMessage(Lang.buildTC(Lang.INSERT_OVERLAPPING.get()));
 			}
 		}
 	}

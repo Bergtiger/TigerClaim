@@ -12,6 +12,7 @@ public class Cons {
 				
 		TIME		= "-time-",
 		FLAG		= "-flag-",
+		TYPE		= "-type-",
 		VALUE		= "-value-",
 
 		PATTERN		= "-pattern-",

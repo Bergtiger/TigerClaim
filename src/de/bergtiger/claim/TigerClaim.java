@@ -10,6 +10,7 @@ import de.bergtiger.claim.cmd.Claim;
 import de.bergtiger.claim.cmd.ClaimTabCompleter;
 import de.bergtiger.claim.data.Config;
 import de.bergtiger.claim.listener.ConfirmationListener;
+import de.bergtiger.claim.listener.PlayerListener;
 
 public class TigerClaim extends JavaPlugin {
 
@@ -30,5 +31,6 @@ public class TigerClaim extends JavaPlugin {
 		getCommand("claim").setTabCompleter(new ClaimTabCompleter());
 		// Listener
 		Bukkit.getPluginManager().registerEvents(ConfirmationListener.inst(), this);
+		Bukkit.getPluginManager().registerEvents(new PlayerListener(), this);
 	}
 }

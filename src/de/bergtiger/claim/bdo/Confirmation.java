@@ -20,15 +20,39 @@ public class Confirmation {
 	private final Player player;
 	private final Location location;
 	private final Integer radius;
+	private final Location locMin, locMax;
 	private final Boolean vert;
 	private final HashMap<Flag<?>, Object> flags;
+
+	public Confirmation(Player p, Location locMin, Location locMax, boolean expandVert, HashMap<Flag<?>, Object> flags) {
+		this.player = p;
+		this.locMin = locMin;
+		this.locMax = locMax;
+		this.location = null;
+		this.radius = null;
+		this.vert = expandVert;
+		this.flags = flags;
+		// Set PlayerName
+		if((flags != null) && !flags.isEmpty()) {
+			Iterator<Flag<?>> i = flags.keySet().iterator();
+			while(i.hasNext()) {
+				Flag<?> f = i.next();
+				Object o = flags.get(f);
+				if(o instanceof String && o.toString().contains("@p"))
+					flags.put(f, o.toString().replaceAll("@p", p.getName()));
+			}
+		}
+	}
 	
 	public Confirmation(Player p, Location loc, Integer r, boolean expandVert, HashMap<Flag<?>, Object> flags) {
 		this.player = p;
+		this.locMin = null;
+		this.locMax = null;
 		this.location = loc;
 		this.radius = r;
 		this.vert = expandVert;
 		this.flags = flags;
+		// Set PlayerName
 		if((flags != null) && !flags.isEmpty()) {
 			Iterator<Flag<?>> i = flags.keySet().iterator();
 			while(i.hasNext()) {
