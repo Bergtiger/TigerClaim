@@ -6,7 +6,7 @@ import static de.bergtiger.claim.data.Cons.VALUE;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import de.bergtiger.claim.TigerClaim;
+import de.bergtiger.claim.Claims;
 import de.bergtiger.claim.data.Config;
 import de.bergtiger.claim.data.Lang;
 import de.bergtiger.claim.data.Perm;
@@ -22,7 +22,7 @@ public class CmdPlugin {
 				p.spigot().sendMessage(Lang.buildTC(Lang.PLUGIN_HEADER.get()));
 				// Version
 				p.spigot().sendMessage(Lang.buildTC(
-						Lang.PLUGIN_VERSION.get().replace(VALUE, TigerClaim.inst().getDescription().getVersion())));
+						Lang.PLUGIN_VERSION.get().replace(VALUE, Claims.inst().getDescription().getVersion())));
 				// Radius
 				p.spigot()
 						.sendMessage(
@@ -66,7 +66,7 @@ public class CmdPlugin {
 				cs.sendMessage(Lang.PLUGIN_HEADER.get());
 				// Version
 				cs.sendMessage(
-						Lang.PLUGIN_VERSION.get().replace(VALUE, TigerClaim.inst().getDescription().getVersion()));
+						Lang.PLUGIN_VERSION.get().replace(VALUE, Claims.inst().getDescription().getVersion()));
 				// Radius
 				cs.sendMessage(Lang.PLUGIN_RADIUS.get().replace(VALUE,
 						c.hasValue(Config.REGION_RADIUS) ? c.getValue(Config.REGION_RADIUS) : "-"));

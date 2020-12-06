@@ -12,11 +12,11 @@ import de.bergtiger.claim.data.Config;
 import de.bergtiger.claim.listener.ConfirmationListener;
 import de.bergtiger.claim.listener.PlayerListener;
 
-public class TigerClaim extends JavaPlugin {
+public class Claims extends JavaPlugin {
 
-	private static TigerClaim instance;
+	private static Claims instance;
 	
-	public static TigerClaim inst() {
+	public static Claims inst() {
 		return instance;
 	}
 	
@@ -25,7 +25,7 @@ public class TigerClaim extends JavaPlugin {
 		instance = this;
 		// load config
 		Config.inst().loadConfig();
-		Logger.getLogger(TigerClaim.class.getName()).log(Level.INFO, "loaded config");
+		Logger.getLogger(Claims.class.getName()).log(Level.INFO, "loaded config");
 		// Commands
 		getCommand("claim").setExecutor(new Claim());
 		getCommand("claim").setTabCompleter(new ClaimTabCompleter());

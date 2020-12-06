@@ -15,22 +15,21 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Iterator;
 
+@Deprecated
 public class Confirmation {
 
 	private final Player player;
 	private final Location location;
-	private final Integer radius;
-	private final Location locMin, locMax;
+	private final Integer radius, gab;
 	private final Boolean vert;
 	private final HashMap<Flag<?>, Object> flags;
 	private int count = 0;
 
-	public Confirmation(Player p, Location locMin, Location locMax, boolean expandVert, HashMap<Flag<?>, Object> flags) {
+	public Confirmation(Player p, Location locMin, Location locMax, boolean expandVert, Integer gab, HashMap<Flag<?>, Object> flags) {
 		this.player = p;
-		this.locMin = locMin;
-		this.locMax = locMax;
 		this.location = null;
 		this.radius = null;
+		this.gab = null;
 		this.vert = expandVert;
 		this.flags = flags;
 		// Set PlayerName
@@ -45,12 +44,11 @@ public class Confirmation {
 		}
 	}
 	
-	public Confirmation(Player p, Location loc, Integer r, boolean expandVert, HashMap<Flag<?>, Object> flags) {
+	public Confirmation(Player p, Location loc, Integer r, Integer gab, boolean expandVert, HashMap<Flag<?>, Object> flags) {
 		this.player = p;
-		this.locMin = null;
-		this.locMax = null;
 		this.location = loc;
 		this.radius = r;
+		this.gab = gab;
 		this.vert = expandVert;
 		this.flags = flags;
 		// Set PlayerName
@@ -135,8 +133,16 @@ public class Confirmation {
 	 * Get Radius.
 	 * @return the r
 	 */
-	public Integer getR() {
+	public Integer getRadius() {
 		return radius;
+	}
+	
+	/**
+	 * Space between to regions.
+	 * @return
+	 */
+	public Integer getGab() {
+		return gab;
 	}
 	
 	public boolean isExpandVert() {

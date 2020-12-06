@@ -13,7 +13,7 @@ import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.protection.flags.Flag;
 import com.sk89q.worldguard.protection.flags.registry.FlagRegistry;
 
-import de.bergtiger.claim.TigerClaim;
+import de.bergtiger.claim.Claims;
 
 /**
  * 
@@ -32,7 +32,7 @@ public class Config {
 		return instance;
 	}
 
-	private TigerClaim plugin = TigerClaim.inst();
+	private Claims plugin = Claims.inst();
 	private HashMap<String, String> values;
 	private HashMap<Flag<?>, Object> flags;
 	
@@ -48,6 +48,7 @@ public class Config {
 	REGION_EXPAND_VERT	= CONFIG + ".Region.ExpandVert",
 	REGION_RADIUS		= CONFIG + ".Region.Radius",
 	REGION_FLAGS		= CONFIG + ".Region.Flags",
+	REGION_GAB			= CONFIG + ".Region.Gab",
 	
 	LANGUAGE			= CONFIG + ".Language",
 	PAGE_LENGTH			= CONFIG + ".PageLength",
