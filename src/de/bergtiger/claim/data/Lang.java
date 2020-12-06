@@ -55,7 +55,9 @@ public enum Lang {
 	// Insert
 	INSERT_OVERLAPPING	("&cOverlapping Regions."),
 	INSERT_SUCCESS		("&aCreated Claim successfully."),
+	INSERT_EXISTING		("&cClaim &e'&6" + VALUE + "&e' &calready exists."),
 	INSERT_CANCEL		("&cClaim canceled."),
+	INSERT_LIMIT		("&cYou reached your claim-limit&e[&6" + VALUE + "&e/&6" + LIMIT + "&e]"),
 	INSERT_TEXT			("&eConfirm Claim&f: "),
 	INSERT_YES			("&aYes"),
 	INSERT_NO			(" &cNo"),

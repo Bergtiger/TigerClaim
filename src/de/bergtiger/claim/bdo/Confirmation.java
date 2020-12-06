@@ -23,6 +23,7 @@ public class Confirmation {
 	private final Location locMin, locMax;
 	private final Boolean vert;
 	private final HashMap<Flag<?>, Object> flags;
+	private int count = 0;
 
 	public Confirmation(Player p, Location locMin, Location locMax, boolean expandVert, HashMap<Flag<?>, Object> flags) {
 		this.player = p;
@@ -129,7 +130,7 @@ public class Confirmation {
 	public Integer getMaxZ() {
 		return Math.max(location.getBlockZ() - radius, location.getBlockZ() + radius);
 	}
-
+	
 	/**
 	 * Get Radius.
 	 * @return the r
@@ -144,5 +145,13 @@ public class Confirmation {
 	
 	public HashMap<Flag<?>, Object> getFlags() {
 		return flags;
+	}
+	
+	public void addCount() {
+		count++;
+	}
+	
+	public int getCount() {
+		return count;
 	}
 }

@@ -14,6 +14,7 @@ public class Cons {
 		FLAG		= "-flag-",
 		TYPE		= "-type-",
 		VALUE		= "-value-",
+		LIMIT		= "-limit-",
 
 		PATTERN		= "-pattern-",
 		PLAYER		= "-player-",

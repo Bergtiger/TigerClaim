@@ -17,6 +17,8 @@ public enum Perm {
 	
 	CLAIM_SET		("tclaim.set"),
 	CLAIM_CLAIM		("tclaim.claim"),
+	CLAIM_LIMIT		("tclaim.limit"),
+	CLAIM_LIMITLESS	("tclaim.nolimit"),
 	CLAIM_PLUGIN	("tbuttons.plugin"),
 	CLAIM_RELOAD	("tbuttons.reload"),
 	CLAIM_WORLDEDIT	("tbuttons.worldedit");
