@@ -28,25 +28,33 @@ public class CmdPlugin {
 						.sendMessage(
 								Lang.buildTC(
 										Lang.PLUGIN_RADIUS.get().replace(VALUE,
-												c.hasValue(Config.REGION_RADIUS) ? c.getValue(Config.REGION_RADIUS)
+												c.hasValue(Config.REGION_RADIUS) ? c.getValue(Config.REGION_RADIUS).toString()
 														: "-"),
 										null, Lang.PLUGIN_HOVER_RADIUS.get(), "/claim set radius "));
+				// Gap
+				p.spigot()
+						.sendMessage(
+								Lang.buildTC(
+										Lang.PLUGIN_GAP.get().replace(VALUE,
+												c.hasValue(Config.REGION_GAP) ? c.getValue(Config.REGION_GAP).toString()
+														: "-"),
+										null, Lang.PLUGIN_HOVER_GAP.get(), "/claim set gap "));
 				// Expand Vert
 				p.spigot()
 						.sendMessage(Lang.buildTC(
 								Lang.PLUGIN_EXPANDVERT.get().replace(VALUE,
 										c.hasValue(Config.REGION_EXPAND_VERT) ? c
-												.getValue(Config.REGION_EXPAND_VERT) : "-"),
+												.getValue(Config.REGION_EXPAND_VERT).toString() : "-"),
 								null, Lang.PLUGIN_HOVER_EXPANDVERT.get(),
 								"/claim set expandvert " + (c.hasValue(Config.REGION_EXPAND_VERT)
-										? !Boolean.valueOf(c.getValue(Config.REGION_EXPAND_VERT))
+										? !Boolean.valueOf(c.getValue(Config.REGION_EXPAND_VERT).toString())
 										: "")));
 				// Pattern
 				p.spigot()
 						.sendMessage(
 								Lang.buildTC(
 										Lang.PLUGIN_PATTERN.get().replace(VALUE,
-												c.hasValue(Config.REGION_PATTERN) ? c.getValue(Config.REGION_PATTERN)
+												c.hasValue(Config.REGION_PATTERN) ? c.getValue(Config.REGION_PATTERN).toString()
 														: "-"),
 										null, Lang.PLUGIN_HOVER_PATTERN.get(), "/claim set pattern "));
 				// Flags
@@ -69,13 +77,16 @@ public class CmdPlugin {
 						Lang.PLUGIN_VERSION.get().replace(VALUE, Claims.inst().getDescription().getVersion()));
 				// Radius
 				cs.sendMessage(Lang.PLUGIN_RADIUS.get().replace(VALUE,
-						c.hasValue(Config.REGION_RADIUS) ? c.getValue(Config.REGION_RADIUS) : "-"));
+						c.hasValue(Config.REGION_RADIUS) ? c.getValue(Config.REGION_RADIUS).toString() : "-"));
+				// Gap
+				cs.sendMessage(Lang.PLUGIN_GAP.get().replace(VALUE,
+						c.hasValue(Config.REGION_GAP) ? c.getValue(Config.REGION_GAP).toString() : "-"));
 				// Expand Vert
 				cs.sendMessage(Lang.PLUGIN_EXPANDVERT.get().replace(VALUE,
-						c.hasValue(Config.REGION_EXPAND_VERT) ? c.getValue(Config.REGION_EXPAND_VERT) : "-"));
+						c.hasValue(Config.REGION_EXPAND_VERT) ? c.getValue(Config.REGION_EXPAND_VERT).toString() : "-"));
 				// Pattern
 				cs.sendMessage(Lang.PLUGIN_PATTERN.get().replace(VALUE,
-						c.hasValue(Config.REGION_PATTERN) ? c.getValue(Config.REGION_PATTERN) : "-"));
+						c.hasValue(Config.REGION_PATTERN) ? c.getValue(Config.REGION_PATTERN).toString() : "-"));
 				// Flags
 				cs.sendMessage(Lang.PLUGIN_FLAGS.get());
 				if (c.hasFlags()) {

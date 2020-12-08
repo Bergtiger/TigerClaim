@@ -43,16 +43,16 @@ public abstract class TigerClaim {
 			flags = null;
 		// IdPattern
 		if(c.hasValue(Config.REGION_PATTERN))
-			pattern = c.getValue(Config.REGION_PATTERN);
+			pattern = c.getValue(Config.REGION_PATTERN).toString();
 		else
 			pattern = null;
 		// Gab
-		if(c.hasValue(Config.REGION_GAB)) {
+		if(c.hasValue(Config.REGION_GAP)) {
 			Integer i = null;
 			try {
-				i = Integer.valueOf(c.getValue(Config.REGION_GAB));
+				i = Integer.valueOf(c.getValue(Config.REGION_GAP).toString());
 			} catch (NumberFormatException e) {
-				Claims.inst().getLogger().log(Level.SEVERE, Config.REGION_GAB + " has to be a Number.", e);
+				Claims.inst().getLogger().log(Level.SEVERE, Config.REGION_GAP + " has to be a Number.", e);
 			}
 			gap = i;
 		}
@@ -60,7 +60,7 @@ public abstract class TigerClaim {
 			gap = null;
 		// Expand Vert
 		if(c.hasValue(Config.REGION_EXPAND_VERT))
-			expandVert = Boolean.valueOf(c.getValue(Config.REGION_EXPAND_VERT));
+			expandVert = Boolean.valueOf(c.getValue(Config.REGION_EXPAND_VERT).toString());
 		else
 			expandVert = false;
 	}

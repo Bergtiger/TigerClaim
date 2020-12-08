@@ -10,7 +10,11 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import com.sk89q.worldguard.WorldGuard;
+import com.sk89q.worldguard.protection.flags.BooleanFlag;
+import com.sk89q.worldguard.protection.flags.DoubleFlag;
 import com.sk89q.worldguard.protection.flags.Flag;
+import com.sk89q.worldguard.protection.flags.IntegerFlag;
+import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.sk89q.worldguard.protection.flags.registry.FlagRegistry;
 
 import de.bergtiger.claim.Claims;
@@ -23,85 +27,101 @@ import de.bergtiger.claim.Claims;
 public class Config {
 
 	private static Config instance;
-	
-	private Config() {};
-	
+
+	private Config() {
+	};
+
 	public static Config inst() {
-		if(instance == null)
+		if (instance == null)
 			instance = new Config();
 		return instance;
 	}
 
 	private Claims plugin = Claims.inst();
-	private HashMap<String, String> values;
+	private HashMap<String, Object> values;
 	private HashMap<Flag<?>, Object> flags;
-	
-	public static final String	
+
+	public static final String
 	// Langues
-	LANG				= "lang",
-	DE					= "DE",
-	EN					= "EN",
-	// Config
-	CONFIG				= "config",
-	// Region
-	REGION_PATTERN		= CONFIG + ".Region.Pattern",
-	REGION_EXPAND_VERT	= CONFIG + ".Region.ExpandVert",
-	REGION_RADIUS		= CONFIG + ".Region.Radius",
-	REGION_FLAGS		= CONFIG + ".Region.Flags",
-	REGION_GAB			= CONFIG + ".Region.Gab",
-	
-	LANGUAGE			= CONFIG + ".Language",
-	PAGE_LENGTH			= CONFIG + ".PageLength",
-	LIMIT				= CONFIG + ".Limit";
-	
+	LANG = "lang", DE = "DE", EN = "EN",
+			// Config
+			CONFIG = "config",
+			// Region
+			REGION_PATTERN = CONFIG + ".Region.Pattern", REGION_EXPAND_VERT = CONFIG + ".Region.ExpandVert",
+			REGION_RADIUS = CONFIG + ".Region.Radius", REGION_FLAGS = CONFIG + ".Region.Flags",
+			REGION_GAP = CONFIG + ".Region.Gap",
+
+			LANGUAGE = CONFIG + ".Language", PAGE_LENGTH = CONFIG + ".PageLength", LIMIT = CONFIG + ".Limit";
+
 	public Boolean hasValue(String key) {
-		if((values != null) && (!values.isEmpty())) {
+		if ((values != null) && (!values.isEmpty())) {
 			return values.containsKey(key);
 		}
 		return false;
 	}
-	
+
 	public boolean hasFlags() {
 		return flags != null && !flags.isEmpty();
 	}
-	
+
 	public HashMap<Flag<?>, Object> getFlags() {
 		return flags;
 	}
-	
+
 	public void setFlag(Flag<?> flag, Object o) {
-		if(flag != null) {
-			if((o == null) && (flags != null) && (flags.containsKey(flag))) {
+		if (flag != null) {
+			if ((o == null) && (flags != null) && (flags.containsKey(flag))) {
 				flags.remove(flag);
 			} else {
-				if(flags == null)
-					flags = new HashMap<Flag<?>, Object>();
-				flags.put(flag, o);
+				if (o != null) {
+					// Check flag value
+					try {
+						if (flags == null)
+							flags = new HashMap<Flag<?>, Object>();
+						if (flag instanceof StateFlag) {
+							flags.put(flag, StateFlag.State.valueOf(o.toString().toUpperCase()));
+						} else if (flag instanceof BooleanFlag) {
+							flags.put(flag, Boolean.valueOf(o.toString()));
+						} else if (flag instanceof IntegerFlag) {
+							flags.put(flag, Integer.valueOf(o.toString()));
+						} else if (flag instanceof DoubleFlag) {
+							flags.put(flag, Double.valueOf(o.toString()));
+						} else {
+							flags.put(flag, o);
+						}
+					} catch (NumberFormatException e) {
+						Claims.inst().getLogger().log(Level.WARNING,
+								o + " is not a valid number value for Flag (" + flag.getName() + ")");
+					} catch (Exception e) {
+						Claims.inst().getLogger().log(Level.WARNING,
+								o + " is not a valid value for Flag (" + flag.getName() + ")");
+					}
+				}
 			}
 		}
 	}
-	
-	public String getValue(String key) {
-		if((values != null) && (!values.isEmpty())) {
+
+	public Object getValue(String key) {
+		if ((values != null) && (!values.isEmpty())) {
 			return values.get(key);
 		}
 		return null;
 	}
-	
-	public void setValue(String key, String value) {
-		if((key != null) && (!key.isEmpty())) {
-			if(values == null)
+
+	public void setValue(String key, Object value) {
+		if ((key != null) && (!key.isEmpty())) {
+			if (values == null)
 				values = new HashMap<>();
 			values.put(key, value);
 		}
 	}
-	
+
 	protected void checkConfigBoolean(FileConfiguration cfg, String path, Boolean value) {
-		if((cfg != null) && (path != null) && (!path.isEmpty()) && (value != null)) {
-			if(cfg.contains(path)) {
+		if ((cfg != null) && (path != null) && (!path.isEmpty()) && (value != null)) {
+			if (cfg.contains(path)) {
 				// Check value
 				String s = cfg.getString(path);
-				if(!(s.equalsIgnoreCase("true") || s.equalsIgnoreCase("false")))
+				if (!(s.equalsIgnoreCase("true") || s.equalsIgnoreCase("false")))
 					cfg.set(path, value);
 			} else {
 				// Add Value
@@ -109,16 +129,16 @@ public class Config {
 			}
 		}
 	}
-	
+
 	protected void checkConfigInteger(FileConfiguration cfg, String path, Integer value) {
-		if((cfg != null) && (path != null) && (!path.isEmpty())) {
-			if(cfg.contains(path)) {
+		if ((cfg != null) && (path != null) && (!path.isEmpty())) {
+			if (cfg.contains(path)) {
 				// Check value
 				String s = cfg.getString(path);
 				try {
 					Integer.valueOf(s);
 				} catch (NumberFormatException e) {
-					if(!s.equalsIgnoreCase("false"))
+					if (!s.equalsIgnoreCase("false"))
 						cfg.set(path, (value != null) ? value : false);
 				}
 			} else {
@@ -127,13 +147,13 @@ public class Config {
 			}
 		}
 	}
-	
+
 	protected void checkConfigString(FileConfiguration cfg, String path, String value) {
-		if((cfg != null) && (path != null) && (!path.isEmpty())) {
-			if(cfg.contains(path)) {
+		if ((cfg != null) && (path != null) && (!path.isEmpty())) {
+			if (cfg.contains(path)) {
 				// Check value
 				String s = cfg.getString(path);
-				if(s == null) {
+				if (s == null) {
 					cfg.set(path, value);
 				}
 			} else {
@@ -142,13 +162,13 @@ public class Config {
 			}
 		}
 	}
-	
+
 	protected void checkConfigLanguage(FileConfiguration cfg, String path) {
-		if((cfg != null) && (path != null) && (!path.isEmpty())) {
-			if(cfg.contains(path)) {
+		if ((cfg != null) && (path != null) && (!path.isEmpty())) {
+			if (cfg.contains(path)) {
 				// Check value
 				String s = cfg.getString(path);
-				if(!((s != null) && (s.equalsIgnoreCase(DE) || s.equalsIgnoreCase(EN))))
+				if (!((s != null) && (s.equalsIgnoreCase(DE) || s.equalsIgnoreCase(EN))))
 					cfg.set(path, EN);
 			} else {
 				// Add value
@@ -156,7 +176,7 @@ public class Config {
 			}
 		}
 	}
-	
+
 	public void checkConfig() {
 		FileConfiguration cfg = plugin.getConfig();
 		if (cfg != null) {
@@ -180,17 +200,18 @@ public class Config {
 		if ((cfg != null) && (cfg.contains(CONFIG))) {
 			checkConfig();
 			for (String k : cfg.getKeys(true)) {
-				if(k.contains(REGION_FLAGS)) {
-					System.out.println("Load flag: " + k);
+				if (k.contains(REGION_FLAGS)) {
 					FlagRegistry registry = WorldGuard.getInstance().getFlagRegistry();
 					Flag<?> f = registry.get(k.replace(REGION_FLAGS + ".", ""));
-					if(f != null) {
+					if (f != null) {
 						setFlag(f, cfg.getString(k));
 					}
 				} else {
-					if (values == null)
-						values = new HashMap<>();
-					values.put(k, cfg.getString(k));
+					if (!cfg.isConfigurationSection(k)) {
+						if (values == null)
+							values = new HashMap<>();
+						values.put(k, cfg.get(k));
+					}
 				}
 			}
 		} else {
@@ -206,7 +227,7 @@ public class Config {
 		loadLanguage();
 		Logger.getLogger(Config.class.getName()).log(Level.FINE, Lang.CONFIG_LOAD_FINISH.get());
 	}
-	
+
 	public void loadLanguage() {
 		File file = new File("plugins/" + plugin.getName() + "/" + getValue(LANGUAGE) + ".yml");
 		if (file.exists()) {
@@ -236,24 +257,24 @@ public class Config {
 		if (cfg != null) {
 			Logger.getLogger(Config.class.getName()).log(Level.FINE, Lang.CONFIG_SAVE_START.get());
 			// Region
-			cfg.addDefault(REGION_PATTERN, Cons.PLAYER + "_claim_" + Cons.TIME);
-			cfg.addDefault(REGION_RADIUS, 39);
-			cfg.addDefault(REGION_EXPAND_VERT, true);
-			
+			if (!cfg.contains(REGION_PATTERN))
+				cfg.addDefault(REGION_PATTERN, Cons.PLAYER + "_claim_" + Cons.TIME);
+			if (!cfg.contains(REGION_RADIUS))
+				cfg.addDefault(REGION_RADIUS, 39);
+			if (!cfg.contains(REGION_EXPAND_VERT))
+				cfg.addDefault(REGION_EXPAND_VERT, true);
 			// Values
-			if(values != null && !values.isEmpty()) {
+			if (values != null && !values.isEmpty()) {
 				// Set Values
-				values.forEach((k,v) -> {
-					cfg.set(k, v);
-				});
+				values.forEach((k, v) -> cfg.set(k, v));
 			}
 			// Flags
-			if(cfg.contains(REGION_FLAGS))
+			if (cfg.contains(REGION_FLAGS))
 				cfg.set(REGION_FLAGS, null);
-			if(flags != null && !flags.isEmpty()) {
+			if (flags != null && !flags.isEmpty()) {
 				// Set Flags
 				flags.forEach((f, v) -> {
-					if(v != null)
+					if (v != null)
 						cfg.set(REGION_FLAGS + "." + f.getName(), v.toString());
 				});
 			}

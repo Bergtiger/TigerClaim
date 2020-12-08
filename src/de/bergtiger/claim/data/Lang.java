@@ -72,12 +72,14 @@ public enum Lang {
 	PLUGIN_FOOTER		("&a------------------------"),
 	PLUGIN_VERSION		("&aVersion&e: &6" + VALUE),
 	PLUGIN_RADIUS		("&aRadius&e: &6" + VALUE),
+	PLUGIN_GAP			("&aGap&e: &6" + VALUE),
 	PLUGIN_EXPANDVERT	("&aExpandVert&e: &6" + VALUE),
 	PLUGIN_PATTERN		("&aRegionPattern&e: &6" + VALUE),
 	PLUGIN_FLAGS		("&aFlags"),
 	PLUGIN_FLAG_LIST	("  &6" + FLAG + "&e: &f" + VALUE),
 	// PluginInfo Hover
 	PLUGIN_HOVER_RADIUS		("&aSet radius"),
+	PLUGIN_HOVER_GAP		("&aSet gap between claim and other regions"),
 	PLUGIN_HOVER_EXPANDVERT	("&aChange expand vertical"),
 	PLUGIN_HOVER_PATTERN	("&aSet a new RegionPattern"),
 	PLUGIN_HOVER_FLAGS		("&aSet a Flag");

@@ -14,6 +14,7 @@ import com.google.common.collect.Lists;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.domains.DefaultDomain;
+import com.sk89q.worldguard.protection.flags.Flag;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import com.sk89q.worldguard.protection.regions.RegionContainer;
@@ -25,6 +26,7 @@ import de.bergtiger.claim.data.Perm;
 
 import static de.bergtiger.claim.data.Cons.VALUE;
 import static de.bergtiger.claim.data.Cons.LIMIT;
+import static de.bergtiger.claim.data.Cons.PLAYER;
 
 public class ConfirmationListener implements Listener {
 
@@ -157,8 +159,15 @@ public class ConfirmationListener implements Listener {
 					DefaultDomain owners = region.getOwners();
 					owners.addPlayer(tc.getPlayer().getUniqueId());
 					// Add Flags
-					if (tc.getFlags() != null)
-						region.setFlags(tc.getFlags());
+					if (tc.getFlags() != null) {
+						HashMap<Flag<?>, Object> flags = new HashMap<>();
+						tc.getFlags().forEach((f,v) -> {
+							if(v instanceof String)
+								v = v.toString().replace("@p", tc.getPlayer().getName()).replace(PLAYER, tc.getPlayer().getName());
+							flags.put(f, v);
+						});
+						region.setFlags(flags);
+					}
 					// Add Region to Manager - save
 					regions.addRegion(region);
 					tc.getPlayer().spigot().sendMessage(Lang.buildTC(Lang.INSERT_SUCCESS.get(),

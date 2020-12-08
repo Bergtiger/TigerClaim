@@ -27,7 +27,7 @@ public class TigerClaimRadius extends TigerClaim {
 		if(Config.inst().hasValue(Config.REGION_RADIUS)) {
 			int r = 0;
 			try {
-				r = Integer.valueOf(Config.inst().getValue(Config.REGION_RADIUS));
+				r = Integer.valueOf(Config.inst().getValue(Config.REGION_RADIUS).toString());
 			} catch (NumberFormatException e) {
 				Claims.inst().getLogger().log(Level.SEVERE, Config.REGION_RADIUS + " has to be a Number.", e);
 			}
