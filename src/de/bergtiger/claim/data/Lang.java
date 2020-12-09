@@ -25,9 +25,6 @@ public enum Lang {
 	NONUMBERVALUE		("&e'&4" + VALUE + "&e' &cis not a Number"),
 	NOSUCHFLAG			("&e'&4" + VALUE + "&e' &cis not a Flag"),
 	NOPLAYER			("&cYou have to be a Player to perform this command."),
-	
-	FORMAT_TIME			("dd-MM-yyyy_HH:mm"),
-	
 	// Config
 	CONFIG_LOAD_START	("Loading Config"),
 	CONFIG_LOAD_FINISH	("Finished loading"),
@@ -37,6 +34,7 @@ public enum Lang {
 	// Set
 	SET_SAVED			("&aSaved &6" + TYPE + "&f: &e" + VALUE),
 	SET_MISSING			("&cMissing values"),
+	SET_TIME_FAILED		("&cCan't use &e'&4" + VALUE + "&e' &cas time pattern."),
 	SET_FLAG_SAVED		("&aSaved &eFlag &f(&6" + TYPE + "&f): &e" + VALUE),
 	SET_FLAG_REMOVED	("&cRemoved &eFlag &f(&6" + TYPE + "&f)"),
 	SET_FLAG_MISSING	("&cMissing flag value."),
@@ -74,15 +72,17 @@ public enum Lang {
 	PLUGIN_RADIUS		("&aRadius&e: &6" + VALUE),
 	PLUGIN_GAP			("&aGap&e: &6" + VALUE),
 	PLUGIN_EXPANDVERT	("&aExpandVert&e: &6" + VALUE),
-	PLUGIN_PATTERN		("&aRegionPattern&e: &6" + VALUE),
+	PLUGIN_PATTERN_ID	("&aRegionPattern&e: &6" + VALUE),
+	PLUGIN_PATTERN_TIME	("&aTimePattern&e: &6" + VALUE),
 	PLUGIN_FLAGS		("&aFlags"),
 	PLUGIN_FLAG_LIST	("  &6" + FLAG + "&e: &f" + VALUE),
 	// PluginInfo Hover
-	PLUGIN_HOVER_RADIUS		("&aSet radius"),
-	PLUGIN_HOVER_GAP		("&aSet gap between claim and other regions"),
-	PLUGIN_HOVER_EXPANDVERT	("&aChange expand vertical"),
-	PLUGIN_HOVER_PATTERN	("&aSet a new RegionPattern"),
-	PLUGIN_HOVER_FLAGS		("&aSet a Flag");
+	PLUGIN_HOVER_RADIUS			("&aSet radius"),
+	PLUGIN_HOVER_GAP			("&aSet gap between claim and other regions"),
+	PLUGIN_HOVER_EXPANDVERT		("&aChange expand vertical"),
+	PLUGIN_HOVER_PATTERN_ID		("&aSet a new region pattern"),
+	PLUGIN_HOVER_PATTERN_TIME	("&aSet a new time pattern"),
+	PLUGIN_HOVER_FLAGS			("&aSet a flag");
 	
 	private String value;
 	

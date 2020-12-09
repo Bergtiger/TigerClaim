@@ -3,10 +3,12 @@ package de.bergtiger.claim.cmd;
 import static de.bergtiger.claim.data.Cons.TYPE;
 import static de.bergtiger.claim.data.Cons.VALUE;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 import org.bukkit.command.CommandSender;
 
 import com.sk89q.worldguard.WorldGuard;
-import com.sk89q.worldguard.protection.flags.BooleanFlag;
 import com.sk89q.worldguard.protection.flags.DoubleFlag;
 import com.sk89q.worldguard.protection.flags.Flag;
 import com.sk89q.worldguard.protection.flags.IntegerFlag;
@@ -20,7 +22,7 @@ import de.bergtiger.claim.data.Perm;
 
 public class CmdSet {
 
-	public static final String CMD_GAP = "gap", CMD_RADIUS = "radius", CMD_FLAG = "flag", CMD_PATTERN = "pattern",
+	public static final String CMD_GAP = "gap", CMD_RADIUS = "radius", CMD_FLAG = "flag", CMD_TIME = "time", CMD_PATTERN = "pattern",
 			CMD_EXPAND_VERT = "expandvert";
 
 	/**
@@ -53,6 +55,19 @@ public class CmdSet {
 								c.getValue(Config.REGION_GAP).toString()));
 					} catch (NumberFormatException e) {
 						cs.sendMessage(Lang.NONUMBERVALUE.get().replace(VALUE, args[2]));
+					}
+					break;
+				}
+				case CMD_TIME: {
+					String timePattern = ClaimUtils.arrayToString(args, 2);
+					try {
+						DateTimeFormatter.ofPattern(timePattern).format(LocalDateTime.now());
+						c.setValue(Config.TIME_PATTERN, timePattern);
+						c.saveConfig();
+						cs.sendMessage(Lang.SET_SAVED.get().replace(TYPE, CMD_TIME).replace(VALUE,
+								c.getValue(Config.TIME_PATTERN).toString()));
+					} catch (Exception e) {
+						cs.sendMessage(Lang.SET_TIME_FAILED.get().replace(VALUE, timePattern));
 					}
 					break;
 				}

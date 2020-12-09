@@ -42,16 +42,16 @@ public class Config {
 	private HashMap<Flag<?>, Object> flags;
 
 	public static final String
-	// Langues
-	LANG = "lang", DE = "DE", EN = "EN",
 			// Config
 			CONFIG = "config",
+			// Time
+			TIME_PATTERN = CONFIG + ".Time.Pattern",
 			// Region
-			REGION_PATTERN = CONFIG + ".Region.Pattern", REGION_EXPAND_VERT = CONFIG + ".Region.ExpandVert",
-			REGION_RADIUS = CONFIG + ".Region.Radius", REGION_FLAGS = CONFIG + ".Region.Flags",
-			REGION_GAP = CONFIG + ".Region.Gap",
-
-			LANGUAGE = CONFIG + ".Language", PAGE_LENGTH = CONFIG + ".PageLength", LIMIT = CONFIG + ".Limit";
+			REGION_PATTERN = CONFIG + ".Region.Pattern",
+			REGION_EXPAND_VERT = CONFIG + ".Region.ExpandVert",
+			REGION_RADIUS = CONFIG + ".Region.Radius",
+			REGION_FLAGS = CONFIG + ".Region.Flags",
+			REGION_GAP = CONFIG + ".Region.Gap";
 
 	public Boolean hasValue(String key) {
 		if ((values != null) && (!values.isEmpty())) {
@@ -163,28 +163,14 @@ public class Config {
 		}
 	}
 
-	protected void checkConfigLanguage(FileConfiguration cfg, String path) {
-		if ((cfg != null) && (path != null) && (!path.isEmpty())) {
-			if (cfg.contains(path)) {
-				// Check value
-				String s = cfg.getString(path);
-				if (!((s != null) && (s.equalsIgnoreCase(DE) || s.equalsIgnoreCase(EN))))
-					cfg.set(path, EN);
-			} else {
-				// Add value
-				cfg.addDefault(path, EN);
-			}
-		}
-	}
-
 	public void checkConfig() {
 		FileConfiguration cfg = plugin.getConfig();
 		if (cfg != null) {
 			// Region
 			checkConfigBoolean(cfg, REGION_EXPAND_VERT, true);
 			checkConfigInteger(cfg, REGION_RADIUS, 39);
-			// Language
-			checkConfigLanguage(cfg, LANGUAGE);
+			checkConfigInteger(cfg, REGION_GAP, 39);
+
 			cfg.options().copyDefaults(true);
 			cfg.options().copyHeader(true);
 			plugin.saveConfig();
@@ -229,7 +215,7 @@ public class Config {
 	}
 
 	public void loadLanguage() {
-		File file = new File("plugins/" + plugin.getName() + "/" + getValue(LANGUAGE) + ".yml");
+		File file = new File("plugins/" + plugin.getName() + "/language.yml");
 		if (file.exists()) {
 			YamlConfiguration cfg = YamlConfiguration.loadConfiguration(file);
 			for (Lang l : Lang.values()) {
@@ -256,18 +242,22 @@ public class Config {
 		FileConfiguration cfg = plugin.getConfig();
 		if (cfg != null) {
 			Logger.getLogger(Config.class.getName()).log(Level.FINE, Lang.CONFIG_SAVE_START.get());
+			// Time
+			if(!cfg.contains(TIME_PATTERN))
+				cfg.addDefault(TIME_PATTERN, "dd-MM-yyyy");
 			// Region
 			if (!cfg.contains(REGION_PATTERN))
 				cfg.addDefault(REGION_PATTERN, Cons.PLAYER + "_claim_" + Cons.TIME);
 			if (!cfg.contains(REGION_RADIUS))
 				cfg.addDefault(REGION_RADIUS, 39);
+			if (!cfg.contains(REGION_GAP))
+				cfg.addDefault(REGION_GAP, 10);
 			if (!cfg.contains(REGION_EXPAND_VERT))
 				cfg.addDefault(REGION_EXPAND_VERT, true);
 			// Values
-			if (values != null && !values.isEmpty()) {
+			if (values != null && !values.isEmpty())
 				// Set Values
 				values.forEach((k, v) -> cfg.set(k, v));
-			}
 			// Flags
 			if (cfg.contains(REGION_FLAGS))
 				cfg.set(REGION_FLAGS, null);
@@ -278,8 +268,7 @@ public class Config {
 						cfg.set(REGION_FLAGS + "." + f.getName(), v.toString());
 				});
 			}
-			// Other
-			cfg.addDefault(LANGUAGE, EN);
+			// Options
 			cfg.options().header(plugin.getName() + " (Version: " + plugin.getDescription().getVersion() + ")");
 			cfg.options().copyDefaults(true);
 			cfg.options().copyHeader(true);
@@ -289,7 +278,7 @@ public class Config {
 	}
 
 	public void saveLanguage() {
-		File file = new File("plugins/" + plugin.getName() + "/" + getValue(LANGUAGE) + ".yml");
+		File file = new File("plugins/" + plugin.getName() + "/language.yml");
 		if (!file.exists()) {
 			file.getParentFile().mkdirs();
 		}

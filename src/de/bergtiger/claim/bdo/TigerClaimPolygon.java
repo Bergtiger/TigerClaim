@@ -71,7 +71,6 @@ public class TigerClaimPolygon extends TigerClaim {
 					.map(p -> (Integer.toString(p.getX()) + Integer.toString(p.getZ()))).collect(Collectors.joining("\n")) : "-");
 	}
 	
-	
 	private Vector2 intersection(Vector2 a, Vector2 b, Vector2 c) {
 		Vector2 ab = a.subtract(b);
 		Vector2 o = orthogonal(ab, 90, getGap());

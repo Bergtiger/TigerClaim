@@ -147,7 +147,7 @@ public class ConfirmationListener implements Listener {
 						}).max().getAsInt();
 			} catch (NoSuchElementException e) {
 			}
-			if ((limit != null) && (tc.getCount() < limit)) {
+			if (Perm.hasPermission(tc.getPlayer(), Perm.CLAIM_LIMITLESS) || ((limit != null) && (tc.getCount() < limit))) {
 				// Can claim
 				List<ProtectedRegion> overlapping = region.getIntersectingRegions(candidates);
 				// if overlapping is empty -> save region

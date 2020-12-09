@@ -9,6 +9,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import de.bergtiger.claim.cmd.Claim;
 import de.bergtiger.claim.cmd.ClaimTabCompleter;
 import de.bergtiger.claim.data.Config;
+import de.bergtiger.claim.data.ReadMe;
 import de.bergtiger.claim.listener.ConfirmationListener;
 import de.bergtiger.claim.listener.PlayerListener;
 
@@ -26,6 +27,8 @@ public class Claims extends JavaPlugin {
 		// load config
 		Config.inst().loadConfig();
 		Logger.getLogger(Claims.class.getName()).log(Level.INFO, "loaded config");
+		// save ReadMe
+		ReadMe.save();
 		// Commands
 		getCommand("claim").setExecutor(new Claim());
 		getCommand("claim").setTabCompleter(new ClaimTabCompleter());

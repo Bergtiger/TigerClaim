@@ -15,7 +15,6 @@ import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 
 import de.bergtiger.claim.Claims;
 import de.bergtiger.claim.data.Config;
-import de.bergtiger.claim.data.Lang;
 
 import static de.bergtiger.claim.data.Cons.PLAYER;
 import static de.bergtiger.claim.data.Cons.TIME;
@@ -27,6 +26,7 @@ public abstract class TigerClaim {
 	private final HashMap<Flag<?>, Object> flags;
 	private final Boolean expandVert;
 	private final String pattern;
+	private final String timePattern;
 	private final Integer gap;
 	
 	private Integer count = 0;
@@ -41,6 +41,11 @@ public abstract class TigerClaim {
 			flags = c.getFlags();
 		else
 			flags = null;
+		// timePattern
+		if(c.hasValue(Config.TIME_PATTERN))
+			timePattern = c.getValue(Config.TIME_PATTERN).toString();
+		else
+			timePattern = "dd-MM-yyyy";
 		// IdPattern
 		if(c.hasValue(Config.REGION_PATTERN))
 			pattern = c.getValue(Config.REGION_PATTERN).toString();
@@ -65,10 +70,11 @@ public abstract class TigerClaim {
 			expandVert = false;
 	}
 	
-	public TigerClaim(@Nonnull Player player, World world, HashMap<Flag<?>, Object> flags, String pattern, Integer gab, Boolean expantVert) {
+	public TigerClaim(@Nonnull Player player, World world, HashMap<Flag<?>, Object> flags, String time, String pattern, Integer gab, Boolean expantVert) {
 		this.player = player;
 		this.world = world;
 		this.flags = flags;
+		this.timePattern = time;
 		this.pattern = pattern;
 		this.gap = gab;
 		this.expandVert = expantVert;
@@ -120,7 +126,7 @@ public abstract class TigerClaim {
 	 */
 	public String getId() {
 		if(pattern != null)
-			return pattern.replace(PLAYER, player.getName()).replace(TIME, DateTimeFormatter.ofPattern(Lang.FORMAT_TIME.get()).format(LocalDateTime.now()));
+			return pattern.replace(PLAYER, player.getName()).replace(TIME, DateTimeFormatter.ofPattern(timePattern).format(LocalDateTime.now()));
 		return player.getName();
 	}
 	
