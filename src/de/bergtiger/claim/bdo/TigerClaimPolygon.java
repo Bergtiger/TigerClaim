@@ -14,6 +14,9 @@ import com.sk89q.worldedit.regions.Polygonal2DRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 
+import de.bergtiger.claim.data.Lang;
+import static de.bergtiger.claim.data.Cons.*;
+
 public class TigerClaimPolygon extends TigerClaim {
 
 	private final List<BlockVector2> points;
@@ -66,9 +69,16 @@ public class TigerClaimPolygon extends TigerClaim {
 	
 	@Override
 	public String buildHover() {
-		return "Region: " + getId() + "\nPoints:\n" + ((points != null && !points.isEmpty()) ? 
-				points.stream()
-					.map(p -> (Integer.toString(p.getX()) + Integer.toString(p.getZ()))).collect(Collectors.joining("\n")) : "-");
+		return Lang.CLAIM_POLYGON.get()
+				.replace(ID, getId())
+				.replace(VALUE, ((points != null) && !points.isEmpty()) ? 
+						("\n" + points.stream().map(p -> Lang.CLAIM_PATTERN_POINTS.get()
+								.replace(X, Integer.toString(p.getBlockX()))
+								.replace(Z, Integer.toString(p.getBlockZ())))
+						.collect(Collectors.joining("\n"))) : "");
+//		return "Region: " + getId() + "\nPoints:\n" + ((points != null && !points.isEmpty()) ? 
+//				points.stream()
+//					.map(p -> (Integer.toString(p.getX()) + Integer.toString(p.getZ()))).collect(Collectors.joining("\n")) : "-");
 	}
 	
 	private Vector2 intersection(Vector2 a, Vector2 b, Vector2 c) {

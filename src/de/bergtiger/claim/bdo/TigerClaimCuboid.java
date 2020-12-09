@@ -10,6 +10,9 @@ import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 
+import de.bergtiger.claim.data.Lang;
+import static de.bergtiger.claim.data.Cons.*;
+
 public class TigerClaimCuboid extends TigerClaim {
 	
 	private final BlockVector3 min, max;
@@ -40,6 +43,14 @@ public class TigerClaimCuboid extends TigerClaim {
 
 	@Override
 	public String buildHover() {
-		return "Region: " + getId() + "\nmin: " + min + "\nmax: " + max;
+		return Lang.CLAIM_CUBOID.get().replace(ID, getId())
+				.replace(POS1, Lang.CLAIM_PATTERN_LOC.get()
+						.replace(X, Integer.toString(min.getX()))
+						.replace(Y, isExpandVert() ? "0" : Integer.toString(min.getY()))
+						.replace(Z, Integer.toString(min.getZ())))
+				.replace(POS2, Lang.CLAIM_PATTERN_LOC.get()
+						.replace(X, Integer.toString(max.getX()))
+						.replace(Y, isExpandVert() ? "255" : Integer.toString(max.getY()))
+						.replace(Z, Integer.toString(max.getZ())));
 	}
 }

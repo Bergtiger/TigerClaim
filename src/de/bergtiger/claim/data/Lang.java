@@ -63,6 +63,12 @@ public enum Lang {
 	INSERT_HOVER_TEXT	("&eClaim at your position."),
 	INSERT_HOVER_YES	("&ecreates Claim."),
 	INSERT_HOVER_NO		("&eabort Claim."),
+	// Claim
+	CLAIM_POLYGON		("&aRegion&e: &6" + ID + "\n&apoints&e:" + VALUE),
+	CLAIM_CUBOID		("&aRegion&e: &6" + ID + "\n&apos1&e: " + POS1 + "\n&apos2&e: " + POS2),
+	CLAIM_RADIUS		("&aRegion&e: &6" + ID + "\n&aCenter&e: " + POS1 + "\n&aradius&e: &6" + VALUE),
+	CLAIM_PATTERN_POINTS("  &6" + X + "&f, &6" + Z),
+	CLAIM_PATTERN_LOC	("&6" + X + "&f, &6" + Y + "&f, &6" + Z),
 	// Reload
 	RELOAD_FINISHED		("&aReload finished."),
 	// PluginInfo

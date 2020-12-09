@@ -5,6 +5,8 @@ It is a simple solution to create Regions for Player.
 It allows Player to create their own Region with predefined Flags like greeting, farewell, ice-melt and so on.
 TigerClaim supports all WorldGuard flags, also all WorldGuard flag add-ons.
 
+https://github.com/Bergtiger/TigerClaim/wiki
+
 Configuration
 
 Once you have run your server with TigerClaim installed, you will find the configuration file inside the plugins/TigerClaim folder: config.yml

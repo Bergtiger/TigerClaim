@@ -14,6 +14,8 @@ import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 
 import de.bergtiger.claim.Claims;
 import de.bergtiger.claim.data.Config;
+import de.bergtiger.claim.data.Lang;
+import static de.bergtiger.claim.data.Cons.*;
 
 public class TigerClaimRadius extends TigerClaim {
 
@@ -75,6 +77,12 @@ public class TigerClaimRadius extends TigerClaim {
 	
 	@Override
 	public String buildHover() {
-		return "Region: " + getId() + "\nmid: " + loc + "\nradius: " + radius;
+		return Lang.CLAIM_RADIUS.get()
+				.replace(ID, getId())
+				.replace(POS1, Lang.CLAIM_PATTERN_LOC.get()
+						.replace(X, Integer.toString(loc.getBlockX()))
+						.replace(Y, Integer.toString(loc.getBlockY()))
+						.replace(Z, Integer.toString(loc.getBlockZ())))
+				.replace(VALUE, Integer.toString(radius));
 	}
 }

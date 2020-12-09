@@ -2,10 +2,12 @@ package de.bergtiger.claim.data;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -42,15 +44,13 @@ public class Config {
 	private HashMap<Flag<?>, Object> flags;
 
 	public static final String
-			// Config
-			CONFIG = "config",
+	// Config
+	CONFIG = "config", CONSTANT = "constant", CONSTANTS = CONSTANT + ".",
 			// Time
 			TIME_PATTERN = CONFIG + ".Time.Pattern",
 			// Region
-			REGION_PATTERN = CONFIG + ".Region.Pattern",
-			REGION_EXPAND_VERT = CONFIG + ".Region.ExpandVert",
-			REGION_RADIUS = CONFIG + ".Region.Radius",
-			REGION_FLAGS = CONFIG + ".Region.Flags",
+			REGION_PATTERN = CONFIG + ".Region.Pattern", REGION_EXPAND_VERT = CONFIG + ".Region.ExpandVert",
+			REGION_RADIUS = CONFIG + ".Region.Radius", REGION_FLAGS = CONFIG + ".Region.Flags",
 			REGION_GAP = CONFIG + ".Region.Gap";
 
 	public Boolean hasValue(String key) {
@@ -209,6 +209,8 @@ public class Config {
 				Logger.getLogger(Config.class.getName()).log(Level.SEVERE, "Could not save Config");
 			}
 		}
+		// Constants
+		getCons(cfg);
 		// Load Language
 		loadLanguage();
 		Logger.getLogger(Config.class.getName()).log(Level.FINE, Lang.CONFIG_LOAD_FINISH.get());
@@ -238,12 +240,36 @@ public class Config {
 		}
 	}
 
+	private void getCons(FileConfiguration cfg) {
+		if (cfg != null) {
+			if(cfg.contains(CONSTANT)) {
+				for (String k : cfg.getConfigurationSection(CONSTANT).getKeys(false)) {
+					try {
+						Field f = Cons.class.getField(k);
+						if (f != null)
+							f.set(null, cfg.getString(CONSTANTS + k));
+					} catch (NoSuchFieldException e) {
+						e.printStackTrace();
+					} catch (SecurityException e) {
+						e.printStackTrace();
+					} catch (IllegalArgumentException e) {
+						e.printStackTrace();
+					} catch (IllegalAccessException e) {
+						e.printStackTrace();
+					}
+				}
+			} else {
+				saveConfig();
+			}
+		}
+	}
+
 	public void saveConfig() {
 		FileConfiguration cfg = plugin.getConfig();
 		if (cfg != null) {
 			Logger.getLogger(Config.class.getName()).log(Level.FINE, Lang.CONFIG_SAVE_START.get());
 			// Time
-			if(!cfg.contains(TIME_PATTERN))
+			if (!cfg.contains(TIME_PATTERN))
 				cfg.addDefault(TIME_PATTERN, "dd-MM-yyyy");
 			// Region
 			if (!cfg.contains(REGION_PATTERN))
@@ -267,6 +293,18 @@ public class Config {
 					if (v != null)
 						cfg.set(REGION_FLAGS + "." + f.getName(), v.toString());
 				});
+			}
+			// Cons
+			for (Field f : Cons.class.getFields()) {
+				if (!cfg.contains(CONSTANTS + f.getName())) {
+					try {
+						cfg.set(CONSTANTS + f.getName(), f.get(null));
+					} catch (IllegalArgumentException e) {
+						e.printStackTrace();
+					} catch (IllegalAccessException e) {
+						e.printStackTrace();
+					}
+				}
 			}
 			// Options
 			cfg.options().header(plugin.getName() + " (Version: " + plugin.getDescription().getVersion() + ")");
