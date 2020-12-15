@@ -1,5 +1,6 @@
 package de.bergtiger.claim.bdo;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -54,17 +55,27 @@ public class TigerClaimPolygon extends TigerClaim {
 
 	@Override
 	public ProtectedRegion getRegionWithGab() {
+		List<BlockVector2> intersections = new ArrayList<>();
 		// calculate intersection
-//		for(int i = 0; i < points.size(); i++) {
-//			if(i == 0) {
-//				schnittpunkt(points.get(points.size() - 1).toVector2(), points.get(i).toVector2(), points.get(i + 1).toVector2());
-//			} else if(i == points.size() - 1) {
-//				schnittpunkt(points.get(i - 1).toVector2(), points.get(i).toVector2(), points.get(0).toVector2());
-//			} else {
-//				schnittpunkt(points.get(i - 1).toVector2(), points.get(i).toVector2(), points.get(i + 1).toVector2());
-//			}
-//		}
-		return getRegion();
+		for(int i = 0; i < points.size(); i++) {
+			Vector2 s;
+			if(i == 0) {
+				s = intersection(points.get(points.size() - 1).toVector2(), points.get(i).toVector2(), points.get(i + 1).toVector2());
+			} else if(i == points.size() - 1) {
+				s = intersection(points.get(i - 1).toVector2(), points.get(i).toVector2(), points.get(0).toVector2());
+			} else {
+				s = intersection(points.get(i - 1).toVector2(), points.get(i).toVector2(), points.get(i + 1).toVector2());
+			}
+			if(s != null) {
+				intersections.add(s.toBlockPoint());
+				// System.out.println("s: " + s);
+			}
+		}
+		return new ProtectedPolygonalRegion(
+				getId(), 
+				intersections, 
+				isExpandVert() ? 0 : minY, 
+				isExpandVert() ? 255 : maxY);
 	}
 	
 	@Override
@@ -92,14 +103,13 @@ public class TigerClaimPolygon extends TigerClaim {
 		Vector2 b2 = b.add(o2);
 		Vector2 c2 = c.add(o2);
 		
-		// m*o + a1 = x, n*o2 + b2 = x;
-		double 
-			x = (b2.getX() - a1.getX()) / ((a1.subtract(b1).getX() - b2.subtract(c2).getX())),
-			y = (b2.getZ() - a1.getZ()) / ((a1.subtract(b1).getZ() - b2.subtract(c2).getZ()));
-		Vector2 s = a1.add(a1.subtract(b1).multiply(x));
-		
-		System.out.println(a1 + ", " + b1 + "; " + b2 + ", " + c2 + "; " + x + ", " + y + "; " + s);
-		return s;
+		TigerLinearFunction 
+			f = new TigerLinearFunction(new TigerPoint(a1.getX(), a1.getZ()), new TigerPoint(b1.getX(), b1.getZ())),
+			g = new TigerLinearFunction(new TigerPoint(b2.getX(), b2.getZ()), new TigerPoint(c2.getX(), c2.getZ()));
+		TigerPoint s = f.getIntersection(g);
+		if(s != null)
+			return Vector2.at(s.x, s.z);
+		return null;
 	}
 	
 	/**

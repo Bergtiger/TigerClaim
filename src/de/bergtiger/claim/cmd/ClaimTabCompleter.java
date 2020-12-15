@@ -28,21 +28,21 @@ public class ClaimTabCompleter implements TabCompleter {
 		if (args.length <= 1) {
 			// Claim
 			if (Perm.hasPermission(cs, Perm.CLAIM_ADMIN, Perm.CLAIM_CLAIM))
-				list.add("claim");
+				list.add(Claim.CLAIM);
 			// Set
 			if (Perm.hasPermission(cs, Perm.CLAIM_ADMIN, Perm.CLAIM_SET))
-				list.add("set");
+				list.add(Claim.SET);
 			// Plugin
 			if (Perm.hasPermission(cs, Perm.CLAIM_ADMIN, Perm.CLAIM_PLUGIN))
-				list.add("plugin");
+				list.add(Claim.PLUGIN);
 			// Reload
 			if (Perm.hasPermission(cs, Perm.CLAIM_ADMIN, Perm.CLAIM_RELOAD))
-				list.add("reload");
+				list.add(Claim.RELOAD);
 			if (args.length == 1) {
 				return list.stream().filter(s -> s.startsWith(args[0])).collect(Collectors.toList());
 			}
 		} else {
-			if (args[0].equalsIgnoreCase("set") && Perm.hasPermission(cs, Perm.CLAIM_ADMIN, Perm.CLAIM_SET)) {
+			if (args[0].equalsIgnoreCase(Claim.SET) && Perm.hasPermission(cs, Perm.CLAIM_ADMIN, Perm.CLAIM_SET)) {
 				if (args.length == 2) {
 					list.addAll(Arrays.asList(CmdSet.CMD_GAP, CmdSet.CMD_EXPAND_VERT, CmdSet.CMD_FLAG, CmdSet.CMD_TIME, CmdSet.CMD_PATTERN, CmdSet.CMD_RADIUS));
 					return list.stream().filter(s -> s.startsWith(args[1])).collect(Collectors.toList());
