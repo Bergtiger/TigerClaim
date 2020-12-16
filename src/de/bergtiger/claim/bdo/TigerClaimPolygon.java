@@ -22,26 +22,12 @@ public class TigerClaimPolygon extends TigerClaim {
 
 	private final List<BlockVector2> points;
 	private final int maxY, minY;
-	private double length, centerX, centerZ;
 	
 	public TigerClaimPolygon(Player player, World world, Polygonal2DRegion pr) {
 		super(player, world);
 		this.points = pr.getPoints();
 		this.minY = pr.getMinimumY();
 		this.maxY = pr.getMaximumY();
-		// find center
-		if(points != null && !points.isEmpty()) {
-			length = points.size();
-			points.forEach(bv2 -> {
-				centerX += bv2.getBlockX() / length;
-				centerZ += bv2.getBlockZ() / length;
-			});
-		} else {
-			centerX = 0;
-			centerZ = 0;
-		}
-		
-		getRegionWithGab();
 	}
 
 	@Override
@@ -55,27 +41,30 @@ public class TigerClaimPolygon extends TigerClaim {
 
 	@Override
 	public ProtectedRegion getRegionWithGab() {
-		List<BlockVector2> intersections = new ArrayList<>();
-		// calculate intersection
-		for(int i = 0; i < points.size(); i++) {
-			Vector2 s;
-			if(i == 0) {
-				s = intersection(points.get(points.size() - 1).toVector2(), points.get(i).toVector2(), points.get(i + 1).toVector2());
-			} else if(i == points.size() - 1) {
-				s = intersection(points.get(i - 1).toVector2(), points.get(i).toVector2(), points.get(0).toVector2());
-			} else {
-				s = intersection(points.get(i - 1).toVector2(), points.get(i).toVector2(), points.get(i + 1).toVector2());
+		if((getGap() != null) && (getGap() > 0)) {
+			List<BlockVector2> intersections = new ArrayList<>();
+			// calculate intersection
+			for(int i = 0; i < points.size(); i++) {
+				Vector2 s;
+				if(i == 0) {
+					s = intersection(points.get(points.size() - 1).toVector2(), points.get(i).toVector2(), points.get(i + 1).toVector2());
+				} else if(i == points.size() - 1) {
+					s = intersection(points.get(i - 1).toVector2(), points.get(i).toVector2(), points.get(0).toVector2());
+				} else {
+					s = intersection(points.get(i - 1).toVector2(), points.get(i).toVector2(), points.get(i + 1).toVector2());
+				}
+				if(s != null) {
+					intersections.add(s.toBlockPoint());
+					// System.out.println("s: " + s);
+				}
 			}
-			if(s != null) {
-				intersections.add(s.toBlockPoint());
-				// System.out.println("s: " + s);
-			}
-		}
-		return new ProtectedPolygonalRegion(
+			return new ProtectedPolygonalRegion(
 				getId(), 
 				intersections, 
 				isExpandVert() ? 0 : minY, 
 				isExpandVert() ? 255 : maxY);
+		}
+		return getRegion();
 	}
 	
 	@Override
@@ -87,9 +76,6 @@ public class TigerClaimPolygon extends TigerClaim {
 								.replace(X, Integer.toString(p.getBlockX()))
 								.replace(Z, Integer.toString(p.getBlockZ())))
 						.collect(Collectors.joining("\n"))) : "");
-//		return "Region: " + getId() + "\nPoints:\n" + ((points != null && !points.isEmpty()) ? 
-//				points.stream()
-//					.map(p -> (Integer.toString(p.getX()) + Integer.toString(p.getZ()))).collect(Collectors.joining("\n")) : "-");
 	}
 	
 	private Vector2 intersection(Vector2 a, Vector2 b, Vector2 c) {

@@ -6,6 +6,7 @@ import static de.bergtiger.claim.data.Cons.VALUE;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 
 import com.sk89q.worldguard.WorldGuard;
@@ -15,6 +16,7 @@ import com.sk89q.worldguard.protection.flags.IntegerFlag;
 import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.sk89q.worldguard.protection.flags.registry.FlagRegistry;
 
+import de.bergtiger.claim.Claims;
 import de.bergtiger.claim.data.ClaimUtils;
 import de.bergtiger.claim.data.Config;
 import de.bergtiger.claim.data.Lang;
@@ -22,16 +24,20 @@ import de.bergtiger.claim.data.Perm;
 
 public class CmdSet {
 
-	public static final String CMD_GAP = "gap", CMD_RADIUS = "radius", CMD_FLAG = "flag", CMD_TIME = "time", CMD_PATTERN = "pattern",
-			CMD_EXPAND_VERT = "expandvert";
+	public static final String CMD_GAP = "gap", CMD_RADIUS = "radius", CMD_FLAG = "flag", CMD_TIME = "time",
+			CMD_PATTERN = "pattern", CMD_EXPAND_VERT = "expandvert", CMD_OVERLAPPING = "overlapping";
+
+	public static void setConfig(CommandSender cs, String[] args) {
+		Bukkit.getScheduler().runTaskAsynchronously(Claims.inst(), () -> new CmdSet().serConfigValue(cs, args));
+	}
 
 	/**
-	 * Set a value in Conifg. claim set type value
+	 * Set a value in Configuration. claim set type value.
 	 * 
 	 * @param cs
 	 * @param args
 	 */
-	public static void setConfig(CommandSender cs, String[] args) {
+	public void serConfigValue(CommandSender cs, String[] args) {
 		if (Perm.hasPermission(cs, Perm.CLAIM_ADMIN, Perm.CLAIM_SET)) {
 			if (args.length >= 3) {
 				Config c = Config.inst();
@@ -85,6 +91,13 @@ public class CmdSet {
 							c.getValue(Config.REGION_EXPAND_VERT).toString()));
 					break;
 				}
+				case CMD_OVERLAPPING: {
+					c.setValue(Config.REGION_OVERLAPPING, Boolean.valueOf(args[2]));
+					c.saveConfig();
+					cs.sendMessage(Lang.SET_SAVED.get().replace(TYPE, CMD_OVERLAPPING).replace(VALUE,
+							c.getValue(Config.REGION_OVERLAPPING).toString()));
+					break;
+				}
 				case CMD_FLAG: {
 					// claim set flag [flag][value]
 					if (args.length >= 3) {
@@ -97,30 +110,32 @@ public class CmdSet {
 							if (args.length >= 4)
 								value = ClaimUtils.arrayToString(args, 3);
 							// value set with 'null'
-							if ((value != null) && value.equalsIgnoreCase("null")) {
-								value = null;
-							} else {
-								// check value
-								if(f instanceof StateFlag) {
-									try {
-										StateFlag.State.valueOf(value.toUpperCase());
-									} catch (Exception e) {
-										cs.sendMessage("No StateValue");
-										return;
-									}
-								} else if(f instanceof IntegerFlag) {
-									try {
-										Integer.valueOf(value);
-									} catch (NumberFormatException e) {
-										cs.sendMessage(Lang.NONUMBERVALUE.get().replace(VALUE, value));
-										return;
-									}
-								} else if(f instanceof DoubleFlag) {
-									try {
-										Double.valueOf(value);
-									} catch (NumberFormatException e) {
-										cs.sendMessage(Lang.NONUMBERVALUE.get().replace(VALUE, value));
-										return;
+							if (value != null) {
+								if (value.equalsIgnoreCase("null")) {
+									value = null;
+								} else {
+									// check value
+									if (f instanceof StateFlag) {
+										try {
+											StateFlag.State.valueOf(value.toUpperCase());
+										} catch (Exception e) {
+											cs.sendMessage(Lang.NOFLAGVALUE.get().replace(VALUE, value).replace(TYPE, f.getName()));
+											return;
+										}
+									} else if (f instanceof IntegerFlag) {
+										try {
+											Integer.valueOf(value);
+										} catch (NumberFormatException e) {
+											cs.sendMessage(Lang.NONUMBERVALUE.get().replace(VALUE, value));
+											return;
+										}
+									} else if (f instanceof DoubleFlag) {
+										try {
+											Double.valueOf(value);
+										} catch (NumberFormatException e) {
+											cs.sendMessage(Lang.NONUMBERVALUE.get().replace(VALUE, value));
+											return;
+										}
 									}
 								}
 							}

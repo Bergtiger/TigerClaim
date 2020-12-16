@@ -105,25 +105,28 @@ public class ConfirmationListener implements Listener {
 	 */
 	private void createRegion(TigerClaim tc) {
 		if (tc != null) {
-			// create Region
-			// with gab to check overlapping
-			ProtectedRegion region = tc.getRegionWithGab();
 			// get RegionManager for world
 			RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
 			RegionManager regions = container.get(BukkitAdapter.adapt(tc.getWorld()));
 			// same name/id
-			if (regions.getRegion(region.getId()) != null) {
-				// existing Region
-				tc.getPlayer().spigot()
-						.sendMessage(Lang.buildTC(Lang.INSERT_EXISTING.get().replace(VALUE, region.getId())));
-				return;
+			if (tc.hasRegionCounter()) {
+				// addCounter until value available (fills lower values)
+				while(regions.getRegion(tc.getId()) != null)
+					tc.addRegionCounter();
+			} else {
+				if (regions.getRegion(tc.getId()) != null) {
+					// existing Region
+					tc.getPlayer().spigot()
+						.sendMessage(Lang.buildTC(Lang.INSERT_EXISTING.getValue().replace(VALUE, tc.getId())));
+					return;
+				}
 			}
 			// add all regions to candidates
 			List<ProtectedRegion> candidates = Lists.newArrayList();
 			regions.getRegions().forEach((k, r) -> {
 				candidates.add(r);
 				if (r.getOwners().contains(tc.getPlayer().getUniqueId()))
-					tc.addCount();
+					tc.addPlayerRegionCount();
 			});
 			// Get Limit
 			Integer limit = null, length = Perm.CLAIM_LIMIT.get().split("\\.").length;
@@ -147,15 +150,19 @@ public class ConfirmationListener implements Listener {
 						}).max().getAsInt();
 			} catch (NoSuchElementException e) {
 			}
-			if (Perm.hasPermission(tc.getPlayer(), Perm.CLAIM_LIMITLESS) || ((limit != null) && (tc.getCount() < limit))) {
+			if (Perm.hasPermission(tc.getPlayer(), Perm.CLAIM_LIMITLESS) || ((limit != null) && (tc.getPlayerRegionCount() < limit))) {
 				// Can claim
-				List<ProtectedRegion> overlapping = region.getIntersectingRegions(candidates);
+				List<ProtectedRegion> overlapping = null;
+				// isOverlapping false -> not allowed to overlap
+				// isOverlapping true -> allowed to overlap
+				if(!tc.isOverlapping())
+					overlapping = tc.getRegionWithGab().getIntersectingRegions(candidates);
 				// if overlapping is empty -> save region
 				if (overlapping == null || overlapping.isEmpty()) {
 					// no overlapping
-					// without gab to add
-					region = tc.getRegion();
-					// Add Player as Owner (Config ?)
+					// create Region without gap to add
+					ProtectedRegion region = tc.getRegion();
+					// Add Player as Owner
 					DefaultDomain owners = region.getOwners();
 					owners.addPlayer(tc.getPlayer().getUniqueId());
 					// Add Flags
@@ -170,16 +177,16 @@ public class ConfirmationListener implements Listener {
 					}
 					// Add Region to Manager - save
 					regions.addRegion(region);
-					tc.getPlayer().spigot().sendMessage(Lang.buildTC(Lang.INSERT_SUCCESS.get(),
-							"/rg i " + region.getId(), Lang.INSERT_HOVER_SUCCESS.get(), null));
+					tc.getPlayer().spigot().sendMessage(Lang.buildTC(Lang.INSERT_SUCCESS.getValue(),
+							"/rg i " + region.getId(), Lang.INSERT_HOVER_SUCCESS.getValue(), null));
 				} else {
 					// is overlapping
-					tc.getPlayer().spigot().sendMessage(Lang.buildTC(Lang.INSERT_OVERLAPPING.get()));
+					tc.getPlayer().spigot().sendMessage(Lang.buildTC(Lang.INSERT_OVERLAPPING.getValue()));
 				}
 			} else {
 				// limit reached
 				tc.getPlayer().spigot().sendMessage(
-						Lang.buildTC(Lang.INSERT_LIMIT.get().replace(VALUE, Integer.toString(tc.getCount()))
+						Lang.buildTC(Lang.INSERT_LIMIT.getValue().replace(VALUE, Integer.toString(tc.getPlayerRegionCount()))
 								.replace(LIMIT, (limit != null) ? Integer.toString(limit) : "-")));
 			}
 		}

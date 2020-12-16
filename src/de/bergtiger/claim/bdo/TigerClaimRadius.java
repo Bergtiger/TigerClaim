@@ -25,7 +25,7 @@ public class TigerClaimRadius extends TigerClaim {
 	public TigerClaimRadius(@Nonnull Player player, @Nonnull Location loc) {
 		super(player, loc.getWorld());
 		this.loc = loc;
-		// load missing region from Radius
+		// load missing value Radius from Configuration
 		if(Config.inst().hasValue(Config.REGION_RADIUS)) {
 			int r = 0;
 			try {

@@ -5,9 +5,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
-import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -44,14 +42,19 @@ public class Config {
 	private HashMap<Flag<?>, Object> flags;
 
 	public static final String
-	// Config
-	CONFIG = "config", CONSTANT = "constant", CONSTANTS = CONSTANT + ".",
-			// Time
-			TIME_PATTERN = CONFIG + ".Time.Pattern",
-			// Region
-			REGION_PATTERN = CONFIG + ".Region.Pattern", REGION_EXPAND_VERT = CONFIG + ".Region.ExpandVert",
-			REGION_RADIUS = CONFIG + ".Region.Radius", REGION_FLAGS = CONFIG + ".Region.Flags",
-			REGION_GAP = CONFIG + ".Region.Gap";
+		// Config
+		CONFIG = "config", 
+		CONSTANT = "constant", 
+		CONSTANTS = CONSTANT + ".",
+		// Time
+		TIME_PATTERN = CONFIG + ".Time.Pattern",
+		// Region
+		REGION_PATTERN = CONFIG + ".Region.Pattern", 
+		REGION_EXPAND_VERT = CONFIG + ".Region.ExpandVert",
+		REGION_OVERLAPPING = CONFIG + ".Region.Overlapping",
+		REGION_RADIUS = CONFIG + ".Region.Radius", 
+		REGION_FLAGS = CONFIG + ".Region.Flags",
+		REGION_GAP = CONFIG + ".Region.Gap";
 
 	public Boolean hasValue(String key) {
 		if ((values != null) && (!values.isEmpty())) {
@@ -168,19 +171,20 @@ public class Config {
 		if (cfg != null) {
 			// Region
 			checkConfigBoolean(cfg, REGION_EXPAND_VERT, true);
+			checkConfigBoolean(cfg, REGION_OVERLAPPING, false);
 			checkConfigInteger(cfg, REGION_RADIUS, 39);
-			checkConfigInteger(cfg, REGION_GAP, 39);
+			checkConfigInteger(cfg, REGION_GAP, 50);
 
 			cfg.options().copyDefaults(true);
 			cfg.options().copyHeader(true);
 			plugin.saveConfig();
 		}
-		Logger.getLogger(Config.class.getName()).log(Level.FINE, "");
+		Claims.inst().getLogger().log(Level.FINE, "");
 	}
 
 	public void loadConfig() {
 		Boolean save = false;
-		Logger.getLogger(Config.class.getName()).log(Level.FINE, Lang.CONFIG_LOAD_START.get());
+		Claims.inst().getLogger().log(Level.FINE, Lang.CONFIG_LOAD_START.get());
 		plugin.reloadConfig();
 		FileConfiguration cfg = plugin.getConfig();
 		if ((cfg != null) && (cfg.contains(CONFIG))) {
@@ -206,14 +210,14 @@ public class Config {
 				saveConfig();
 				loadConfig();
 			} else {
-				Logger.getLogger(Config.class.getName()).log(Level.SEVERE, "Could not save Config");
+				Claims.inst().getLogger().log(Level.SEVERE, "Could not save Config");
 			}
 		}
 		// Constants
 		getCons(cfg);
 		// Load Language
 		loadLanguage();
-		Logger.getLogger(Config.class.getName()).log(Level.FINE, Lang.CONFIG_LOAD_FINISH.get());
+		Claims.inst().getLogger().log(Level.FINE, Lang.CONFIG_LOAD_FINISH.get());
 	}
 
 	public void loadLanguage() {
@@ -232,7 +236,7 @@ public class Config {
 				cfg.options().copyHeader(true);
 				cfg.save(file);
 			} catch (Exception e) {
-				Logger.getLogger(Config.class.getName()).log(Level.SEVERE, null, e);
+				Claims.inst().getLogger().log(Level.SEVERE, null, e);
 			}
 		} else {
 			// create Language
@@ -267,19 +271,21 @@ public class Config {
 	public void saveConfig() {
 		FileConfiguration cfg = plugin.getConfig();
 		if (cfg != null) {
-			Logger.getLogger(Config.class.getName()).log(Level.FINE, Lang.CONFIG_SAVE_START.get());
+			Claims.inst().getLogger().log(Level.FINE, Lang.CONFIG_SAVE_START.get());
 			// Time
 			if (!cfg.contains(TIME_PATTERN))
 				cfg.addDefault(TIME_PATTERN, "dd-MM-yyyy");
 			// Region
 			if (!cfg.contains(REGION_PATTERN))
-				cfg.addDefault(REGION_PATTERN, Cons.PLAYER + "_claim_" + Cons.TIME);
+				cfg.addDefault(REGION_PATTERN, Cons.PLAYER + "_" + Cons.COUNTER + "_" + Cons.TIME);
 			if (!cfg.contains(REGION_RADIUS))
 				cfg.addDefault(REGION_RADIUS, 39);
 			if (!cfg.contains(REGION_GAP))
 				cfg.addDefault(REGION_GAP, 10);
 			if (!cfg.contains(REGION_EXPAND_VERT))
 				cfg.addDefault(REGION_EXPAND_VERT, true);
+			if (!cfg.contains(REGION_OVERLAPPING))
+				cfg.addDefault(REGION_OVERLAPPING, false);
 			// Values
 			if (values != null && !values.isEmpty())
 				// Set Values
@@ -311,7 +317,7 @@ public class Config {
 			cfg.options().copyDefaults(true);
 			cfg.options().copyHeader(true);
 			plugin.saveConfig();
-			Logger.getLogger(Config.class.getName()).log(Level.FINE, Lang.CONFIG_SAVE_FINISH.get());
+			Claims.inst().getLogger().log(Level.FINE, Lang.CONFIG_SAVE_FINISH.get());
 		}
 	}
 
@@ -334,7 +340,7 @@ public class Config {
 			cfg.options().copyHeader(true);
 			cfg.save(file);
 		} catch (IOException e) {
-			Logger.getLogger(Config.class.getName()).log(Level.SEVERE, null, e);
+			Claims.inst().getLogger().log(Level.SEVERE, null, e);
 		}
 	}
 }

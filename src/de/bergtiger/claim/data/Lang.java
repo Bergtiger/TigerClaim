@@ -24,6 +24,7 @@ public enum Lang {
 	NONUMBER			("&cNot a Number"),
 	NONUMBERVALUE		("&e'&4" + VALUE + "&e' &cis not a Number"),
 	NOSUCHFLAG			("&e'&4" + VALUE + "&e' &cis not a Flag"),
+	NOFLAGVALUE			("&e'&4" + VALUE + "&e' &cis not a valid value for &6" + TYPE),
 	NOPLAYER			("&cYou have to be a Player to perform this command."),
 	// Config
 	CONFIG_LOAD_START	("Loading Config"),
@@ -78,6 +79,7 @@ public enum Lang {
 	PLUGIN_RADIUS		("&aRadius&e: &6" + VALUE),
 	PLUGIN_GAP			("&aGap&e: &6" + VALUE),
 	PLUGIN_EXPANDVERT	("&aExpandVert&e: &6" + VALUE),
+	PLUGIN_OVERLAPPING	("&aOverlapping&e: &6" + VALUE),
 	PLUGIN_PATTERN_ID	("&aRegionPattern&e: &6" + VALUE),
 	PLUGIN_PATTERN_TIME	("&aTimePattern&e: &6" + VALUE),
 	PLUGIN_FLAGS		("&aFlags"),
@@ -86,6 +88,7 @@ public enum Lang {
 	PLUGIN_HOVER_RADIUS			("&aSet radius"),
 	PLUGIN_HOVER_GAP			("&aSet gap between claim and other regions"),
 	PLUGIN_HOVER_EXPANDVERT		("&aChange expand vertical"),
+	PLUGIN_HOVER_OVERLAPPING	("&aChange if claims are allowed to overlap existing regions."),
 	PLUGIN_HOVER_PATTERN_ID		("&aSet a new region pattern"),
 	PLUGIN_HOVER_PATTERN_TIME	("&aSet a new time pattern"),
 	PLUGIN_HOVER_FLAGS			("&aSet a flag");

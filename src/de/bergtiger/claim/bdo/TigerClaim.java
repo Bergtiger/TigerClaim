@@ -17,6 +17,7 @@ import de.bergtiger.claim.Claims;
 import de.bergtiger.claim.data.Config;
 
 import static de.bergtiger.claim.data.Cons.PLAYER;
+import static de.bergtiger.claim.data.Cons.COUNTER;
 import static de.bergtiger.claim.data.Cons.TIME;
 
 public abstract class TigerClaim {
@@ -25,16 +26,18 @@ public abstract class TigerClaim {
 	private final World world;
 	private final HashMap<Flag<?>, Object> flags;
 	private final Boolean expandVert;
+	private final Boolean overlapping;
 	private final String pattern;
 	private final String timePattern;
 	private final Integer gap;
 	
-	private Integer count = 0;
+	private Integer playerRegionCount = 0;
+	private Integer regionCounter = 1;
 
 	public TigerClaim(@Nonnull Player player, World world) {
 		this.player = player;
 		this.world = world;
-		// load missing values from Config
+		// load missing values from Configuration
 		Config c = Config.inst();
 		// Flags
 		if(c.hasFlags())
@@ -51,7 +54,7 @@ public abstract class TigerClaim {
 			pattern = c.getValue(Config.REGION_PATTERN).toString();
 		else
 			pattern = null;
-		// Gab
+		// Gap
 		if(c.hasValue(Config.REGION_GAP)) {
 			Integer i = null;
 			try {
@@ -63,14 +66,19 @@ public abstract class TigerClaim {
 		}
 		else
 			gap = null;
-		// Expand Vert
+		// Expand Vertical
 		if(c.hasValue(Config.REGION_EXPAND_VERT))
 			expandVert = Boolean.valueOf(c.getValue(Config.REGION_EXPAND_VERT).toString());
 		else
 			expandVert = false;
+		// Overlapping
+		if(c.hasValue(Config.REGION_OVERLAPPING))
+			overlapping = Boolean.valueOf(c.getValue(Config.REGION_OVERLAPPING).toString());
+		else
+			overlapping = false;
 	}
 	
-	public TigerClaim(@Nonnull Player player, World world, HashMap<Flag<?>, Object> flags, String time, String pattern, Integer gab, Boolean expantVert) {
+	public TigerClaim(@Nonnull Player player, World world, HashMap<Flag<?>, Object> flags, String time, String pattern, Integer gab, Boolean expantVert, Boolean overlapping) {
 		this.player = player;
 		this.world = world;
 		this.flags = flags;
@@ -78,6 +86,7 @@ public abstract class TigerClaim {
 		this.pattern = pattern;
 		this.gap = gab;
 		this.expandVert = expantVert;
+		this.overlapping = overlapping;
 	}
 
 	/**
@@ -99,18 +108,41 @@ public abstract class TigerClaim {
 	/**
 	 * Counts regions from this Player.
 	 */
-	public void addCount() {
-		count++;
+	public void addPlayerRegionCount() {
+		playerRegionCount++;
 	}
 
 	/**
 	 * Return regions counted from this Player.
 	 * @return Integer
 	 */
-	public Integer getCount() {
-		return count;
+	public Integer getPlayerRegionCount() {
+		return playerRegionCount;
 	}
 
+	/**
+	 * Counts regions with equal name.
+	 */
+	public void addRegionCounter() {
+		regionCounter++;
+	}
+
+	/**
+	 * Return regions counted with equal name.
+	 * @return Integer
+	 */
+	public Integer getRegionCounter() {
+		return regionCounter;
+	}
+	
+	/**
+	 * Return if region pattern contains counter.
+	 * @return Boolean
+	 */
+	public Boolean hasRegionCounter() {
+		return pattern.contains(COUNTER);
+	}
+	
 	/**
 	 * Flags that will be set when claim is created.
 	 * @return
@@ -126,7 +158,10 @@ public abstract class TigerClaim {
 	 */
 	public String getId() {
 		if(pattern != null)
-			return pattern.replace(PLAYER, player.getName()).replace(TIME, DateTimeFormatter.ofPattern(timePattern).format(LocalDateTime.now()));
+			return pattern
+					.replace(PLAYER, player.getName())
+					.replace(TIME, DateTimeFormatter.ofPattern(timePattern).format(LocalDateTime.now()))
+					.replace(COUNTER, Integer.toString(regionCounter));
 		return player.getName();
 	}
 	
@@ -138,8 +173,20 @@ public abstract class TigerClaim {
 		return gap;
 	}
 	
+	/**
+	 * Region is supposed to be expanded vertically.
+	 * @return true if expanded
+	 */
 	public boolean isExpandVert() {
 		return expandVert;
+	}
+	
+	/**
+	 * Region is allowed to overlap other regions.
+	 * @return false if not allowed to overlap
+	 */
+	public boolean isOverlapping() {
+		return overlapping;
 	}
 	
 	/**

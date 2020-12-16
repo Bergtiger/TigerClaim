@@ -44,35 +44,35 @@ public class ClaimTabCompleter implements TabCompleter {
 		} else {
 			if (args[0].equalsIgnoreCase(Claim.SET) && Perm.hasPermission(cs, Perm.CLAIM_ADMIN, Perm.CLAIM_SET)) {
 				if (args.length == 2) {
-					list.addAll(Arrays.asList(CmdSet.CMD_GAP, CmdSet.CMD_EXPAND_VERT, CmdSet.CMD_FLAG, CmdSet.CMD_TIME, CmdSet.CMD_PATTERN, CmdSet.CMD_RADIUS));
+					list.addAll(Arrays.asList(CmdSet.CMD_GAP, CmdSet.CMD_EXPAND_VERT, CmdSet.CMD_OVERLAPPING,
+							CmdSet.CMD_FLAG, CmdSet.CMD_TIME, CmdSet.CMD_PATTERN, CmdSet.CMD_RADIUS));
 					return list.stream().filter(s -> s.startsWith(args[1])).collect(Collectors.toList());
 				}
 				FlagRegistry registry = WorldGuard.getInstance().getFlagRegistry();
-				if (args.length == 3 && args[1].equalsIgnoreCase("flag")) {
-					// Show all Flags
-					return registry.getAll().stream().map(f -> f.getName()).filter(f -> f.startsWith(args[2]))
-							.collect(Collectors.toList());
-				}
-				if (args.length == 4) {
-					Flag<?> flag = registry.get(args[2]);
-					if (flag != null) {
-						if (flag instanceof BooleanFlag) {
-							list.addAll(Arrays.asList("True", "False"));
-							return list.stream().filter(s -> s.startsWith(args[3])).collect(Collectors.toList());
-						}
-						if (flag instanceof StateFlag) {
-							list.addAll(Arrays.asList("Allow", "Deny"));
-							return list.stream().filter(s -> s.startsWith(args[3])).collect(Collectors.toList());
-						}
-						if (flag instanceof StringFlag) {
-							list.addAll(Arrays.asList("Text"));
-							return list.stream().filter(s -> s.startsWith(args[3])).collect(Collectors.toList());
-						}
-						if (flag instanceof IntegerFlag) {
-							
-						}
-						if (flag instanceof DoubleFlag) {
-							
+				if (args.length >= 3 && args[1].equalsIgnoreCase(CmdSet.CMD_FLAG)) {
+					if (args.length == 3)
+						// Show all Flags
+						return registry.getAll().stream().map(f -> f.getName()).filter(f -> f.startsWith(args[2]))
+								.collect(Collectors.toList());
+					if (args.length == 4) {
+						Flag<?> flag = registry.get(args[2]);
+						if (flag != null) {
+							if (flag instanceof BooleanFlag) {
+								list.addAll(Arrays.asList("True", "False"));
+								return list.stream().filter(s -> s.startsWith(args[3])).collect(Collectors.toList());
+							}
+							if (flag instanceof StateFlag) {
+								list.addAll(Arrays.asList("Allow", "Deny"));
+								return list.stream().filter(s -> s.startsWith(args[3])).collect(Collectors.toList());
+							}
+							if (flag instanceof StringFlag) {
+								list.addAll(Arrays.asList("Text"));
+								return list.stream().filter(s -> s.startsWith(args[3])).collect(Collectors.toList());
+							}
+							if (flag instanceof IntegerFlag) {
+							}
+							if (flag instanceof DoubleFlag) {
+							}
 						}
 					}
 				}

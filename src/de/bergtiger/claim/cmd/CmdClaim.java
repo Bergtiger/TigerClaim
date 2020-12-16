@@ -57,9 +57,9 @@ public class CmdClaim {
 					// send Confirmation
 					ConfirmationListener.inst().addConfirmation(tc);
 					// inform Player
-					p.spigot().sendMessage(Lang.buildTC(Lang.INSERT_TEXT.get(), null, tc.buildHover(), null),
-						Lang.buildTC(Lang.INSERT_YES.get(), "/yes", Lang.INSERT_HOVER_YES.get(), null),
-						Lang.buildTC(Lang.INSERT_NO.get(), "/no", Lang.INSERT_HOVER_NO.get(), null));
+					p.spigot().sendMessage(Lang.buildTC(Lang.INSERT_TEXT.getValue(), null, tc.buildHover(), null),
+						Lang.buildTC(Lang.INSERT_YES.getValue(), "/yes", Lang.INSERT_HOVER_YES.getValue(), null),
+						Lang.buildTC(Lang.INSERT_NO.getValue(), "/no", Lang.INSERT_HOVER_NO.getValue(), null));
 				}
 			} else {
 				// Not a player

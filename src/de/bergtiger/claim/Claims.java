@@ -26,7 +26,7 @@ public class Claims extends JavaPlugin {
 		instance = this;
 		// load config
 		Config.inst().loadConfig();
-		Logger.getLogger(Claims.class.getName()).log(Level.INFO, "loaded config");
+		getLogger().log(Level.INFO, "loaded config");
 		// save ReadMe
 		ReadMe.save();
 		// Commands

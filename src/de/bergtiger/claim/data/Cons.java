@@ -7,6 +7,7 @@ public class Cons {
 		FLAG	= "-flag-",
 		LIMIT	= "-limit-",
 		PLAYER	= "-player-",
+		COUNTER = "-counter-",
 		TIME	= "-time-",
 		TYPE	= "-type-",
 		VALUE	= "-value-",
