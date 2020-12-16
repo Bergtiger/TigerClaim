@@ -75,19 +75,19 @@ public class TigerLinearFunction {
 				// 				  mz*(ax/mx)*s						= bz + az*s - nz - mz*((bx - nx)/mx)
 				// 				  mz*(ax/mx)*s - az*s				= bz 		- nz - mz*((bx - nx)/mx)
 				// 			   s*(mz*(ax/mx)   - az) 				= bz 		- nz - mz*((bx - nx)/mx)
-				// 			   s 									=(bz 		- nz - mz*((bx - nx)/mx)) / (mz*(ax/mx)*-az)
-				s = (g.n.z - n.z - m.z * ((g.n.x - n.x) / m.x))/(m.z * ((g.m.x / m.x)) * g.m.z);
+				// 			   s 									=(bz 		- nz - mz*((bx - nx)/mx)) / (mz*(ax/mx)-az)
+				s = (g.n.z - n.z - m.z * ((g.n.x - n.x) / m.x))/(m.z * ((g.m.x / m.x)) - g.m.z);
 				// s in I r = nx + mx*r = bx + ax*s
 				// mx*r = bx + ax*s -nx
 				// r = (bx + ax*s - nx)/mx
 				r = (g.n.x + g.m.x * s - n.x) / m.x;
 			}
-			System.out.println(String.format("f(r) = (%f|%f) + (%f|%f)*r = (%f|%f) + (%f|%f)*s = g(s) r = %f, s = %f",
-				n.x, n.z,
-				m.x, m.z,
-				g.n.x, g.n.z,
-				g.m.x, g.m.z, 
-				r, s));
+//			System.out.println(String.format("f(r) = (%f|%f) + (%f|%f)*r = (%f|%f) + (%f|%f)*s = g(s) r = %f, s = %f",
+//				n.x, n.z,
+//				m.x, m.z,
+//				g.n.x, g.n.z,
+//				g.m.x, g.m.z, 
+//				r, s));
 			return new TigerPoint(n.x + m.x * r, n.z + m.z * r);
 		}
 		return null;
