@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.bergtiger</groupId>
 	<artifactId>TigerClaim</artifactId>
-	<version>1.4.4</version>
+	<version>1.4.5</version>
 	<packaging>jar</packaging>
 
 	<name>TigerClaim</name>
@@ -17,8 +17,8 @@
 		<mvninstall.version>3.0.0-M1</mvninstall.version> <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-install-plugin -->
 
 		<module>de.bergtiger.claim</module>
-
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<minecraft.plugin.version>${project.version}</minecraft.plugin.version>
 	</properties>
 
 	<build>
@@ -26,6 +26,7 @@
 		<resources>
 			<resource>
 				<directory>src</directory>
+				<filtering>true</filtering>
 				<includes>
 					<include>**/*.xml</include>
 					<include>**/*.png</include>

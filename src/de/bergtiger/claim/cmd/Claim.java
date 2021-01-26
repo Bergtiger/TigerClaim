@@ -6,13 +6,19 @@ import org.bukkit.command.CommandSender;
 
 public class Claim implements CommandExecutor {
 
-	public static final String SET = "set", CLAIM = "claim", PLUGIN = "plugin", RELOAD = "reload";
+	public static final String SET = "set", INFO = "info", LIST = "list", CLAIM = "claim", PLUGIN = "plugin", RELOAD = "reload";
 	
 	public boolean onCommand(CommandSender cs, Command cmd, String label, String[] args) {
 		if (args.length >= 1) {
 			switch (args[0].toLowerCase()) {
 			case SET:
 				CmdSet.setConfig(cs, args);
+				break;
+			case INFO:
+				CmdInfo.info(cs);
+				break;
+			case LIST:
+				CmdList.list(cs, args);
 				break;
 			case "create":
 			case CLAIM:

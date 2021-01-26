@@ -14,6 +14,7 @@ public class CmdReload {
 		if (Perm.hasPermission(cs, Perm.CLAIM_ADMIN, Perm.CLAIM_RELOAD)) {
 			// clear cache
 			ConfirmationListener.inst().clearQueue();
+			CmdList.clear();
 			// save Config
 			Config.inst().loadConfig();
 			// save ReadMe

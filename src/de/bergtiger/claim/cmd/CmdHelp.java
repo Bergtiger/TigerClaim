@@ -24,6 +24,14 @@ public class CmdHelp {
 				if (Perm.hasPermission(cs, Perm.CLAIM_ADMIN, Perm.CLAIM_CLAIM))
 					p.spigot().sendMessage(
 							Lang.buildTC(Lang.CMD_INSERT.getValue(), "/claim " + Claim.CLAIM, Lang.CMD_HOVER_INSERT.getValue(), null));
+				// Info
+				if (Perm.hasPermission(cs, Perm.CLAIM_ADMIN, Perm.CLAIM_INFO))
+					p.spigot().sendMessage(
+							Lang.buildTC(Lang.CMD_INFO.getValue(), "/claim " + Claim.INFO, Lang.CMD_HOVER_INFO.getValue(), null));
+				// List
+				if (Perm.hasPermission(cs, Perm.CLAIM_ADMIN, Perm.CLAIM_LIST))
+					p.spigot().sendMessage(
+							Lang.buildTC(Lang.CMD_LIST.getValue(), "/claim " + Claim.LIST, Lang.CMD_HOVER_LIST.getValue(), null));
 				// Set
 				if (Perm.hasPermission(cs, Perm.CLAIM_ADMIN, Perm.CLAIM_SET))
 					p.spigot().sendMessage(
@@ -47,6 +55,12 @@ public class CmdHelp {
 				// Set
 				if (Perm.hasPermission(cs, Perm.CLAIM_ADMIN, Perm.CLAIM_SET))
 					cs.sendMessage(Lang.CMD_SET.get());
+				// Info
+				if (Perm.hasPermission(cs, Perm.CLAIM_ADMIN, Perm.CLAIM_INFO))
+					cs.sendMessage(Lang.CMD_INFO.get());
+				// List
+				if (Perm.hasPermission(cs, Perm.CLAIM_ADMIN, Perm.CLAIM_LIST))
+					cs.sendMessage(Lang.CMD_LIST.get());
 				// Plugin
 				if (Perm.hasPermission(cs, Perm.CLAIM_ADMIN, Perm.CLAIM_PLUGIN))
 					cs.sendMessage(Lang.CMD_PLUGIN.get());

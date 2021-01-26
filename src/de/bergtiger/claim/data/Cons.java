@@ -16,5 +16,8 @@ public class Cons {
 		POS2	= "-pos2-",
 		X		= "-x-",
 		Y		= "-y-",
-		Z		= "-z-";
+		Z		= "-z-",
+		// List
+		PAGE		= "-page-",
+		PAGEMAX		= "-pagemax-";
 }

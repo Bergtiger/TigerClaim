@@ -1,7 +1,7 @@
-name: TigerClaim
-version: 1.4.4
-author: Bergtiger
 main: de.bergtiger.claim.Claims
+name: TigerClaim
+version: ${minecraft.plugin.version}
+author: Bergtiger
 api-version: 1.16
 description: Easy to Claim Regions.
 depend: [WorldGuard]

@@ -16,6 +16,8 @@ public enum Perm {
 	CLAIM_USER		("tclaim.user"),
 	
 	CLAIM_SET		("tclaim.set"),
+	CLAIM_INFO		("tclaim.info"),
+	CLAIM_LIST		("tclaim.list"),
 	CLAIM_CLAIM		("tclaim.claim"),
 	CLAIM_LIMIT		("tclaim.limit"),
 	CLAIM_LIMITLESS	("tclaim.nolimit"),

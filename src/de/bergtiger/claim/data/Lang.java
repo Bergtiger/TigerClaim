@@ -9,6 +9,7 @@ import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.hover.content.Text;
 import net.md_5.bungee.api.chat.ClickEvent.Action;
+
 import static de.bergtiger.claim.data.Cons.*;
 
 /**
@@ -26,6 +27,7 @@ public enum Lang {
 	NOSUCHFLAG			("&e'&4" + VALUE + "&e' &cis not a Flag"),
 	NOFLAGVALUE			("&e'&4" + VALUE + "&e' &cis not a valid value for &6" + TYPE),
 	NOPLAYER			("&cYou have to be a Player to perform this command."),
+	NOREGIONS			("&cNo Regions"),
 	// Config
 	CONFIG_LOAD_START	("Loading Config"),
 	CONFIG_LOAD_FINISH	("Finished loading"),
@@ -43,11 +45,15 @@ public enum Lang {
 	CMD_HEADER			("&a----<(&eTigerClaim&a)>----"),
 	CMD_FOOTER			("&a---------------------------"),
 	CMD_SET				("&7set"),
+	CMD_LIST			("&7list"),
+	CMD_INFO			("&7info"),
 	CMD_INSERT			("&7claim"),
 	CMD_RELOAD			("&7reload"),
 	CMD_PLUGIN			("&7plugin"),
 	// Commands Hover
 	CMD_HOVER_SET		("set config."),
+	CMD_HOVER_INFO		("informatio how you create a Claim."),
+	CMD_HOVER_LIST		("list all Regions where you are an owner."),
 	CMD_HOVER_INSERT	("created a new Claim around your Position."),
 	CMD_HOVER_RELOAD	("reloads TigerClaimPlugin(config and cache)"),
 	CMD_HOVER_PLUGIN	("shows plugin info"),
@@ -64,6 +70,20 @@ public enum Lang {
 	INSERT_HOVER_TEXT	("&eClaim at your position."),
 	INSERT_HOVER_YES	("&ecreates Claim."),
 	INSERT_HOVER_NO		("&eabort Claim."),
+	// Info
+	INFO				("How to claim a region?\n"),
+	// List
+	LIST_HEADER			("&a----<(&e" + VALUE + "'s Regions&a)>----"),
+	LIST_REGION			("&e- " + VALUE),
+	LIST_FOOTER_NEXT	("&f[&eNext&f]"),
+	LIST_FOOTER_PREV	("&f[&eprev&f]"),
+	LIST_FOOTER_PLAYER	("&a-----&6[&e" + PAGE + "&f/&e" + PAGEMAX + "&6]&a-----"),
+	LIST_FOOTER_CONSOLE	("&a-----&6[&e" + PAGE + "&f/&e" + PAGEMAX + "&6]&a-----"),
+	
+	LIST_HOVER			("&e" + ID),
+	
+	LIST_FOOTER			("&a---------------------------"),
+	LIST_ROW			("&e- " + VALUE),
 	// Claim
 	CLAIM_POLYGON		("&aRegion&e: &6" + ID + "\n&apoints&e:" + VALUE),
 	CLAIM_CUBOID		("&aRegion&e: &6" + ID + "\n&apos1&e: " + POS1 + "\n&apos2&e: " + POS2),
