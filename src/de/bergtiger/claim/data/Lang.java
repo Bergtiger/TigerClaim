@@ -45,7 +45,7 @@ public enum Lang {
 	CMD_HEADER			("&a----<(&eTigerClaim&a)>----"),
 	CMD_FOOTER			("&a---------------------------"),
 	CMD_SET				("&7set"),
-	CMD_LIST			("&7list"),
+	CMD_LIST			("&7list [page]"),
 	CMD_INFO			("&7info"),
 	CMD_INSERT			("&7claim"),
 	CMD_RELOAD			("&7reload"),
