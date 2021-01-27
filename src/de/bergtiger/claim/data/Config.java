@@ -43,18 +43,20 @@ public class Config {
 
 	public static final String
 		// Config
-		CONFIG = "config", 
-		CONSTANT = "constant", 
-		CONSTANTS = CONSTANT + ".",
+		CONFIG				= "config", 
+		CONSTANT			= "constant", 
+		CONSTANTS			= CONSTANT + ".",
 		// Time
-		TIME_PATTERN = CONFIG + ".Time.Pattern",
+		TIME_PATTERN		= CONFIG + ".Time.Pattern",
+		// Page
+		PAGE_LENGTH			= CONFIG + ".PageLength",
 		// Region
-		REGION_PATTERN = CONFIG + ".Region.Pattern", 
-		REGION_EXPAND_VERT = CONFIG + ".Region.ExpandVert",
-		REGION_OVERLAPPING = CONFIG + ".Region.Overlapping",
-		REGION_RADIUS = CONFIG + ".Region.Radius", 
-		REGION_FLAGS = CONFIG + ".Region.Flags",
-		REGION_GAP = CONFIG + ".Region.Gap";
+		REGION_PATTERN		= CONFIG + ".Region.Pattern", 
+		REGION_EXPAND_VERT	= CONFIG + ".Region.ExpandVert",
+		REGION_OVERLAPPING	= CONFIG + ".Region.Overlapping",
+		REGION_RADIUS		= CONFIG + ".Region.Radius", 
+		REGION_FLAGS		= CONFIG + ".Region.Flags",
+		REGION_GAP			= CONFIG + ".Region.Gap";
 
 	public Boolean hasValue(String key) {
 		if ((values != null) && (!values.isEmpty())) {
@@ -169,6 +171,8 @@ public class Config {
 	public void checkConfig() {
 		FileConfiguration cfg = plugin.getConfig();
 		if (cfg != null) {
+			// Page
+			checkConfigInteger(cfg, PAGE_LENGTH, 15);
 			// Region
 			checkConfigBoolean(cfg, REGION_EXPAND_VERT, true);
 			checkConfigBoolean(cfg, REGION_OVERLAPPING, false);
@@ -275,6 +279,9 @@ public class Config {
 			// Time
 			if (!cfg.contains(TIME_PATTERN))
 				cfg.addDefault(TIME_PATTERN, "dd-MM-yyyy");
+			// Page
+			if (!cfg.contains(PAGE_LENGTH))
+				cfg.addDefault(PAGE_LENGTH, 15);
 			// Region
 			if (!cfg.contains(REGION_PATTERN))
 				cfg.addDefault(REGION_PATTERN, Cons.PLAYER + "_" + Cons.COUNTER + "_" + Cons.TIME);

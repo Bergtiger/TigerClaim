@@ -28,6 +28,13 @@ public class CmdPlugin {
 				// Version
 				p.spigot().sendMessage(Lang.buildTC(
 						Lang.PLUGIN_VERSION.getValue().replace(VALUE, Claims.inst().getDescription().getVersion())));
+				// Page Length
+				p.spigot()
+						.sendMessage(Lang.buildTC(
+								Lang.PLUGIN_PAGE_LENGTH.getValue().replace(VALUE, 
+										c.hasValue(Config.PAGE_LENGTH) ? c.getValue(Config.PAGE_LENGTH).toString()
+												: "-"),
+								null, Lang.PLUGIN_HOVER_PAGE_LENGTH.getValue(), "/claim set " + CmdSet.CMD_PAGE_LENGTH + " "));
 				// Radius
 				p.spigot()
 						.sendMessage(Lang.buildTC(
@@ -96,6 +103,9 @@ public class CmdPlugin {
 				cs.sendMessage(Lang.PLUGIN_HEADER.get());
 				// Version
 				cs.sendMessage(Lang.PLUGIN_VERSION.get().replace(VALUE, Claims.inst().getDescription().getVersion()));
+				// Page Length
+				cs.sendMessage(Lang.PLUGIN_PAGE_LENGTH.get().replace(VALUE,
+						c.hasValue(Config.PAGE_LENGTH) ? c.getValue(Config.PAGE_LENGTH).toString() : "-"));
 				// Radius
 				cs.sendMessage(Lang.PLUGIN_RADIUS.get().replace(VALUE,
 						c.hasValue(Config.REGION_RADIUS) ? c.getValue(Config.REGION_RADIUS).toString() : "-"));

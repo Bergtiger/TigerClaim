@@ -104,6 +104,7 @@ public enum Lang {
 	PLUGIN_PATTERN_TIME	("&aTimePattern&e: &6" + VALUE),
 	PLUGIN_FLAGS		("&aFlags"),
 	PLUGIN_FLAG_LIST	("  &6" + FLAG + "&e: &f" + VALUE),
+	PLUGIN_PAGE_LENGTH	("&aPage length&e: &6" + VALUE),
 	// PluginInfo Hover
 	PLUGIN_HOVER_RADIUS			("&aSet radius"),
 	PLUGIN_HOVER_GAP			("&aSet gap between claim and other regions"),
@@ -111,7 +112,8 @@ public enum Lang {
 	PLUGIN_HOVER_OVERLAPPING	("&aChange if claims are allowed to overlap existing regions."),
 	PLUGIN_HOVER_PATTERN_ID		("&aSet a new region pattern"),
 	PLUGIN_HOVER_PATTERN_TIME	("&aSet a new time pattern"),
-	PLUGIN_HOVER_FLAGS			("&aSet a flag");
+	PLUGIN_HOVER_FLAGS			("&aSet a flag"),
+	PLUGIN_HOVER_PAGE_LENGTH	("&aSet page length for claim_list command");
 	
 	private String value;
 	

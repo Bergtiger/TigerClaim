@@ -17,6 +17,7 @@ import com.sk89q.worldguard.protection.regions.RegionContainer;
 import de.bergtiger.claim.Claims;
 import de.bergtiger.claim.bdo.TigerList;
 import de.bergtiger.claim.data.ClaimUtils;
+import de.bergtiger.claim.data.Config;
 import de.bergtiger.claim.data.Lang;
 import de.bergtiger.claim.data.Perm;
 
@@ -58,6 +59,12 @@ public class CmdList {
 			RegionManager regions = container.get(BukkitAdapter.adapt(p.getWorld()));
 			// 
 			TigerList<ProtectedRegion> list = new TigerList<ProtectedRegion>();
+			if(Config.inst().hasValue(Config.PAGE_LENGTH)) {
+				try {
+					list.setPageSize(Integer.valueOf(Config.inst().getValue(Config.PAGE_LENGTH).toString()));
+				} catch(NumberFormatException e) {
+				}
+			}
 			// LocalPlayer for WorldGuard
 			LocalPlayer pLocal = WorldGuardPlugin.inst().wrapPlayer(p);
 			regions.getRegions().forEach((s,r) -> {
@@ -139,14 +146,14 @@ public class CmdList {
 				((Player)cs).spigot().sendMessage(
 						Lang.buildTC(
 								Lang.LIST_FOOTER_PREV.get(),
-								("/claim " + Claim.LIST + " " + (regionList.getPage())),
+								("/claim " + Claim.LIST + " " + (regionList.getPage() - 1)),
 								null,
 								null),
 						Lang.buildTC(
 								Lang.LIST_FOOTER_PLAYER.get().replace(PAGE, Integer.toString(regionList.getPage() + 1)).replace(PAGEMAX, Integer.toString(regionList.getPageMax()))),
 						Lang.buildTC(
 								Lang.LIST_FOOTER_NEXT.get(),
-								("/claim " + Claim.LIST + " " + (regionList.getPage() + 2)),
+								("/claim " + Claim.LIST + " " + (regionList.getPage() + 1)),
 								null,
 								null));
 			else

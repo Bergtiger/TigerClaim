@@ -24,8 +24,15 @@ import de.bergtiger.claim.data.Perm;
 
 public class CmdSet {
 
-	public static final String CMD_GAP = "gap", CMD_RADIUS = "radius", CMD_FLAG = "flag", CMD_TIME = "time",
-			CMD_PATTERN = "pattern", CMD_EXPAND_VERT = "expandvert", CMD_OVERLAPPING = "overlapping";
+	public static final String
+			CMD_GAP			= "gap",
+			CMD_RADIUS		= "radius",
+			CMD_FLAG		= "flag",
+			CMD_TIME		= "time",
+			CMD_PATTERN		= "pattern",
+			CMD_EXPAND_VERT	= "expandvert",
+			CMD_OVERLAPPING	= "overlapping",
+			CMD_PAGE_LENGTH	= "pagelength";
 
 	public static void setConfig(CommandSender cs, String[] args) {
 		Bukkit.getScheduler().runTaskAsynchronously(Claims.inst(), () -> new CmdSet().serConfigValue(cs, args));
@@ -42,6 +49,17 @@ public class CmdSet {
 			if (args.length >= 3) {
 				Config c = Config.inst();
 				switch (args[1].toLowerCase()) {
+				case CMD_PAGE_LENGTH: {
+					try {
+						c.setValue(Config.PAGE_LENGTH, Integer.valueOf(args[2]));
+						c.saveConfig();
+						cs.sendMessage(Lang.SET_SAVED.get().replace(TYPE, CMD_PAGE_LENGTH).replace(VALUE,
+								c.getValue(Config.PAGE_LENGTH).toString()));
+					} catch (NumberFormatException e) {
+						cs.sendMessage(Lang.NONUMBERVALUE.get().replace(VALUE, args[2]));
+					}
+					break;
+				}
 				case CMD_RADIUS: {
 					try {
 						c.setValue(Config.REGION_RADIUS, Integer.valueOf(args[2]));
