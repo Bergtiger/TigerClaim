@@ -1,8 +1,8 @@
-package de.bergtiger.claim.data;
+package de.bergtiger.claim.data.language;
 
-public class Cons {
+public interface Cons {
 
-	public static String
+	String
 		ID		= "-id-",
 		FLAG	= "-flag-",
 		LIMIT	= "-limit-",

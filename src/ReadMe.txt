@@ -1,6 +1,6 @@
 TigerClaim %version%
 
-TigerClaim is a add-on for WorldGuard.
+TigerClaim is an add-on for WorldGuard.
 It is a simple solution to create Regions for Player.
 It allows Player to create their own Region with predefined Flags like greeting, farewell, ice-melt and so on.
 TigerClaim supports all WorldGuard flags, also all WorldGuard flag add-ons.
@@ -16,11 +16,13 @@ Settings
 Setting         Default                     Description
 
 Time.Pattern:   dd-MM-yyyy                  Time pattern.
-ExpandVert:     true                        Regions will be automatically expanded to full height
-Overlapping:    false                       Claims can overlap existing Regions
-Radius:         39                          Claims without WorldEdit selection will be a square with this radius around the player
-Pattern:        -player-_-counter-_-time-   Claims will be named with this pattern
+ExpandVert:     true                        Regions will be automatically expanded to full height.
+Overlapping:    false                       Claims can overlap existing Regions.
+Radius:         39                          Claims without WorldEdit selection will be a square with this radius around the player.
+Pattern:        -player-_-counter-_-time-   Claims will be named with this pattern.
 Gap:            10                          Claims need a gap between each other.
+Height.Min:     -64                         Claims min height by expand vert.
+Height.Max:     320                         Claims max height by expand vert.
 Flags:          -                           Default flags that will be added when a claim is made.
 
 Constant
@@ -43,6 +45,8 @@ set     expandvert [true/false]     Set if regions should be automatically expan
         time [value]                Set the time-pattern used in the pattern for naming regions.
         pattern [value]             Set the pattern for naming regions. -player- will be replaced with the player-name and -time- will be replaced with time-pattern
         radius [number]             Set radius of Blocks around the player for default regions.
+        min [number]                Set minimal height of a region, only by expand vert.
+        max [number]                Set maximal height of a region, only by expand vert.
 
 Examples
 

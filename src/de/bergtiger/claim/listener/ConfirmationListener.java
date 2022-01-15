@@ -21,12 +21,12 @@ import com.sk89q.worldguard.protection.regions.RegionContainer;
 
 import de.bergtiger.claim.Claims;
 import de.bergtiger.claim.bdo.TigerClaim;
-import de.bergtiger.claim.data.Lang;
-import de.bergtiger.claim.data.Perm;
+import de.bergtiger.claim.data.language.Lang;
+import de.bergtiger.claim.data.permission.Perm;
 
-import static de.bergtiger.claim.data.Cons.VALUE;
-import static de.bergtiger.claim.data.Cons.LIMIT;
-import static de.bergtiger.claim.data.Cons.PLAYER;
+import static de.bergtiger.claim.data.language.Cons.VALUE;
+import static de.bergtiger.claim.data.language.Cons.LIMIT;
+import static de.bergtiger.claim.data.language.Cons.PLAYER;
 
 public class ConfirmationListener implements Listener {
 
@@ -56,7 +56,7 @@ public class ConfirmationListener implements Listener {
 				queue.remove(e.getPlayer());
 				if (queue.isEmpty())
 					queue = null;
-				e.getPlayer().spigot().sendMessage(Lang.buildTC(Lang.INSERT_CANCEL.get()));
+				e.getPlayer().spigot().sendMessage(Lang.build(Lang.INSERT_CANCEL));
 				e.setCancelled(true);
 			}
 		}
@@ -64,12 +64,12 @@ public class ConfirmationListener implements Listener {
 	
 	/**
 	 * add claim to queue.
-	 * @param con
+	 * @param con to claim
 	 */
 	public void addConfirmation(TigerClaim con) {
 		if (con != null) {
 			if (queue == null)
-				queue = new HashMap<Player, TigerClaim>();
+				queue = new HashMap<>();
 			queue.put(con.getPlayer(), con);
 		}
 	}
@@ -84,7 +84,7 @@ public class ConfirmationListener implements Listener {
 
 	/**
 	 * clear claim queue
-	 * @param p
+	 * @param p player to clear
 	 */
 	public void clearQueue(Player p) {
 		if (queue != null && !queue.isEmpty())
@@ -92,8 +92,8 @@ public class ConfirmationListener implements Listener {
 	}
 
 	/**
-	 * sorround with Thread
-	 * @param con
+	 * surround with Thread
+	 * @param con to claim
 	 */
 	private void createRegionThread(TigerClaim con) {
 		Bukkit.getScheduler().runTaskAsynchronously(Claims.inst(), () -> createRegion(con));
@@ -101,7 +101,7 @@ public class ConfirmationListener implements Listener {
 
 	/**
 	 * create claim
-	 * @param tc
+	 * @param tc to claim
 	 */
 	private void createRegion(TigerClaim tc) {
 		if (tc != null) {
@@ -117,7 +117,7 @@ public class ConfirmationListener implements Listener {
 				if (regions.getRegion(tc.getId()) != null) {
 					// existing Region
 					tc.getPlayer().spigot()
-						.sendMessage(Lang.buildTC(Lang.INSERT_EXISTING.getValue().replace(VALUE, tc.getId())));
+						.sendMessage(Lang.build(Lang.INSERT_EXISTING.replace(VALUE, tc.getId())));
 					return;
 				}
 			}
@@ -138,17 +138,17 @@ public class ConfirmationListener implements Listener {
 								if (s.length == length + 2) {
 									// with world
 									if (tc.getWorld().getName().equalsIgnoreCase(s[s.length - 2]))
-										return Integer.valueOf(s[s.length - 1]);
+										return Integer.parseInt(s[s.length - 1]);
 									return 0;
 								}
 								// Without world
-								return Integer.valueOf(s[s.length - 1]);
+								return Integer.parseInt(s[s.length - 1]);
 							} catch (NumberFormatException e) {
 								e.printStackTrace();
 							}
 							return 0;
 						}).max().getAsInt();
-			} catch (NoSuchElementException e) {
+			} catch (NoSuchElementException ignored) {
 			}
 			if (Perm.hasPermission(tc.getPlayer(), Perm.CLAIM_LIMITLESS) || ((limit != null) && (tc.getPlayerRegionCount() < limit))) {
 				// Can claim
@@ -177,16 +177,16 @@ public class ConfirmationListener implements Listener {
 					}
 					// Add Region to Manager - save
 					regions.addRegion(region);
-					tc.getPlayer().spigot().sendMessage(Lang.buildTC(Lang.INSERT_SUCCESS.getValue(),
-							"/rg i " + region.getId(), Lang.INSERT_HOVER_SUCCESS.getValue(), null));
+					tc.getPlayer().spigot().sendMessage(Lang.build(Lang.INSERT_SUCCESS,
+							"/rg i " + region.getId(), Lang.build(Lang.INSERT_HOVER_SUCCESS), null));
 				} else {
 					// is overlapping
-					tc.getPlayer().spigot().sendMessage(Lang.buildTC(Lang.INSERT_OVERLAPPING.getValue()));
+					tc.getPlayer().spigot().sendMessage(Lang.build(Lang.INSERT_OVERLAPPING));
 				}
 			} else {
 				// limit reached
 				tc.getPlayer().spigot().sendMessage(
-						Lang.buildTC(Lang.INSERT_LIMIT.getValue().replace(VALUE, Integer.toString(tc.getPlayerRegionCount()))
+						Lang.build(Lang.INSERT_LIMIT.replace(VALUE, Integer.toString(tc.getPlayerRegionCount()))
 								.replace(LIMIT, (limit != null) ? Integer.toString(limit) : "-")));
 			}
 		}

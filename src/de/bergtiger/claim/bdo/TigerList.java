@@ -1,5 +1,6 @@
 package de.bergtiger.claim.bdo;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -8,6 +9,7 @@ public class TigerList<T> extends ArrayList<T> {
 	/**
 	 * 
 	 */
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private boolean order = true;
@@ -26,7 +28,7 @@ public class TigerList<T> extends ArrayList<T> {
 	/**
 	 * Get current Page (Starts with 0)
 	 * 
-	 * @return
+	 * @return page
 	 */
 	public int getPage() {
 		return page;
@@ -35,7 +37,7 @@ public class TigerList<T> extends ArrayList<T> {
 	/**
 	 * Set Page
 	 * 
-	 * @param page
+	 * @param page to set
 	 */
 	public void setPage(int page) {
 		if (page <= 0)
@@ -49,7 +51,7 @@ public class TigerList<T> extends ArrayList<T> {
 	/**
 	 * Get Page size (Elements on each Page)
 	 * 
-	 * @return
+	 * @return amount of elements on a page
 	 */
 	public int getPageSize() {
 		return pageSize;
@@ -58,7 +60,7 @@ public class TigerList<T> extends ArrayList<T> {
 	/**
 	 * Set Page size (Elements on each Page)
 	 * 
-	 * @param pageSize
+	 * @param pageSize to set
 	 */
 	public void setPageSize(int pageSize) {
 		this.pageSize = pageSize;
@@ -76,7 +78,7 @@ public class TigerList<T> extends ArrayList<T> {
 	/**
 	 * Get Max Page
 	 * 
-	 * @return
+	 * @return max pages
 	 */
 	public int getPageMax() {
 		return (size() / pageSize) + ((size() % pageSize != 0) ? 1 : 0);

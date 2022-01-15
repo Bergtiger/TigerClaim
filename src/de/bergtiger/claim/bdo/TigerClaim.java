@@ -7,18 +7,18 @@ import java.util.logging.Level;
 
 import javax.annotation.Nonnull;
 
+import de.bergtiger.claim.data.logger.TigerLogger;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 
 import com.sk89q.worldguard.protection.flags.Flag;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 
-import de.bergtiger.claim.Claims;
-import de.bergtiger.claim.data.Config;
+import de.bergtiger.claim.data.configuration.Config;
 
-import static de.bergtiger.claim.data.Cons.PLAYER;
-import static de.bergtiger.claim.data.Cons.COUNTER;
-import static de.bergtiger.claim.data.Cons.TIME;
+import static de.bergtiger.claim.data.language.Cons.PLAYER;
+import static de.bergtiger.claim.data.language.Cons.COUNTER;
+import static de.bergtiger.claim.data.language.Cons.TIME;
 
 public abstract class TigerClaim {
 	
@@ -28,54 +28,45 @@ public abstract class TigerClaim {
 	private final Boolean expandVert;
 	private final Boolean overlapping;
 	private final String pattern;
-	private final String timePattern;
+	private String timePattern;
 	private final Integer gap;
 	
 	private Integer playerRegionCount = 0;
 	private Integer regionCounter = 1;
 
+	protected final int minHeight = Config.getInt(Config.REGION_MIN_HEIGHT);
+	protected final int maxHeight = Config.getInt(Config.REGION_MAX_HEIGHT);
+
 	public TigerClaim(@Nonnull Player player, World world) {
 		this.player = player;
 		this.world = world;
 		// load missing values from Configuration
-		Config c = Config.inst();
 		// Flags
-		if(c.hasFlags())
-			flags = c.getFlags();
+		if(Config.hasValue(Config.REGION_FLAGS))
+			flags = Config.getFlags();
 		else
 			flags = null;
 		// timePattern
-		if(c.hasValue(Config.TIME_PATTERN))
-			timePattern = c.getValue(Config.TIME_PATTERN).toString();
-		else
+		if ((timePattern = Config.getString(Config.TIME_PATTERN)) == null)
 			timePattern = "dd-MM-yyyy";
 		// IdPattern
-		if(c.hasValue(Config.REGION_PATTERN))
-			pattern = c.getValue(Config.REGION_PATTERN).toString();
-		else
-			pattern = null;
+		pattern = Config.getString(Config.REGION_PATTERN);
 		// Gap
-		if(c.hasValue(Config.REGION_GAP)) {
+		if(Config.hasValue(Config.REGION_GAP)) {
 			Integer i = null;
 			try {
-				i = Integer.valueOf(c.getValue(Config.REGION_GAP).toString());
+				i = Integer.valueOf(Config.getValue(Config.REGION_GAP).toString());
 			} catch (NumberFormatException e) {
-				Claims.inst().getLogger().log(Level.SEVERE, Config.REGION_GAP + " has to be a Number.", e);
+				TigerLogger.log(Level.SEVERE, String.format("&6'&e%s&6' &chas to be a Number.", Config.REGION_GAP), e);
 			}
 			gap = i;
 		}
 		else
 			gap = null;
 		// Expand Vertical
-		if(c.hasValue(Config.REGION_EXPAND_VERT))
-			expandVert = Boolean.valueOf(c.getValue(Config.REGION_EXPAND_VERT).toString());
-		else
-			expandVert = false;
+		expandVert = Config.getBoolean(Config.REGION_EXPAND_VERT);
 		// Overlapping
-		if(c.hasValue(Config.REGION_OVERLAPPING))
-			overlapping = Boolean.valueOf(c.getValue(Config.REGION_OVERLAPPING).toString());
-		else
-			overlapping = false;
+		overlapping = Config.getBoolean(Config.REGION_OVERLAPPING);
 	}
 	
 	public TigerClaim(@Nonnull Player player, World world, HashMap<Flag<?>, Object> flags, String time, String pattern, Integer gab, Boolean expantVert, Boolean overlapping) {
@@ -145,7 +136,7 @@ public abstract class TigerClaim {
 	
 	/**
 	 * Flags that will be set when claim is created.
-	 * @return
+	 * @return map of flags and their value
 	 */
 	public HashMap<Flag<?>, Object> getFlags() {
 		return flags;
@@ -191,19 +182,19 @@ public abstract class TigerClaim {
 	
 	/**
 	 * Build Region.
-	 * @return
+	 * @return ProtectedRegion
 	 */
 	public abstract ProtectedRegion getRegion();
 
 	/**
 	 * Build Region with gap.
-	 * @return
+	 * @return ProtectedRegion
 	 */
 	public abstract ProtectedRegion getRegionWithGab();
 	
 	/**
 	 * Build Hover.
-	 * @return
+	 * @return String
 	 */
 	public abstract String buildHover();
 }

@@ -8,14 +8,16 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.logging.Level;
 
+import de.bergtiger.claim.data.logger.TigerLogger;
 import org.bukkit.Bukkit;
 
 import de.bergtiger.claim.Claims;
 
 public class ReadMe {
 
-	private File file = new File("plugins/" + Claims.inst().getName() + "/ReadMe.txt");
+	private final File file = new File(Claims.inst().getDataFolder(), "ReadMe.txt");
 	
 	public static void save() {
 		Bukkit.getScheduler().runTaskAsynchronously(Claims.inst(), () -> {
@@ -37,15 +39,15 @@ public class ReadMe {
 					return lines.length >= 2 && lines[0].equalsIgnoreCase(Claims.inst().getName()) && lines[1].equalsIgnoreCase(Claims.inst().getDescription().getVersion());
 				}
 			} catch (FileNotFoundException e) {
-				e.printStackTrace();
+				TigerLogger.log(Level.SEVERE, "&cCould not find file", e);
 			} catch (IOException e) {
-				e.printStackTrace();
+				TigerLogger.log(Level.SEVERE, "&cError on checkVersion", e);
 			} finally {
 				if(br != null)
 					try {
 						br.close();
 					} catch (IOException e) {
-						e.printStackTrace();
+						TigerLogger.log(Level.SEVERE, "&cError on checkVersion", e);
 					}
 			}
 		}

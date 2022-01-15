@@ -1,7 +1,5 @@
 package de.bergtiger.claim.bdo;
 
-import java.util.logging.Level;
-
 import javax.annotation.Nonnull;
 
 import org.bukkit.Location;
@@ -12,10 +10,9 @@ import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 
-import de.bergtiger.claim.Claims;
-import de.bergtiger.claim.data.Config;
-import de.bergtiger.claim.data.Lang;
-import static de.bergtiger.claim.data.Cons.*;
+import de.bergtiger.claim.data.configuration.Config;
+import de.bergtiger.claim.data.language.Lang;
+import static de.bergtiger.claim.data.language.Cons.*;
 
 public class TigerClaimRadius extends TigerClaim {
 
@@ -26,17 +23,7 @@ public class TigerClaimRadius extends TigerClaim {
 		super(player, loc.getWorld());
 		this.loc = loc;
 		// load missing value Radius from Configuration
-		if(Config.inst().hasValue(Config.REGION_RADIUS)) {
-			int r = 0;
-			try {
-				r = Integer.valueOf(Config.inst().getValue(Config.REGION_RADIUS).toString());
-			} catch (NumberFormatException e) {
-				Claims.inst().getLogger().log(Level.SEVERE, Config.REGION_RADIUS + " has to be a Number.", e);
-			}
-			radius = r;
-		} else {
-			radius = 0;
-		}
+		radius = Config.getInt(Config.REGION_RADIUS);
 	}
 	
 	public TigerClaimRadius(@Nonnull Player player, @Nonnull World world, @Nonnull Location loc, int radius) {
@@ -51,11 +38,11 @@ public class TigerClaimRadius extends TigerClaim {
 				getId(), 
 				BlockVector3.at(
 						(loc.getBlockX() - radius),
-						(isExpandVert() ?   0 : Math.max((loc.getBlockY() - radius),   0)),
+						(isExpandVert() ? minHeight : Math.max((loc.getBlockY() - radius), minHeight)),
 						(loc.getBlockZ() - radius)),
 				BlockVector3.at(
 						(loc.getBlockX() + radius),
-						(isExpandVert() ? 255 : Math.min((loc.getBlockY() + radius), 255)),
+						(isExpandVert() ? maxHeight : Math.min((loc.getBlockY() + radius), maxHeight)),
 						(loc.getBlockZ() + radius)));
 	}
 
@@ -66,11 +53,11 @@ public class TigerClaimRadius extends TigerClaim {
 					getId(), 
 					BlockVector3.at(
 							(loc.getBlockX() - radius - getGap()),
-							(isExpandVert() ?   0 : Math.max((loc.getBlockY() - radius - getGap()),   0)),
+							(isExpandVert() ? minHeight : Math.max((loc.getBlockY() - radius - getGap()), minHeight)),
 							(loc.getBlockZ() - radius - getGap())), 
 					BlockVector3.at(
 							(loc.getBlockX() + radius + getGap()),
-							(isExpandVert() ? 255 : Math.min((loc.getBlockY() + radius + getGap()), 255)),
+							(isExpandVert() ? maxHeight : Math.min((loc.getBlockY() + radius + getGap()), maxHeight)),
 							(loc.getBlockZ() + radius + getGap())));
 		return getRegion();
 	}

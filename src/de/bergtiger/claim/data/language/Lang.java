@@ -1,6 +1,6 @@
-package de.bergtiger.claim.data;
+package de.bergtiger.claim.data.language;
 
-import java.util.List;
+import java.util.Collection;
 
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
@@ -10,14 +10,12 @@ import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.hover.content.Text;
 import net.md_5.bungee.api.chat.ClickEvent.Action;
 
-import static de.bergtiger.claim.data.Cons.*;
-
 /**
  * 
  * @author Bergtiger
  *
  */
-public enum Lang {
+public enum Lang implements Cons {
 	
 	NOPERMISSION		("&cYou have no Permission"),
 	
@@ -50,6 +48,7 @@ public enum Lang {
 	CMD_INSERT			("&7claim"),
 	CMD_RELOAD			("&7reload"),
 	CMD_PLUGIN			("&7plugin"),
+	CMD_WIKI			("&7more information in the wiki"),
 	// Commands Hover
 	CMD_HOVER_SET		("set config."),
 	CMD_HOVER_INFO		("informatio how you create a Claim."),
@@ -57,6 +56,7 @@ public enum Lang {
 	CMD_HOVER_INSERT	("created a new Claim around your Position."),
 	CMD_HOVER_RELOAD	("reloads TigerClaimPlugin(config and cache)"),
 	CMD_HOVER_PLUGIN	("shows plugin info"),
+	CMD_HOVER_WIKI		("opens the wiki page"),
 	// Insert
 	INSERT_OVERLAPPING	("&cOverlapping Regions."),
 	INSERT_SUCCESS		("&aCreated Claim successfully."),
@@ -80,7 +80,7 @@ public enum Lang {
 	LIST_FOOTER_PLAYER	("&a-----&6[&e" + PAGE + "&f/&e" + PAGEMAX + "&6]&a-----"),
 	LIST_FOOTER_CONSOLE	("&a-----&6[&e" + PAGE + "&f/&e" + PAGEMAX + "&6]&a-----"),
 	
-	LIST_HOVER			("&e" + ID),
+	LIST_HOVER			("&f Show region info for: &e" + ID),
 	
 	LIST_FOOTER			("&a---------------------------"),
 	LIST_ROW			("&e- " + VALUE),
@@ -102,6 +102,8 @@ public enum Lang {
 	PLUGIN_OVERLAPPING	("&aOverlapping&e: &6" + VALUE),
 	PLUGIN_PATTERN_ID	("&aRegionPattern&e: &6" + VALUE),
 	PLUGIN_PATTERN_TIME	("&aTimePattern&e: &6" + VALUE),
+	PLUGIN_HEIGHT_MIN	(String.format("&aMin height&e: &6%s", VALUE)),
+	PLUGIN_HEIGHT_MAX	(String.format("&aMax height&e: &6%s", VALUE)),
 	PLUGIN_FLAGS		("&aFlags"),
 	PLUGIN_FLAG_LIST	("  &6" + FLAG + "&e: &f" + VALUE),
 	PLUGIN_PAGE_LENGTH	("&aPage length&e: &6" + VALUE),
@@ -112,89 +114,115 @@ public enum Lang {
 	PLUGIN_HOVER_OVERLAPPING	("&aChange if claims are allowed to overlap existing regions."),
 	PLUGIN_HOVER_PATTERN_ID		("&aSet a new region pattern"),
 	PLUGIN_HOVER_PATTERN_TIME	("&aSet a new time pattern"),
+	PLUGIN_HOVER_HEIGHT_MIN		("&aSet a new min height for expand vert"),
+	PLUGIN_HOVER_HEIGHT_MAX		("&aSet a new max height for expand vert"),
 	PLUGIN_HOVER_FLAGS			("&aSet a flag"),
 	PLUGIN_HOVER_PAGE_LENGTH	("&aSet page length for claim_list command");
 	
 	private String value;
 	
-	private Lang(String value) {
+	Lang(String value) {
 		this.value = value;
 	}
 	
 	/**
-	 * uncolored
-	 * @return
+	 * set value
+	 * @param value to set
 	 */
-	public String getValue() {
-		return value;
-	}
-	
-	/**
-	 * uncolored
-	 * @param value
-	 */
-	public void setValue(String value) {
+	public void set(String value) {
 		this.value = value;
 	}
 	
 	/**
-	 * get String colored.
-	 * only legacy colors
-	 * @return Value colored
+	 * get value
+	 * @return value
 	 */
 	public String get() {
-		return color(value);
+		return value;
 	}
-	
+
 	/**
-	 * get String colored.
-	 * only legacy colors
-	 * @param args
-	 * @return
+	 * Combines TextComponents to one.
+	 * @param args {@link TextComponent} to combine
+	 * @return a single {@link TextComponent}
 	 */
-	public static String color(String args) {
-		if(args != null)
-			return ChatColor.translateAlternateColorCodes('&', args);
-		return args;
+	public static TextComponent combine(TextComponent...args) {
+		if(args != null) {
+			TextComponent tc = new TextComponent();
+			for(TextComponent t : args) {
+				if(t != null)
+					tc.addExtra(t);
+			}
+			return tc;
+		}
+		return null;
 	}
-	
+
+	/**
+	 * Combines TextComponents to one.
+	 * @param args {@link TextComponent} to combine
+	 * @return a single {@link TextComponent}
+	 */
+	public static TextComponent combine(Collection<? extends TextComponent> args) {
+		if(args != null) {
+			TextComponent tc = new TextComponent();
+			for(TextComponent t : args) {
+				if(t != null)
+					tc.addExtra(t);
+			}
+			return tc;
+		}
+		return null;
+	}
+
 	/**
 	 * Builds a TextComponent with text and colors
 	 * @param args - Text
 	 * @return TextComponent
 	 */
-	public static TextComponent buildTC(String args) {
-		return buildTC(args, null, null, null);
+	public static TextComponent build(Lang args) {
+		return build(args.value);
 	}
-	
+
 	/**
-	 * Builds a TextComponent with colored text, and extras
-	 * @param args - text
-	 * @param cmd - onClick command
-	 * @param hover - onHover text
-	 * @param cmd_suggestion - onClick suggestion
+	 * Builds a TextComponent with text and colors
+	 * @param args - Text
 	 * @return TextComponent
 	 */
-	public static TextComponent buildTC(String args, String cmd, String hover, String cmd_suggestion) {
-		return buildTC2(args, cmd, hover != null ? rgbColor(new TextComponent(hover), null) : null, cmd_suggestion);
+	public static TextComponent build(String args) {
+		return build(args, null, null, null);
 	}
-	
+
 	/**
 	 * Adds Extras to TextComponent no Color or anything!
-	 * @param tc - TextComponent witch will be modified
+	 * @param args - TextComponent witch will be modified
 	 * @param cmd - onClick command
 	 * @param hover - onHover text
-	 * @param cmd_suggestion
+	 * @param cmd_suggestion - onClick suggest command in chat
 	 * @return TextComponent
 	 */
-	public static TextComponent buildTC2(String args, String cmd, BaseComponent hover, String cmd_suggestion) {
+	public static TextComponent build(Object args, String cmd, Object hover, String cmd_suggestion) {
 		if (args != null) {
-			TextComponent tc = (TextComponent) rgbColor(new TextComponent(args),null);
+			TextComponent tc;
+			if (args instanceof String s)
+				tc = (TextComponent) rgbColor(new TextComponent(s), null);
+			else
+			if (args instanceof Lang l)
+				tc = (TextComponent) rgbColor(new TextComponent(l.value), null);
+			else
+			if (args instanceof TextComponent t)
+				tc = (TextComponent) rgbColor(t, null);
+			else
+				return null;
 			if (cmd != null && !cmd.isEmpty())
 				tc.setClickEvent(new ClickEvent(Action.RUN_COMMAND, cmd));
 			if (hover != null) {
-				tc.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-						new Text(new BaseComponent[] {hover})));
+				if (hover instanceof String hs)
+					tc.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+							new Text(hs)));
+				if (hover instanceof BaseComponent hb)
+					tc.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+							new Text(new BaseComponent[] {hb})));
 			}
 			if (cmd_suggestion != null && !cmd_suggestion.isEmpty())
 				tc.setClickEvent(new ClickEvent(Action.SUGGEST_COMMAND, cmd_suggestion));
@@ -202,79 +230,17 @@ public enum Lang {
 		}
 		return null;
 	}
-	
-	public static TextComponent replaceColorless(TextComponent tc, String replace, String value) {
-		if (tc != null) {
-			if(tc.getText().contains(replace)) {
-				tc.setText(tc.getText().replace(replace, value));
-				return tc;
-			}
-			List<BaseComponent> components = tc.getExtra();
-			if(components != null && !components.isEmpty()) {
-				for(BaseComponent bc : components) {
-					if(bc != null && bc instanceof TextComponent) {
-						TextComponent t = (TextComponent)bc;
-						if(t.getText().contains(replace)) {
-							t.setText(t.getText().replace(replace, value));
-							return tc;
-						} else {
-							replaceColorless(t, replace, value);
-						}
-					}
-				}
-			}
-		}
-		return tc;
-	}
-	
-	/**
-	 * Config
-	 * @return
-	 */
-	public String nameModified() {
-		return name().replace("_", ".");
-	}
-	
-	/**
-	 * Adds color code to String.
-	 * Red false, Green true
-	 * @param args - boolean as String
-	 * @return colored String
-	 */
-	public static String coloredBoolean(String args) {
-		if(args.equalsIgnoreCase("true") || args.equalsIgnoreCase("false"))
-			return ChatColor.translateAlternateColorCodes('&', (args.equalsIgnoreCase("true")) ? "&2true" : "&cfalse");
-		return args;
-	}
 
-	/**
-	 * Adds color code to String.
-	 * Red false, Green true
-	 * @param args - boolean as String
-	 * @param bold - if string should be bold
-	 * @return colored String
-	 */
-	public static String coloredBoolean(String args, boolean bold) {
-		if(args.equalsIgnoreCase("true") || args.equalsIgnoreCase("false"))
-			if(bold)
-				return ChatColor.translateAlternateColorCodes('&', (args.equalsIgnoreCase("true")) ? "&2&ltrue&r" : "&c&lfalse&r");
-			else
-				return ChatColor.translateAlternateColorCodes('&', (args.equalsIgnoreCase("true")) ? "&2true&r" : "&cfalse&r");
-		if(bold)
-			return ChatColor.translateAlternateColorCodes('&', "&l" + args + "&r");
-		return args;
-	}
-	
 	/**
 	 * builds recursive BaseComponent with RGB colors
 	 * @param bc - BaseComponent, TextComponent
 	 * @param color - Color for BaseComponent
-	 * @return
+	 * @return BaseComponent with color
 	 */
 	private static BaseComponent rgbColor(BaseComponent bc, ChatColor color) {
 		if(bc instanceof TextComponent) {
 			if(color != null)
-				((TextComponent)bc).setColor(color);
+				bc.setColor(color);
 			// getText
 			String text = ((TextComponent)bc).getText();
 			// if text contains hexColor
@@ -282,7 +248,7 @@ public enum Lang {
 				// find first hexColor
 				int i = text.indexOf("&#");
 				// substring first part(old color)
-				((TextComponent)bc).setText(text.substring(0, i));
+				((TextComponent)bc).setText(ChatColor.translateAlternateColorCodes('&', text.substring(0, i)));
 				// substring last part(new color)
 				bc.addExtra(
 						rgbColor(
@@ -295,5 +261,23 @@ public enum Lang {
 			}
 		}
 		return bc;
+	}
+
+	/**
+	 * Creates a new line.
+	 * @return TextComponent representing new line
+	 */
+	public static TextComponent newLine() {
+		return build("\n");
+	}
+
+	/**
+	 * Replaces each substring of this string that matches the literal target sequence with the specified literal replacement sequence. The replacement proceeds from the beginning of the string to the end, for example, replacing "aa" with "b" in the string "aaa" will result in "ba" rather than "ab".
+	 * @param target The sequence of char values to be replaced
+	 * @param replacement The replacement sequence of char values
+	 * @return The resulting string
+	 */
+	public String replace(String target, String replacement) {
+		return value.replace(target, replacement);
 	}
 }

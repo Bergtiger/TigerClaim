@@ -18,7 +18,7 @@ public class TigerLinearFunction {
 		// s in II mz = az*(mx/ax)
 		if (m.z != (g.m.z * (m.x / g.m.x))) {
 			// linearly independent
-			Double s, r;
+			double s, r;
 			// f(r) = g(s)
 			// I : nx + mx*r = bx + ax*s
 			// II: nz + mz*r = bz + az*s

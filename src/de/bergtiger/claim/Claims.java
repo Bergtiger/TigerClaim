@@ -1,15 +1,12 @@
 package de.bergtiger.claim;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
+import de.bergtiger.claim.data.logger.TigerLogger;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import de.bergtiger.claim.cmd.Claim;
 import de.bergtiger.claim.cmd.ClaimTabCompleter;
-import de.bergtiger.claim.data.Config;
-import de.bergtiger.claim.data.ReadMe;
+import de.bergtiger.claim.data.configuration.Config;
 import de.bergtiger.claim.listener.ConfirmationListener;
 import de.bergtiger.claim.listener.PlayerListener;
 
@@ -24,14 +21,13 @@ public class Claims extends JavaPlugin {
 	@Override
 	public void onEnable() {
 		instance = this;
+		// set logger
+		TigerLogger.setLogger(getLogger());
 		// load config
-		Config.inst().loadConfig();
-		getLogger().log(Level.INFO, "loaded config");
-		// save ReadMe
-		ReadMe.save();
+		Config.load();
 		// Commands
-		getCommand("claim").setExecutor(new Claim());
-		getCommand("claim").setTabCompleter(new ClaimTabCompleter());
+		getCommand(Claim.CMD).setExecutor(new Claim());
+		getCommand(Claim.CMD).setTabCompleter(new ClaimTabCompleter());
 		// Listener
 		Bukkit.getPluginManager().registerEvents(ConfirmationListener.inst(), this);
 		Bukkit.getPluginManager().registerEvents(new PlayerListener(), this);

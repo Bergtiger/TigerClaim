@@ -10,8 +10,8 @@ import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 
-import de.bergtiger.claim.data.Lang;
-import static de.bergtiger.claim.data.Cons.*;
+import de.bergtiger.claim.data.language.Lang;
+import static de.bergtiger.claim.data.language.Cons.*;
 
 public class TigerClaimCuboid extends TigerClaim {
 	
@@ -27,8 +27,8 @@ public class TigerClaimCuboid extends TigerClaim {
 	public ProtectedRegion getRegion() {
 		return new ProtectedCuboidRegion(
 				getId(), 
-				BlockVector3.at(min.getBlockX(), isExpandVert() ?   0 : min.getBlockY(), min.getBlockZ()), 
-				BlockVector3.at(max.getBlockX(), isExpandVert() ? 255 : max.getBlockY(), max.getBlockZ()));
+				BlockVector3.at(min.getBlockX(), isExpandVert() ? minHeight : min.getBlockY(), min.getBlockZ()),
+				BlockVector3.at(max.getBlockX(), isExpandVert() ? maxHeight : max.getBlockY(), max.getBlockZ()));
 	}
 
 	@Override
@@ -36,8 +36,8 @@ public class TigerClaimCuboid extends TigerClaim {
 		if((getGap() != null) && (getGap() > 0))
 			return new ProtectedCuboidRegion(
 					getId(),
-					BlockVector3.at(min.getBlockX() - getGap(), isExpandVert() ?   0 : Math.max(min.getBlockY() - getGap(),   0), min.getBlockZ() - getGap()),
-					BlockVector3.at(max.getBlockX() + getGap(), isExpandVert() ? 255 : Math.min(max.getBlockY() + getGap(), 255), max.getBlockZ() + getGap()));
+					BlockVector3.at(min.getBlockX() - getGap(), isExpandVert() ? minHeight : Math.max(min.getBlockY() - getGap(), minHeight), min.getBlockZ() - getGap()),
+					BlockVector3.at(max.getBlockX() + getGap(), isExpandVert() ? maxHeight : Math.min(max.getBlockY() + getGap(), maxHeight), max.getBlockZ() + getGap()));
 		return getRegion();
 	}
 
@@ -46,11 +46,11 @@ public class TigerClaimCuboid extends TigerClaim {
 		return Lang.CLAIM_CUBOID.get().replace(ID, getId())
 				.replace(POS1, Lang.CLAIM_PATTERN_LOC.get()
 						.replace(X, Integer.toString(min.getX()))
-						.replace(Y, isExpandVert() ? "0" : Integer.toString(min.getY()))
+						.replace(Y, isExpandVert() ? Integer.toString(minHeight) : Integer.toString(min.getY()))
 						.replace(Z, Integer.toString(min.getZ())))
 				.replace(POS2, Lang.CLAIM_PATTERN_LOC.get()
 						.replace(X, Integer.toString(max.getX()))
-						.replace(Y, isExpandVert() ? "255" : Integer.toString(max.getY()))
+						.replace(Y, isExpandVert() ? Integer.toString(maxHeight) : Integer.toString(max.getY()))
 						.replace(Z, Integer.toString(max.getZ())));
 	}
 }

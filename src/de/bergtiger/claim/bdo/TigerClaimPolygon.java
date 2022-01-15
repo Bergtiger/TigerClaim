@@ -15,8 +15,8 @@ import com.sk89q.worldedit.regions.Polygonal2DRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 
-import de.bergtiger.claim.data.Lang;
-import static de.bergtiger.claim.data.Cons.*;
+import de.bergtiger.claim.data.language.Lang;
+import static de.bergtiger.claim.data.language.Cons.*;
 
 public class TigerClaimPolygon extends TigerClaim {
 
@@ -35,8 +35,8 @@ public class TigerClaimPolygon extends TigerClaim {
 		return new ProtectedPolygonalRegion(
 				getId(), 
 				points, 
-				isExpandVert() ? 0 : minY, 
-				isExpandVert() ? 255 : maxY);
+				isExpandVert() ? minHeight : minY,
+				isExpandVert() ? maxHeight : maxY);
 	}
 
 	@Override
@@ -61,8 +61,8 @@ public class TigerClaimPolygon extends TigerClaim {
 			return new ProtectedPolygonalRegion(
 				getId(), 
 				intersections, 
-				isExpandVert() ? 0 : minY, 
-				isExpandVert() ? 255 : maxY);
+				isExpandVert() ? minHeight : minY,
+				isExpandVert() ? maxHeight : maxY);
 		}
 		return getRegion();
 	}

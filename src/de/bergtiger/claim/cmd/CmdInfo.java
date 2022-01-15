@@ -4,8 +4,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 
 import de.bergtiger.claim.Claims;
-import de.bergtiger.claim.data.Lang;
-import de.bergtiger.claim.data.Perm;
+import de.bergtiger.claim.data.language.Lang;
+import de.bergtiger.claim.data.permission.Perm;
 
 public class CmdInfo {
 
@@ -15,9 +15,9 @@ public class CmdInfo {
 	
 	private void sendInfo(CommandSender cs) {
 		if (Perm.hasPermission(cs, Perm.CLAIM_ADMIN, Perm.CLAIM_INFO)) {
-			cs.sendMessage(Lang.INFO.get());
+			cs.spigot().sendMessage(Lang.build(Lang.INFO));
 		} else {
-			cs.sendMessage(Lang.NOPERMISSION.get());
+			cs.spigot().sendMessage(Lang.build(Lang.NOPERMISSION));
 		}
 	}
 }

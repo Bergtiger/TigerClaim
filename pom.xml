@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.bergtiger</groupId>
 	<artifactId>TigerClaim</artifactId>
-	<version>1.4.7</version>
+	<version>1.5</version>
 	<packaging>jar</packaging>
 
 	<name>TigerClaim</name>
@@ -42,8 +42,8 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.8.0</version>
 				<configuration>
-					<source>8</source>
-					<target>8</target>
+					<source>16</source>
+					<target>16</target>
 				</configuration>
 			</plugin>
 
@@ -102,7 +102,7 @@
 		<dependency>
 			<groupId>org.spigotmc</groupId>
 			<artifactId>spigot-api</artifactId>
-			<version>1.16.4-R0.1-SNAPSHOT</version>
+			<version>1.17.1-R0.1-SNAPSHOT</version>
 			<scope>provided</scope>
 		</dependency>
 		<!-- WorldGuard -->

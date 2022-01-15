@@ -1,7 +1,10 @@
 package de.bergtiger.claim.cmd;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -17,13 +20,13 @@ import com.sk89q.worldguard.protection.regions.RegionContainer;
 import de.bergtiger.claim.Claims;
 import de.bergtiger.claim.bdo.TigerList;
 import de.bergtiger.claim.data.ClaimUtils;
-import de.bergtiger.claim.data.Config;
-import de.bergtiger.claim.data.Lang;
-import de.bergtiger.claim.data.Perm;
+import de.bergtiger.claim.data.configuration.Config;
+import de.bergtiger.claim.data.language.Lang;
+import de.bergtiger.claim.data.permission.Perm;
 
-import static de.bergtiger.claim.data.Cons.PAGE;
-import static de.bergtiger.claim.data.Cons.PAGEMAX;
-import static de.bergtiger.claim.data.Cons.VALUE;
+import static de.bergtiger.claim.data.language.Cons.PAGE;
+import static de.bergtiger.claim.data.language.Cons.PAGEMAX;
+import static de.bergtiger.claim.data.language.Cons.VALUE;
 
 public class CmdList {
 	
@@ -37,7 +40,7 @@ public class CmdList {
 	
 	private CmdList() {}
 	
-	private HashMap<CommandSender, TigerList<ProtectedRegion>> regionList = new HashMap<CommandSender, TigerList<ProtectedRegion>>();
+	private final HashMap<CommandSender, TigerList<ProtectedRegion>> regionList = new HashMap<>();
 	
 	public static void list(CommandSender cs, String[] args) {
 		Bukkit.getScheduler().runTaskAsynchronously(Claims.inst(), () -> CmdList.inst().getRegionList(cs, args));
@@ -48,9 +51,9 @@ public class CmdList {
 	}
 	
 	/**
-	 * 
-	 * @param w
-	 * @return
+	 * Get regions from a player
+	 * @param p player
+	 * @return list of protected regions
 	 */
 	private TigerList<ProtectedRegion> getRegions(Player p) {
 		if(p != null) {
@@ -58,13 +61,8 @@ public class CmdList {
 			RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
 			RegionManager regions = container.get(BukkitAdapter.adapt(p.getWorld()));
 			// 
-			TigerList<ProtectedRegion> list = new TigerList<ProtectedRegion>();
-			if(Config.inst().hasValue(Config.PAGE_LENGTH)) {
-				try {
-					list.setPageSize(Integer.valueOf(Config.inst().getValue(Config.PAGE_LENGTH).toString()));
-				} catch(NumberFormatException e) {
-				}
-			}
+			TigerList<ProtectedRegion> list = new TigerList<>();
+			list.setPageSize(Config.getInt(Config.PAGE_LENGTH));
 			// LocalPlayer for WorldGuard
 			LocalPlayer pLocal = WorldGuardPlugin.inst().wrapPlayer(p);
 			regions.getRegions().forEach((s,r) -> {
@@ -78,9 +76,10 @@ public class CmdList {
 	}
 	
 	/**
+	 * Handle list command
 	 * claim list [page]
-	 * @param cs
-	 * @param args
+	 * @param cs command sender
+	 * @param args arguments
 	 */
 	private void getRegionList(CommandSender cs, String[] args) {
 		if (Perm.hasPermission(cs, Perm.CLAIM_ADMIN, Perm.CLAIM_LIST)) {
@@ -90,7 +89,7 @@ public class CmdList {
 					regionList.put(cs, getRegions((Player)cs));
 				} else {
 					// No Player
-					cs.sendMessage(Lang.NOPLAYER.get());
+					cs.spigot().sendMessage(Lang.build(Lang.NOPLAYER));
 					return;
 				}
 			}
@@ -98,78 +97,65 @@ public class CmdList {
 				TigerList<ProtectedRegion> b = regionList.get(cs);
 				if(b != null) {
 					try {
-						b.setPage(Integer.valueOf(args[1]));
+						b.setPage(Integer.parseInt(args[1]));
 						showList(cs, b);
 					} catch (NumberFormatException e) {
-						cs.sendMessage(Lang.NONUMBERVALUE.get().replace(VALUE, args[1]));
+						cs.spigot().sendMessage(Lang.build(Lang.NONUMBERVALUE.replace(VALUE, args[1])));
 					}
 				}
 			} else {
 				showList(cs, regionList.get(cs));
 			}
 		} else {
-			cs.sendMessage(Lang.NOPERMISSION.get());
+			cs.spigot().sendMessage(Lang.build(Lang.NOPERMISSION));
 		}
 	}
 	
 	/**
-	 * 
-	 * @param cs
-	 * @param regionList
+	 * handle show player list of regions
+	 * @param cs command sender
+	 * @param regionList list to show
 	 */
 	public void showList(CommandSender cs, TigerList<ProtectedRegion> regionList) {
 		if(regionList != null && !regionList.isEmpty()) {
+			List<TextComponent> components = new ArrayList<>();
 			// Header
-			cs.sendMessage(Lang.LIST_HEADER.get().replace(VALUE, cs.getName()));
+			components.add(Lang.build(Lang.LIST_HEADER.replace(VALUE, cs.getName())));
+			components.add(Lang.newLine());
 			// Buttons
-			for(int i = 0; (i < regionList.getPageSize()) && (regionList.getPage() * regionList.getPageSize() + i < regionList.size()); i++) {
+			for(int i = 0; (i < regionList.getPageSize()) && ((regionList.getPage() * regionList.getPageSize() + i) < regionList.size()); i++) {
 				try {
 					// Show Regions
 					ProtectedRegion r = regionList.get(regionList.getPage() * regionList.getPageSize() + i);
-					if(cs instanceof Player) {
-						// With Hover/ClickCommand
-						((Player)cs).spigot().sendMessage(Lang.buildTC(
-								buildTextString(r),
-								"/rg i " + r.getId(),
-								ClaimUtils.buildRegionHover(r),
-								null));
-					} else {
-						// Only Text
-						cs.sendMessage(buildTextString(r));
-					}
+					components.add(Lang.build(
+							Lang.LIST_ROW.replace(VALUE, r.getId()),
+							"/rg i " + r.getId(),
+							Lang.build(ClaimUtils.buildRegionHover(r)),
+							null));
+					components.add(Lang.newLine());
 				} catch(ArrayIndexOutOfBoundsException e) {
 					break;
 				}
 			}
 			// Footer
-			if(cs instanceof Player)
-				((Player)cs).spigot().sendMessage(
-						Lang.buildTC(
-								Lang.LIST_FOOTER_PREV.get(),
-								("/claim " + Claim.LIST + " " + (regionList.getPage() - 1)),
+			components.add(Lang.combine(
+						Lang.build(
+								Lang.LIST_FOOTER_PREV,
+								(String.format("/%s %s %d", Claim.CMD, Claim.LIST, (regionList.getPage() - 1))),
 								null,
 								null),
-						Lang.buildTC(
-								Lang.LIST_FOOTER_PLAYER.get().replace(PAGE, Integer.toString(regionList.getPage() + 1)).replace(PAGEMAX, Integer.toString(regionList.getPageMax()))),
-						Lang.buildTC(
-								Lang.LIST_FOOTER_NEXT.get(),
-								("/claim " + Claim.LIST + " " + (regionList.getPage() + 1)),
+						Lang.build(
+								Lang.LIST_FOOTER_PLAYER.replace(PAGE, Integer.toString(regionList.getPage() + 1)).replace(PAGEMAX, Integer.toString(regionList.getPageMax()))),
+						Lang.build(
+								Lang.LIST_FOOTER_NEXT,
+								(String.format("/%s %s %d", Claim.CMD, Claim.LIST, (regionList.getPage() + 1))),
 								null,
-								null));
-			else
-				cs.sendMessage(Lang.LIST_FOOTER_CONSOLE.get().replace(PAGE, Integer.toString(regionList.getPage() + 1)).replace(PAGEMAX, Integer.toString(regionList.getPageMax())));
+								null)));
+			// show message to player
+			cs.spigot().sendMessage(Lang.combine(components));
 		} else {
 			// No Regions
-			cs.sendMessage(Lang.NOREGIONS.get());
+			cs.spigot().sendMessage(Lang.build(Lang.NOREGIONS));
 		}
-	}
-	
-	/**
-	 * 
-	 * @param r
-	 * @return
-	 */
-	private String buildTextString(ProtectedRegion r) {
-		return Lang.LIST_ROW.get().replace(VALUE, r.getId());
 	}
 }

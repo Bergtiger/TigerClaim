@@ -6,33 +6,18 @@ import org.bukkit.command.CommandSender;
 
 public class Claim implements CommandExecutor {
 
-	public static final String SET = "set", INFO = "info", LIST = "list", CLAIM = "claim", PLUGIN = "plugin", RELOAD = "reload";
+	public static final String CMD = "claim", SET = "set", INFO = "info", LIST = "list", CLAIM = "claim", PLUGIN = "plugin", RELOAD = "reload";
 	
 	public boolean onCommand(CommandSender cs, Command cmd, String label, String[] args) {
 		if (args.length >= 1) {
 			switch (args[0].toLowerCase()) {
-			case SET:
-				CmdSet.setConfig(cs, args);
-				break;
-			case INFO:
-				CmdInfo.info(cs);
-				break;
-			case LIST:
-				CmdList.list(cs, args);
-				break;
-			case "create":
-			case CLAIM:
-			case "new":
-				CmdClaim.claim(cs);
-				break;
-			case PLUGIN:
-				CmdPlugin.showPluginInfo(cs);
-				break;
-			case RELOAD:
-				CmdReload.reload(cs);
-				break;
-			default:
-				CmdHelp.help(cs);
+				case SET -> CmdSet.setConfig(cs, args);
+				case INFO -> CmdInfo.info(cs);
+				case LIST -> CmdList.list(cs, args);
+				case "create", CLAIM, "new" -> CmdClaim.claim(cs);
+				case PLUGIN -> CmdPlugin.showPluginInfo(cs);
+				case RELOAD -> CmdReload.reload(cs);
+				default -> CmdHelp.help(cs);
 			}
 		} else {
 			CmdHelp.help(cs);

@@ -15,18 +15,17 @@ import de.bergtiger.claim.bdo.TigerClaim;
 import de.bergtiger.claim.bdo.TigerClaimCuboid;
 import de.bergtiger.claim.bdo.TigerClaimPolygon;
 import de.bergtiger.claim.bdo.TigerClaimRadius;
-import de.bergtiger.claim.data.Lang;
-import de.bergtiger.claim.data.Perm;
+import de.bergtiger.claim.data.language.Lang;
+import de.bergtiger.claim.data.permission.Perm;
 import de.bergtiger.claim.listener.ConfirmationListener;
 
 public class CmdClaim {
 	
 	public static void claim(CommandSender cs) {
 		if (Perm.hasPermission(cs, Perm.CLAIM_ADMIN, Perm.CLAIM_CLAIM)) {
-			if (cs instanceof Player) {
+			if (cs instanceof Player p) {
 				// Get amount of claims
-				Player p = (Player) cs;
-				TigerClaim tc = null;
+				TigerClaim tc;
 				// WorldGuard has dependency for WorldEdit
 				if (Perm.hasPermission(cs, Perm.CLAIM_ADMIN, Perm.CLAIM_WORLDEDIT)) {
 					WorldEdit we = WorldEdit.getInstance();
@@ -53,14 +52,12 @@ public class CmdClaim {
 					// Without WorlEdit
 					tc = new TigerClaimRadius(p, p.getLocation());
 				}
-				if(tc != null) {
-					// send Confirmation
-					ConfirmationListener.inst().addConfirmation(tc);
-					// inform Player
-					p.spigot().sendMessage(Lang.buildTC(Lang.INSERT_TEXT.getValue(), null, tc.buildHover(), null),
-						Lang.buildTC(Lang.INSERT_YES.getValue(), "/yes", Lang.INSERT_HOVER_YES.getValue(), null),
-						Lang.buildTC(Lang.INSERT_NO.getValue(), "/no", Lang.INSERT_HOVER_NO.getValue(), null));
-				}
+				// send Confirmation
+				ConfirmationListener.inst().addConfirmation(tc);
+				// inform Player
+				p.spigot().sendMessage(Lang.build(Lang.INSERT_TEXT, null, Lang.build(tc.buildHover()), null),
+					Lang.build(Lang.INSERT_YES, "/yes", Lang.build(Lang.INSERT_HOVER_YES), null),
+					Lang.build(Lang.INSERT_NO, "/no", Lang.build(Lang.INSERT_HOVER_NO), null));
 			} else {
 				// Not a player
 				cs.sendMessage(Lang.NOPLAYER.get());

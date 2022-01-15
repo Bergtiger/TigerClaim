@@ -1,8 +1,5 @@
 package de.bergtiger.claim.cmd;
 
-import static de.bergtiger.claim.data.Cons.TYPE;
-import static de.bergtiger.claim.data.Cons.VALUE;
-
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -18,9 +15,11 @@ import com.sk89q.worldguard.protection.flags.registry.FlagRegistry;
 
 import de.bergtiger.claim.Claims;
 import de.bergtiger.claim.data.ClaimUtils;
-import de.bergtiger.claim.data.Config;
-import de.bergtiger.claim.data.Lang;
-import de.bergtiger.claim.data.Perm;
+import de.bergtiger.claim.data.configuration.Config;
+import de.bergtiger.claim.data.language.Lang;
+import de.bergtiger.claim.data.permission.Perm;
+
+import static de.bergtiger.claim.data.configuration.Config.*;
 
 public class CmdSet {
 
@@ -32,7 +31,9 @@ public class CmdSet {
 			CMD_PATTERN		= "pattern",
 			CMD_EXPAND_VERT	= "expandvert",
 			CMD_OVERLAPPING	= "overlapping",
-			CMD_PAGE_LENGTH	= "pagelength";
+			CMD_PAGE_LENGTH	= "pagelength",
+			CMD_HEIGHT_MIN	= "min",
+			CMD_HEIGHT_MAX	= "max";
 
 	public static void setConfig(CommandSender cs, String[] args) {
 		Bukkit.getScheduler().runTaskAsynchronously(Claims.inst(), () -> new CmdSet().serConfigValue(cs, args));
@@ -40,85 +41,80 @@ public class CmdSet {
 
 	/**
 	 * Set a value in Configuration. claim set type value.
-	 * 
-	 * @param cs
-	 * @param args
+	 * /claim (0)set (1)type (2)value
+	 * @param cs command sender
+	 * @param args arguments
 	 */
 	public void serConfigValue(CommandSender cs, String[] args) {
 		if (Perm.hasPermission(cs, Perm.CLAIM_ADMIN, Perm.CLAIM_SET)) {
 			if (args.length >= 3) {
-				Config c = Config.inst();
+//				Config c = Config.inst();
 				switch (args[1].toLowerCase()) {
-				case CMD_PAGE_LENGTH: {
-					try {
-						c.setValue(Config.PAGE_LENGTH, Integer.valueOf(args[2]));
-						c.saveConfig();
-						cs.sendMessage(Lang.SET_SAVED.get().replace(TYPE, CMD_PAGE_LENGTH).replace(VALUE,
-								c.getValue(Config.PAGE_LENGTH).toString()));
-					} catch (NumberFormatException e) {
-						cs.sendMessage(Lang.NONUMBERVALUE.get().replace(VALUE, args[2]));
+					case CMD_PAGE_LENGTH -> {
+						try {
+							setValue(PAGE_LENGTH, Integer.valueOf(args[2]));
+							cs.spigot().sendMessage(Lang.build(Lang.SET_SAVED.replace(Lang.TYPE, CMD_PAGE_LENGTH).replace(Lang.VALUE,
+									getValue(PAGE_LENGTH).toString())));
+						} catch (NumberFormatException e) {
+							cs.spigot().sendMessage(Lang.build(Lang.NONUMBERVALUE.replace(Lang.VALUE, args[2])));
+						}
 					}
-					break;
-				}
-				case CMD_RADIUS: {
-					try {
-						c.setValue(Config.REGION_RADIUS, Integer.valueOf(args[2]));
-						c.saveConfig();
-						cs.sendMessage(Lang.SET_SAVED.get().replace(TYPE, CMD_RADIUS).replace(VALUE,
-								c.getValue(Config.REGION_RADIUS).toString()));
-					} catch (NumberFormatException e) {
-						cs.sendMessage(Lang.NONUMBERVALUE.get().replace(VALUE, args[2]));
+					case CMD_RADIUS -> {
+						try {
+							setValue(REGION_RADIUS, Integer.valueOf(args[2]));
+							cs.spigot().sendMessage(Lang.build(Lang.SET_SAVED.replace(Lang.TYPE, CMD_RADIUS).replace(Lang.VALUE,
+									getValue(REGION_RADIUS).toString())));
+						} catch (NumberFormatException e) {
+							cs.spigot().sendMessage(Lang.build(Lang.NONUMBERVALUE.get().replace(Lang.VALUE, args[2])));
+						}
 					}
-					break;
-				}
-				case CMD_GAP: {
-					try {
-						c.setValue(Config.REGION_GAP, Integer.valueOf(args[2]));
-						c.saveConfig();
-						cs.sendMessage(Lang.SET_SAVED.get().replace(TYPE, CMD_GAP).replace(VALUE,
-								c.getValue(Config.REGION_GAP).toString()));
-					} catch (NumberFormatException e) {
-						cs.sendMessage(Lang.NONUMBERVALUE.get().replace(VALUE, args[2]));
+					case CMD_GAP -> {
+						try {
+							setValue(Config.REGION_GAP, Integer.valueOf(args[2]));
+							cs.spigot().sendMessage(Lang.build(Lang.SET_SAVED.replace(Lang.TYPE, CMD_GAP).replace(Lang.VALUE,
+									getValue(Config.REGION_GAP).toString())));
+						} catch (NumberFormatException e) {
+							cs.spigot().sendMessage(Lang.build(Lang.NONUMBERVALUE.get().replace(Lang.VALUE, args[2])));
+						}
 					}
-					break;
-				}
-				case CMD_TIME: {
-					String timePattern = ClaimUtils.arrayToString(args, 2);
-					try {
-						DateTimeFormatter.ofPattern(timePattern).format(LocalDateTime.now());
-						c.setValue(Config.TIME_PATTERN, timePattern);
-						c.saveConfig();
-						cs.sendMessage(Lang.SET_SAVED.get().replace(TYPE, CMD_TIME).replace(VALUE,
-								c.getValue(Config.TIME_PATTERN).toString()));
-					} catch (Exception e) {
-						cs.sendMessage(Lang.SET_TIME_FAILED.get().replace(VALUE, timePattern));
+					case CMD_TIME -> {
+						String timePattern = ClaimUtils.arrayToString(args, 2);
+						try {
+							DateTimeFormatter.ofPattern(timePattern).format(LocalDateTime.now());
+							setValue(TIME_PATTERN, timePattern);
+							cs.spigot().sendMessage(Lang.build(Lang.SET_SAVED.replace(Lang.TYPE, CMD_TIME).replace(Lang.VALUE,
+									getValue(TIME_PATTERN).toString())));
+						} catch (Exception e) {
+							cs.spigot().sendMessage(Lang.build(Lang.SET_TIME_FAILED.replace(Lang.VALUE, timePattern)));
+						}
 					}
-					break;
-				}
-				case CMD_PATTERN: {
-					c.setValue(Config.REGION_PATTERN, args[2]);
-					c.saveConfig();
-					cs.sendMessage(Lang.SET_SAVED.get().replace(TYPE, CMD_PATTERN).replace(VALUE,
-							c.getValue(Config.REGION_PATTERN).toString()));
-					break;
-				}
-				case CMD_EXPAND_VERT: {
-					c.setValue(Config.REGION_EXPAND_VERT, Boolean.valueOf(args[2]));
-					c.saveConfig();
-					cs.sendMessage(Lang.SET_SAVED.get().replace(TYPE, CMD_EXPAND_VERT).replace(VALUE,
-							c.getValue(Config.REGION_EXPAND_VERT).toString()));
-					break;
-				}
-				case CMD_OVERLAPPING: {
-					c.setValue(Config.REGION_OVERLAPPING, Boolean.valueOf(args[2]));
-					c.saveConfig();
-					cs.sendMessage(Lang.SET_SAVED.get().replace(TYPE, CMD_OVERLAPPING).replace(VALUE,
-							c.getValue(Config.REGION_OVERLAPPING).toString()));
-					break;
-				}
-				case CMD_FLAG: {
-					// claim set flag [flag][value]
-					if (args.length >= 3) {
+					case CMD_PATTERN -> {
+						setValue(REGION_PATTERN, args[2]);
+						cs.spigot().sendMessage(Lang.build(Lang.SET_SAVED.replace(Lang.TYPE, CMD_PATTERN).replace(Lang.VALUE,
+								getValue(REGION_PATTERN).toString())));
+					}
+					case CMD_EXPAND_VERT -> {
+						setValue(REGION_EXPAND_VERT, Boolean.valueOf(args[2]));
+						cs.spigot().sendMessage(Lang.build(Lang.SET_SAVED.replace(Lang.TYPE, CMD_EXPAND_VERT).replace(Lang.VALUE,
+								getValue(REGION_EXPAND_VERT).toString())));
+					}
+					case CMD_OVERLAPPING -> {
+						setValue(REGION_OVERLAPPING, Boolean.valueOf(args[2]));
+						cs.spigot().sendMessage(Lang.build(Lang.SET_SAVED.replace(Lang.TYPE, CMD_OVERLAPPING).replace(Lang.VALUE,
+								getValue(REGION_OVERLAPPING).toString())));
+					}
+					case CMD_HEIGHT_MIN -> {
+						setValue(REGION_MIN_HEIGHT, Integer.parseInt(args[2]));
+						cs.spigot().sendMessage(Lang.build(Lang.SET_SAVED.replace(Lang.TYPE, CMD_HEIGHT_MIN).replace(Lang.VALUE,
+								getValue(REGION_MIN_HEIGHT).toString())));
+					}
+					case CMD_HEIGHT_MAX -> {
+						setValue(REGION_MAX_HEIGHT, Integer.parseInt(args[2]));
+						cs.spigot().sendMessage(Lang.build(Lang.SET_SAVED.replace(Lang.TYPE, CMD_HEIGHT_MAX).replace(Lang.VALUE,
+								getValue(REGION_MAX_HEIGHT).toString())));
+					}
+					case CMD_FLAG -> {
+						// claim set flag [flag][value]
 						// Check if is flag
 						FlagRegistry registry = WorldGuard.getInstance().getFlagRegistry();
 						Flag<?> f = registry.get(args[2]);
@@ -137,52 +133,49 @@ public class CmdSet {
 										try {
 											StateFlag.State.valueOf(value.toUpperCase());
 										} catch (Exception e) {
-											cs.sendMessage(Lang.NOFLAGVALUE.get().replace(VALUE, value).replace(TYPE, f.getName()));
+											cs.spigot().sendMessage(Lang.build(Lang.NOFLAGVALUE.replace(Lang.VALUE, value).replace(Lang.TYPE, f.getName())));
 											return;
 										}
 									} else if (f instanceof IntegerFlag) {
 										try {
 											Integer.valueOf(value);
 										} catch (NumberFormatException e) {
-											cs.sendMessage(Lang.NONUMBERVALUE.get().replace(VALUE, value));
+											cs.spigot().sendMessage(Lang.build(Lang.NONUMBERVALUE.replace(Lang.VALUE, value)));
 											return;
 										}
 									} else if (f instanceof DoubleFlag) {
 										try {
 											Double.valueOf(value);
 										} catch (NumberFormatException e) {
-											cs.sendMessage(Lang.NONUMBERVALUE.get().replace(VALUE, value));
+											cs.spigot().sendMessage(Lang.build(Lang.NONUMBERVALUE.replace(Lang.VALUE, value)));
 											return;
 										}
 									}
 								}
-							}
-							// save flag
-							c.setFlag(f, value);
-							c.saveConfig();
-							if (value != null) {
-								cs.sendMessage(
-										Lang.SET_FLAG_SAVED.get().replace(TYPE, f.getName()).replace(VALUE, value));
+								// save flag
+								setFlag(f, value);
+								if (value != null) {
+									cs.spigot().sendMessage(Lang.build(
+											Lang.SET_FLAG_SAVED.replace(Lang.TYPE, f.getName()).replace(Lang.VALUE, value)));
+								} else {
+									cs.spigot().sendMessage(Lang.build(Lang.SET_FLAG_REMOVED.replace(Lang.TYPE, f.getName())));
+								}
 							} else {
-								cs.sendMessage(Lang.SET_FLAG_REMOVED.get().replace(TYPE, f.getName()));
+								cs.spigot().sendMessage(Lang.build(Lang.NOSUCHFLAG.replace(Lang.VALUE, args[2])));
 							}
 						} else {
-							cs.sendMessage(Lang.NOSUCHFLAG.get().replace(VALUE, args[2]));
+							cs.spigot().sendMessage(Lang.build(Lang.SET_FLAG_MISSING));
 						}
-					} else {
-						cs.sendMessage(Lang.SET_FLAG_MISSING.get());
 					}
-					break;
-				}
-				default: {
-					cs.sendMessage(Lang.NOARGUMENT.get().replace(VALUE, args[1]));
-				}
+					default -> {
+						cs.spigot().sendMessage(Lang.build(Lang.NOARGUMENT.replace(Lang.VALUE, args[1])));
+					}
 				}
 			} else {
-				cs.sendMessage(Lang.SET_MISSING.get());
+				cs.spigot().sendMessage(Lang.build(Lang.SET_MISSING));
 			}
 		} else {
-			cs.sendMessage(Lang.NOPERMISSION.get());
+			cs.spigot().sendMessage(Lang.build(Lang.NOPERMISSION));
 		}
 	}
 }

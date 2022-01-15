@@ -1,8 +1,9 @@
 package de.bergtiger.claim.data;
 
-import static de.bergtiger.claim.data.Cons.ID;
+import static de.bergtiger.claim.data.language.Cons.ID;
 
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import de.bergtiger.claim.data.language.Lang;
 
 public class ClaimUtils {
 
@@ -23,7 +24,7 @@ public class ClaimUtils {
 	
 	public static String buildRegionHover(ProtectedRegion r) {
 		if(r != null)
-			return Lang.LIST_HOVER.get().replace(ID, r.getId());
+			return Lang.LIST_HOVER.replace(ID, r.getId());
 		return null;
 	}
 }

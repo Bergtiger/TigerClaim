@@ -2,9 +2,9 @@ package de.bergtiger.claim.cmd;
 
 import org.bukkit.command.CommandSender;
 
-import de.bergtiger.claim.data.Config;
-import de.bergtiger.claim.data.Lang;
-import de.bergtiger.claim.data.Perm;
+import de.bergtiger.claim.data.configuration.Config;
+import de.bergtiger.claim.data.language.Lang;
+import de.bergtiger.claim.data.permission.Perm;
 import de.bergtiger.claim.data.ReadMe;
 import de.bergtiger.claim.listener.ConfirmationListener;
 
@@ -12,16 +12,11 @@ public class CmdReload {
 
 	public static void reload(CommandSender cs) {
 		if (Perm.hasPermission(cs, Perm.CLAIM_ADMIN, Perm.CLAIM_RELOAD)) {
-			// clear cache
-			ConfirmationListener.inst().clearQueue();
-			CmdList.clear();
 			// save Config
-			Config.inst().loadConfig();
-			// save ReadMe
-			ReadMe.save();
-			cs.sendMessage(Lang.RELOAD_FINISHED.get());
+			Config.load();
+			cs.spigot().sendMessage(Lang.build(Lang.RELOAD_FINISHED));
 		} else {
-			cs.sendMessage(Lang.NOPERMISSION.get());
+			cs.spigot().sendMessage(Lang.build(Lang.NOPERMISSION));
 		}
 	}
 }
