@@ -4,7 +4,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import de.bergtiger.claim.bdo.DeleteQueue;
+import de.bergtiger.claim.data.ClaimUtils;
 import de.bergtiger.claim.events.RegionClaimEvent;
+import de.bergtiger.claim.events.RegionDeleteEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -41,15 +44,19 @@ public class ConfirmationListener implements Listener {
 
 	private ConfirmationListener() {}
 	
-	private HashMap<Player, TigerClaim> queue;
+	private HashMap<Player, Object> queue;
 
 	@EventHandler
 	public void onConfirmation(PlayerCommandPreprocessEvent e) {
 		// is something there
 		if (!e.isCancelled() && queue != null && !queue.isEmpty() && queue.containsKey(e.getPlayer())) {
 			if (e.getMessage().equalsIgnoreCase("/yes")) {
-				TigerClaim con = queue.remove(e.getPlayer());
-				createRegionThread(con);
+				Object con = queue.remove(e.getPlayer());
+				if (con instanceof TigerClaim tc) {
+					createRegionThread(tc);
+				} else if (con instanceof DeleteQueue dq) {
+					deleteRegion(dq);
+				}
 				if (queue.isEmpty())
 					queue = null;
 				e.setCancelled(true);
@@ -68,6 +75,18 @@ public class ConfirmationListener implements Listener {
 	 * @param con to claim
 	 */
 	public void addConfirmation(TigerClaim con) {
+		if (con != null) {
+			if (queue == null)
+				queue = new HashMap<>();
+			queue.put(con.getPlayer(), con);
+		}
+	}
+
+	/**
+	 * add delete to queue.
+	 * @param con to claim
+	 */
+	public void addConfirmation(DeleteQueue con) {
 		if (con != null) {
 			if (queue == null)
 				queue = new HashMap<>();
@@ -97,7 +116,7 @@ public class ConfirmationListener implements Listener {
 	 * @param con to claim
 	 */
 	private void createRegionThread(TigerClaim con) {
-		Bukkit.getScheduler().runTaskAsynchronously(Claims.inst(), () -> createRegion(con));
+		Bukkit.getScheduler().runTask(Claims.inst(), () -> createRegion(con));
 	}
 
 	/**
@@ -195,6 +214,17 @@ public class ConfirmationListener implements Listener {
 						Lang.build(Lang.INSERT_LIMIT.replace(VALUE, Integer.toString(tc.getPlayerRegionCount()))
 								.replace(LIMIT, (limit != null) ? Integer.toString(limit) : "-")));
 			}
+		}
+	}
+
+	private void deleteRegion (DeleteQueue dq) {
+		RegionDeleteEvent event = new RegionDeleteEvent(dq.getRegion(), dq.getPlayer(), ClaimUtils.getArea(dq.getRegion()));
+		Bukkit.getPluginManager().callEvent(event);
+		if (!event.isCancelled()) {
+			// get RegionManager for world
+			RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
+			RegionManager regions = container.get(BukkitAdapter.adapt(dq.getPlayer().getWorld()));
+			regions.removeRegion(dq.getRegion().getId());
 		}
 	}
 }

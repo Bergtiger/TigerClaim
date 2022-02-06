@@ -2,10 +2,12 @@ package de.bergtiger.claim.bdo;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
+import de.bergtiger.claim.data.logger.TigerLogger;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 
@@ -111,6 +113,21 @@ public class TigerClaimPolygon extends TigerClaim {
 
 	@Override
 	public double getArea() {
+		if (points != null && points.size() >= 3) {
+			double summe = 0;
+			BlockVector2 letzterPunkt = null;
+			for (int i = 0; i < points.size(); i++) {
+				BlockVector2 punkt = points.get(i);
+				if (i != 0) {
+					summe = summe + letzterPunkt.getBlockX() * punkt.getBlockZ() - letzterPunkt.getBlockZ() * punkt.getBlockX();
+				}
+				letzterPunkt = punkt;
+			}
+			BlockVector2 ersterPunkt = points.get(0);
+			summe = summe + letzterPunkt.getBlockX() * ersterPunkt.getBlockZ() - letzterPunkt.getBlockZ() * ersterPunkt.getBlockX();
+			TigerLogger.log(Level.INFO, "TigerClaimPolygon: Area: " + Math.abs(summe / 2.0));
+			return Math.abs(summe / 2.0);
+		}
 		return 0.0;
 	}
 }

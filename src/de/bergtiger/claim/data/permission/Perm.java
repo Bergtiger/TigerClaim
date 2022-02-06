@@ -23,7 +23,8 @@ public enum Perm {
 	CLAIM_LIMITLESS	("tclaim.nolimit"),
 	CLAIM_PLUGIN	("tclaim.plugin"),
 	CLAIM_RELOAD	("tclaim.reload"),
-	CLAIM_WORLDEDIT	("tclaim.worldedit");
+	CLAIM_WORLDEDIT	("tclaim.worldedit"),
+	CLAIM_DELETE ("tclaim.delete");
 	
 	private final String value;
 	
