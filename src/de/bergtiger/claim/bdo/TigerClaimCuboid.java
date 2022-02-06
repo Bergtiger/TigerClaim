@@ -53,4 +53,9 @@ public class TigerClaimCuboid extends TigerClaim {
 						.replace(Y, isExpandVert() ? Integer.toString(maxHeight) : Integer.toString(max.getY()))
 						.replace(Z, Integer.toString(max.getZ())));
 	}
+
+	@Override
+	public double getArea() {
+		return Math.abs((min.getX() - max.getX()) * (min.getZ() - max.getZ()));
+	}
 }

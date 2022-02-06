@@ -197,4 +197,6 @@ public abstract class TigerClaim {
 	 * @return String
 	 */
 	public abstract String buildHover();
+
+	public abstract double getArea();
 }

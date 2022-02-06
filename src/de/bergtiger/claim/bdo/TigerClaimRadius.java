@@ -72,4 +72,9 @@ public class TigerClaimRadius extends TigerClaim {
 						.replace(Z, Integer.toString(loc.getBlockZ())))
 				.replace(VALUE, Integer.toString(radius));
 	}
+
+	@Override
+	public double getArea() {
+		return Math.pow(2 * radius + 1, 2);
+	}
 }

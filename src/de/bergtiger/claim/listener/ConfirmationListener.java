@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import de.bergtiger.claim.events.RegionClaimEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -175,10 +176,15 @@ public class ConfirmationListener implements Listener {
 						});
 						region.setFlags(flags);
 					}
-					// Add Region to Manager - save
-					regions.addRegion(region);
-					tc.getPlayer().spigot().sendMessage(Lang.build(Lang.INSERT_SUCCESS,
-							"/rg i " + region.getId(), Lang.build(Lang.INSERT_HOVER_SUCCESS), null));
+					//call RegionClaimEvent
+					RegionClaimEvent event = new RegionClaimEvent(region, tc.getPlayer(), tc.getArea());
+					Bukkit.getPluginManager().callEvent(event);
+					if (!event.isCancelled()) {
+						// Add Region to Manager - save
+						regions.addRegion(region);
+						tc.getPlayer().spigot().sendMessage(Lang.build(Lang.INSERT_SUCCESS,
+								"/rg i " + region.getId(), Lang.build(Lang.INSERT_HOVER_SUCCESS), null));
+					}
 				} else {
 					// is overlapping
 					tc.getPlayer().spigot().sendMessage(Lang.build(Lang.INSERT_OVERLAPPING));

@@ -108,4 +108,9 @@ public class TigerClaimPolygon extends TigerClaim {
 	private Vector2 orthogonal(@Nonnull Vector2 vector, @Nonnull double angle, @Nonnull double length) {
 		return vector.transform2D(angle, 0, 0, 0, 0).normalize().multiply(length);
 	}
+
+	@Override
+	public double getArea() {
+		return 0.0;
+	}
 }
