@@ -4,11 +4,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import de.bergtiger.claim.bdo.CheckQueue;
 import de.bergtiger.claim.bdo.DeleteQueue;
+import de.bergtiger.claim.cmd.CmdClaim;
 import de.bergtiger.claim.data.ClaimUtils;
+import de.bergtiger.claim.events.PreCheckConfirmationEvent;
+import de.bergtiger.claim.events.RegionCheckEvent;
 import de.bergtiger.claim.events.RegionClaimEvent;
 import de.bergtiger.claim.events.RegionDeleteEvent;
 import org.bukkit.Bukkit;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -53,9 +58,11 @@ public class ConfirmationListener implements Listener {
 			if (e.getMessage().equalsIgnoreCase("/yes")) {
 				Object con = queue.remove(e.getPlayer());
 				if (con instanceof TigerClaim tc) {
-					createRegionThread(tc);
+					 createRegionThread(tc);
 				} else if (con instanceof DeleteQueue dq) {
 					deleteRegion(dq);
+				} else if (con instanceof CheckQueue cq) {
+					checkRegion(cq);
 				}
 				if (queue.isEmpty())
 					queue = null;
@@ -91,6 +98,18 @@ public class ConfirmationListener implements Listener {
 			if (queue == null)
 				queue = new HashMap<>();
 			queue.put(con.getPlayer(), con);
+		}
+	}
+
+	/**
+	 * add check to queue.
+	 * @param con to claim
+	 */
+	public void addConfirmation(CheckQueue con) {
+		if (con != null) {
+			if (queue == null)
+				queue = new HashMap<>();
+			queue.put(con.getRegion().getPlayer(), con);
 		}
 	}
 
@@ -225,6 +244,71 @@ public class ConfirmationListener implements Listener {
 			RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
 			RegionManager regions = container.get(BukkitAdapter.adapt(dq.getPlayer().getWorld()));
 			regions.removeRegion(dq.getRegion().getId());
+		}
+	}
+
+	/**
+	 * check claim
+	 * @param cq to check region
+	 */
+	private void checkRegion(CheckQueue cq) {
+		if (cq != null) {
+			//We call RegionCheckEvent
+			RegionCheckEvent event = new RegionCheckEvent(cq.getRegion(), cq.getRegion().getPlayer());
+			Bukkit.getPluginManager().callEvent(event);
+			if (!event.isCancelled()) {
+				// get RegionManager for world
+				RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
+				RegionManager regions = container.get(BukkitAdapter.adapt(cq.getRegion().getPlayer().getWorld()));
+				// add all regions to candidates
+				List<ProtectedRegion> candidates = Lists.newArrayList();
+				regions.getRegions().forEach((k, r) -> {
+					candidates.add(r);
+					if (r.getOwners().contains(cq.getRegion().getPlayer().getUniqueId()))
+						cq.getRegion().addPlayerRegionCount();
+				});
+				// Get Limit
+				Integer limit = null, length = Perm.CLAIM_LIMIT.get().split("\\.").length;
+				try {
+					limit = cq.getRegion().getPlayer().getEffectivePermissions().parallelStream().map(p -> p.getPermission())
+							.filter(p -> p.contains(Perm.CLAIM_LIMIT.get())).mapToInt(p -> {
+								try {
+									String[] s = p.split("\\.");
+									if (s.length == length + 2) {
+										// with world
+										if (cq.getRegion().getPlayer().getWorld().getName().equalsIgnoreCase(s[s.length - 2]))
+											return Integer.parseInt(s[s.length - 1]);
+										return 0;
+									}
+									// Without world
+									return Integer.parseInt(s[s.length - 1]);
+								} catch (NumberFormatException e) {
+									e.printStackTrace();
+								}
+								return 0;
+							}).max().getAsInt();
+				} catch (NoSuchElementException ignored) {
+				}
+				// Can claim
+				List<ProtectedRegion> overlapping = null;
+				// isOverlapping false -> not allowed to overlap
+				// isOverlapping true -> allowed to overlap
+				if(!cq.getRegion().isOverlapping())
+					overlapping = cq.getRegion().getRegionWithGab().getIntersectingRegions(candidates);
+				// if overlapping is empty -> save region
+				if (overlapping == null || overlapping.isEmpty()) {
+					if (Perm.hasPermission(cq.getRegion().getPlayer(), Perm.CLAIM_LIMITLESS) || ((limit != null) && (cq.getRegion().getPlayerRegionCount() < limit))) {
+						cq.getRegion().getPlayer().sendMessage("Die ausgewählte Region ist verfügbar. ");
+						CmdClaim.claim(cq.getRegion().getPlayer());
+					} else {
+						// limit reached
+						cq.getRegion().getPlayer().sendMessage("Die ausgewählte Region ist verfügbar. Du kannst allerdings keine weiteren Regionen mehr sichern.");
+					}
+				} else {
+					// is overlapping
+					cq.getRegion().getPlayer().sendMessage("Die ausgewählte Region überlappt sich mit anderen Grundstücken");
+				}
+			}
 		}
 	}
 }

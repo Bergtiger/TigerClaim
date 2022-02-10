@@ -41,26 +41,26 @@ public class CmdDelete {
                             //call RegionDeleteEvent
                             ConfirmationListener.inst().addConfirmation(new DeleteQueue(region, p));
                             // inform Player
-                            p.spigot().sendMessage(Lang.build(Lang.INSERT_TEXT, null, null, null),
+                            p.spigot().sendMessage(Lang.build("&eWillst du die angegebene Region (" + regionName + ") löschen? ", null, null, null),
                                     Lang.build(Lang.INSERT_YES, "/yes", Lang.build(Lang.INSERT_HOVER_YES), null),
                                     Lang.build(Lang.INSERT_NO, "/no", Lang.build(Lang.INSERT_HOVER_NO), null));
                         } else {
                             //Du darfst diese Region nicht löschen
-                            System.out.println("Du darfst diese Region nicht löschen");
+                            p.sendMessage("Du darfst diese Region nicht löschen");
                         }
                     } else {
                         //Es gibt keine Region
-                        System.out.println("Es gibt keine Region");
+                        p.sendMessage("Es gibt keine Region");
                     }
                 } else {
                     //Das ist der Fall, wenn der Spieler in einer Region steht
                     ApplicableRegionSet set = regions.getApplicableRegions(BukkitAdapter.asBlockVector(p.getLocation()));
                     if (set.size() == 0) {
                         //Du stehst in keiner Region
-                        System.out.println("Du stehst in keiner Region");
+                        p.sendMessage("Du stehst in keiner Region");
                     } else if (set.size() > 1) {
                         //Du stehst in mehreren Regionen, bitte Wähle eine Region aus
-                        System.out.println("Du stehst in mehreren Regionen, bitte Wähle eine Region aus");
+                        p.sendMessage("Du stehst in mehreren Regionen, bitte Wähle eine Region aus");
                     } else {
                         //Spieler steht in genau einer Region:
                         ProtectedRegion region = set.getRegions().stream().findFirst().get();
@@ -68,12 +68,13 @@ public class CmdDelete {
                             //call RegionDeleteEvent
                             ConfirmationListener.inst().addConfirmation(new DeleteQueue(region, p));
                             // inform Player
-                            p.spigot().sendMessage(Lang.build(Lang.INSERT_TEXT, null, null, null),
+                            p.spigot().sendMessage(Lang.build("&eWillst du die Region, in der du stehst (" + region.getId() + ") , löschen? ", null, null, null),
                                     Lang.build(Lang.INSERT_YES, "/yes", Lang.build(Lang.INSERT_HOVER_YES), null),
                                     Lang.build(Lang.INSERT_NO, "/no", Lang.build(Lang.INSERT_HOVER_NO), null));
+                            p.sendMessage("Region " + region.getId() + " erfolgreich gelöscht.");
                         } else {
                             //Du darfst diese Region nicht löschen
-                            System.out.println("Du darfst diese Region nicht löschen");
+                            p.sendMessage("Du darfst diese Region nicht löschen");
                         }
                     }
                 }

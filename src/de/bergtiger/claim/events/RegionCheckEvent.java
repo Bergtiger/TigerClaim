@@ -6,7 +6,7 @@ import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
-public class PreConfirmationEvent extends Event implements Cancellable {
+public class RegionCheckEvent extends Event implements Cancellable {
     private static final HandlerList HANDLERS = new HandlerList();
     private boolean isCancelled = false;
     private final TigerClaim tc;
@@ -30,7 +30,7 @@ public class PreConfirmationEvent extends Event implements Cancellable {
         isCancelled = b;
     }
 
-    public PreConfirmationEvent(TigerClaim tc, Player player) {
+    public RegionCheckEvent(TigerClaim tc, Player player) {
         this.tc = tc;
         this.player = player;
     }

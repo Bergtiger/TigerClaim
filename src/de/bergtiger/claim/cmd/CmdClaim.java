@@ -1,6 +1,7 @@
 package de.bergtiger.claim.cmd;
 
-import de.bergtiger.claim.events.PreConfirmationEvent;
+import de.bergtiger.claim.events.PreCheckConfirmationEvent;
+import de.bergtiger.claim.events.PreClaimConfirmationEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -55,13 +56,17 @@ public class CmdClaim {
 					tc = new TigerClaimRadius(p, p.getLocation());
 				}
 				//We call PreConfirmationEvent
-				PreConfirmationEvent event = new PreConfirmationEvent(tc, p);
+				PreClaimConfirmationEvent event = new PreClaimConfirmationEvent(tc, p, null);
 				Bukkit.getPluginManager().callEvent(event);
+				String spielerBenachrichtigung = "&eWillst du die ausgewählte Fläche sichern? ";
+				if (event.getSpielerBenachrichtigung() != null) {
+					spielerBenachrichtigung = event.getSpielerBenachrichtigung();
+				}
 				if (!event.isCancelled()) {
 					// send Confirmation
 					ConfirmationListener.inst().addConfirmation(tc);
 					// inform Player
-					p.spigot().sendMessage(Lang.build(Lang.INSERT_TEXT, null, Lang.build(tc.buildHover()), null),
+					p.spigot().sendMessage(Lang.build(spielerBenachrichtigung, null, Lang.build(tc.buildHover()), null),
 							Lang.build(Lang.INSERT_YES, "/yes", Lang.build(Lang.INSERT_HOVER_YES), null),
 							Lang.build(Lang.INSERT_NO, "/no", Lang.build(Lang.INSERT_HOVER_NO), null));
 				}

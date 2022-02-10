@@ -6,7 +6,7 @@ import org.bukkit.command.CommandSender;
 
 public class Claim implements CommandExecutor {
 
-	public static final String CMD = "claim", SET = "set", INFO = "info", LIST = "list", CLAIM = "claim", PLUGIN = "plugin", RELOAD = "reload", DELETE = "delete";
+	public static final String CMD = "claim", SET = "set", INFO = "info", LIST = "list", CLAIM = "claim", PLUGIN = "plugin", RELOAD = "reload", DELETE = "delete", CHECK = "check";
 	
 	public boolean onCommand(CommandSender cs, Command cmd, String label, String[] args) {
 		if (args.length >= 1) {
@@ -18,6 +18,7 @@ public class Claim implements CommandExecutor {
 				case PLUGIN -> CmdPlugin.showPluginInfo(cs);
 				case RELOAD -> CmdReload.reload(cs);
 				case DELETE -> CmdDelete.delete(cs, args);
+				case CHECK -> CmdCheck.check(cs);
 				default -> CmdHelp.help(cs);
 			}
 		} else {
