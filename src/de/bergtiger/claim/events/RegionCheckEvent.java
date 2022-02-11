@@ -11,6 +11,7 @@ public class RegionCheckEvent extends Event implements Cancellable {
     private boolean isCancelled = false;
     private final TigerClaim tc;
     private final Player player;
+    private String spielerBenachrichtigung;
 
     @Override
     public HandlerList getHandlers() {
@@ -30,9 +31,10 @@ public class RegionCheckEvent extends Event implements Cancellable {
         isCancelled = b;
     }
 
-    public RegionCheckEvent(TigerClaim tc, Player player) {
+    public RegionCheckEvent(TigerClaim tc, Player player, String spielerBenachrichtigung) {
         this.tc = tc;
         this.player = player;
+        this.spielerBenachrichtigung = spielerBenachrichtigung;
     }
 
     public Player getPlayer() {
@@ -41,5 +43,13 @@ public class RegionCheckEvent extends Event implements Cancellable {
 
     public TigerClaim getRegion() {
         return tc;
+    }
+
+    public String getSpielerBenachrichtigung() {
+        return spielerBenachrichtigung;
+    }
+
+    public void setSpielerBenachrichtigung(String spielerBenachrichtigung) {
+        this.spielerBenachrichtigung = spielerBenachrichtigung;
     }
 }

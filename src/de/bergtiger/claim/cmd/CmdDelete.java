@@ -71,7 +71,6 @@ public class CmdDelete {
                             p.spigot().sendMessage(Lang.build("&eWillst du die Region, in der du stehst (" + region.getId() + ") , löschen? ", null, null, null),
                                     Lang.build(Lang.INSERT_YES, "/yes", Lang.build(Lang.INSERT_HOVER_YES), null),
                                     Lang.build(Lang.INSERT_NO, "/no", Lang.build(Lang.INSERT_HOVER_NO), null));
-                            p.sendMessage("Region " + region.getId() + " erfolgreich gelöscht.");
                         } else {
                             //Du darfst diese Region nicht löschen
                             p.sendMessage("Du darfst diese Region nicht löschen");

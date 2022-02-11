@@ -14,7 +14,7 @@ public class Claim implements CommandExecutor {
 				case SET -> CmdSet.setConfig(cs, args);
 				case INFO -> CmdInfo.info(cs);
 				case LIST -> CmdList.list(cs, args);
-				case "create", CLAIM, "new" -> CmdClaim.claim(cs);
+				case "create", CLAIM, "new" -> CmdClaim.claim(cs, false);
 				case PLUGIN -> CmdPlugin.showPluginInfo(cs);
 				case RELOAD -> CmdReload.reload(cs);
 				case DELETE -> CmdDelete.delete(cs, args);

@@ -24,8 +24,8 @@ import de.bergtiger.claim.listener.ConfirmationListener;
 
 public class CmdClaim {
 	
-	public static void claim(CommandSender cs) {
-		if (Perm.hasPermission(cs, Perm.CLAIM_ADMIN, Perm.CLAIM_CLAIM)) {
+	public static void claim(CommandSender cs, boolean priorityPermission) {
+		if (Perm.hasPermission(cs, Perm.CLAIM_ADMIN, Perm.CLAIM_CLAIM) || priorityPermission) {
 			if (cs instanceof Player p) {
 				// Get amount of claims
 				TigerClaim tc;

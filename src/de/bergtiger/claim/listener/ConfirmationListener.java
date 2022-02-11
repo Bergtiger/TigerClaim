@@ -13,6 +13,7 @@ import de.bergtiger.claim.events.RegionCheckEvent;
 import de.bergtiger.claim.events.RegionClaimEvent;
 import de.bergtiger.claim.events.RegionDeleteEvent;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -215,13 +216,19 @@ public class ConfirmationListener implements Listener {
 						region.setFlags(flags);
 					}
 					//call RegionClaimEvent
-					RegionClaimEvent event = new RegionClaimEvent(region, tc.getPlayer(), tc.getArea());
+					RegionClaimEvent event = new RegionClaimEvent(region, tc.getPlayer(), tc.getArea(), null);
 					Bukkit.getPluginManager().callEvent(event);
 					if (!event.isCancelled()) {
 						// Add Region to Manager - save
 						regions.addRegion(region);
-						tc.getPlayer().spigot().sendMessage(Lang.build(Lang.INSERT_SUCCESS,
-								"/rg i " + region.getId(), Lang.build(Lang.INSERT_HOVER_SUCCESS), null));
+						String spielerBenachrichtigung = event.getSpielerBenachrichtigung();
+						if (spielerBenachrichtigung == null) {
+							tc.getPlayer().spigot().sendMessage(Lang.build(Lang.INSERT_SUCCESS,
+									"/rg i " + region.getId(), Lang.build(Lang.INSERT_HOVER_SUCCESS), null));
+						} else {
+							tc.getPlayer().spigot().sendMessage(Lang.build(spielerBenachrichtigung,
+									"/rg i " + region.getId(), Lang.build(Lang.INSERT_HOVER_SUCCESS), null));
+						}
 					}
 				} else {
 					// is overlapping
@@ -244,6 +251,7 @@ public class ConfirmationListener implements Listener {
 			RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
 			RegionManager regions = container.get(BukkitAdapter.adapt(dq.getPlayer().getWorld()));
 			regions.removeRegion(dq.getRegion().getId());
+			dq.getPlayer().sendMessage("Region " + dq.getRegion().getId() + " erfolgreich gelöscht.");
 		}
 	}
 
@@ -254,7 +262,7 @@ public class ConfirmationListener implements Listener {
 	private void checkRegion(CheckQueue cq) {
 		if (cq != null) {
 			//We call RegionCheckEvent
-			RegionCheckEvent event = new RegionCheckEvent(cq.getRegion(), cq.getRegion().getPlayer());
+			RegionCheckEvent event = new RegionCheckEvent(cq.getRegion(), cq.getRegion().getPlayer(), "");
 			Bukkit.getPluginManager().callEvent(event);
 			if (!event.isCancelled()) {
 				// get RegionManager for world
@@ -298,15 +306,18 @@ public class ConfirmationListener implements Listener {
 				// if overlapping is empty -> save region
 				if (overlapping == null || overlapping.isEmpty()) {
 					if (Perm.hasPermission(cq.getRegion().getPlayer(), Perm.CLAIM_LIMITLESS) || ((limit != null) && (cq.getRegion().getPlayerRegionCount() < limit))) {
-						cq.getRegion().getPlayer().sendMessage("Die ausgewählte Region ist verfügbar. ");
-						CmdClaim.claim(cq.getRegion().getPlayer());
+						cq.getRegion().getPlayer().sendMessage(event.getSpielerBenachrichtigung() +
+								ChatColor.GREEN + "Die ausgewählte Region ist verfügbar. ");
+						CmdClaim.claim(cq.getRegion().getPlayer(), true);
 					} else {
 						// limit reached
-						cq.getRegion().getPlayer().sendMessage("Die ausgewählte Region ist verfügbar. Du kannst allerdings keine weiteren Regionen mehr sichern.");
+						cq.getRegion().getPlayer().sendMessage(event.getSpielerBenachrichtigung() +
+								ChatColor.RED + "Die ausgewählte Region ist verfügbar. Du kannst allerdings keine weiteren Regionen mehr sichern.");
 					}
 				} else {
 					// is overlapping
-					cq.getRegion().getPlayer().sendMessage("Die ausgewählte Region überlappt sich mit anderen Grundstücken");
+					cq.getRegion().getPlayer().sendMessage(event.getSpielerBenachrichtigung() +
+							ChatColor.RED + "Die ausgewählte Region überlappt sich mit anderen Grundstücken. ");
 				}
 			}
 		}
