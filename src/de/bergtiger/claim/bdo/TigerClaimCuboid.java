@@ -56,6 +56,6 @@ public class TigerClaimCuboid extends TigerClaim {
 
 	@Override
 	public double getArea() {
-		return Math.abs((min.getX() - max.getX()) * (min.getZ() - max.getZ()));
+		return (1 + Math.abs((min.getX() - max.getX()))) * (1 + Math.abs(min.getZ() - max.getZ()));
 	}
 }

@@ -54,9 +54,8 @@ public class ClaimUtils {
 				return flächeEinesPixelPolygons(scharfeFläche, polyRegion.getPoints());
 			} else {
 				//Rechtecks-Grundfläche
-				double area = Math.abs(
-						(region.getMaximumPoint().getX() - region.getMinimumPoint().getX()) *
-								(region.getMaximumPoint().getZ() - region.getMinimumPoint().getZ()));
+				double area = (1 + Math.abs((region.getMinimumPoint().getX() - region.getMaximumPoint().getX()))) *
+						(1 + Math.abs(region.getMinimumPoint().getZ() - region.getMaximumPoint().getZ()));
 				TigerLogger.log(Level.INFO, "ClaimUtils: Area: " + area);
 				return area;
 			}
