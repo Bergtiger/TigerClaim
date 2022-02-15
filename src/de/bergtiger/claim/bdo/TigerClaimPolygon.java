@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
+import de.bergtiger.claim.data.ClaimUtils;
 import de.bergtiger.claim.data.logger.TigerLogger;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -125,8 +126,11 @@ public class TigerClaimPolygon extends TigerClaim {
 			}
 			BlockVector2 ersterPunkt = points.get(0);
 			summe = summe + letzterPunkt.getBlockX() * ersterPunkt.getBlockZ() - letzterPunkt.getBlockZ() * ersterPunkt.getBlockX();
-			TigerLogger.log(Level.INFO, "TigerClaimPolygon: Area: " + Math.abs(summe / 2.0));
-			return Math.abs(summe / 2.0);
+			double scharfeFläche = Math.abs(summe / 2.0);
+			TigerLogger.log(Level.INFO, "TigerClaimPolygon: scharfeFläche: " + scharfeFläche);
+			double genaueFläche = ClaimUtils.flächeEinesPixelPolygons(scharfeFläche, points);
+			TigerLogger.log(Level.INFO, "TigerClaimPolygon: genaueFläche: " + genaueFläche);
+			return genaueFläche;
 		}
 		return 0.0;
 	}
