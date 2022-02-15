@@ -65,6 +65,7 @@ public class ClaimUtils {
 	}
 
 	public static double flächeEinesPixelPolygons(double scharfeFläche, List<BlockVector2> eckpunkteGanz) {
+		boolean ausgaben = false;
 		ArrayList<TigerVector2> eckpunkte = new ArrayList<>();
 		for (BlockVector2 blockVector2 : eckpunkteGanz) {
 			eckpunkte.add(new TigerVector2( blockVector2.getX() + 0.5,blockVector2.getZ() + 0.5));
@@ -98,7 +99,7 @@ public class ClaimUtils {
 		if (anzahlLinksKnicke < anzahlRechtsKnicke) {
 			imUhrzeigerSinn = true;
 		}
-		System.out.println("imUhrzeigerSinn: " + imUhrzeigerSinn);
+		if (ausgaben) System.out.println("imUhrzeigerSinn: " + imUhrzeigerSinn);
 
 		double richtigeFläche = scharfeFläche;
 		letzterPunkt = eckpunkte.get(eckpunkte.size() - 1);
@@ -131,25 +132,12 @@ public class ClaimUtils {
 			} else {
 				steigung = deltaX / deltaZ;
 			}
-			/*
-			System.out.println("Kante vor Punkt " + i + ", xIstSchnellereRichtung: " + xIstSchnellereRichtung);
-			System.out.println("Kante vor Punkt " + i + ", steigung: " + steigung);
-			System.out.println("Kante vor Punkt " + i + ", sgnXSteigung: " + sgnXSteigung);
-			System.out.println("Kante vor Punkt " + i + ", sgnZSteigung: " + sgnZSteigung);
-
-			 */
 			int k = 0;
 			//Für alle Blöcke, die eine Kante schneidet:
 			for (int j = 0; j <= Math.max(deltaX,deltaZ); j++) {
 				double l = j + 0.5;
 				langsamerWert = steigung * l + 0.5;
 				langsamerWertInt = (int) Math.floor(langsamerWert);
-				/*
-				System.out.println("Kante vor Punkt " + i + ", letzterLangsamerWertInt: " + letzterLangsamerWertInt);
-				System.out.println("Kante vor Punkt " + i + ", langsamerWert: " + langsamerWert);
-				System.out.println("Kante vor Punkt " + i + ", langsamerWertInt: " + langsamerWertInt);
-
-				 */
 				if (j != 0) {
 					if ((double) langsamerWertInt != langsamerWert) {
 						//A
@@ -168,7 +156,7 @@ public class ClaimUtils {
 						}
 						double flächenErgänzung = polygonRandPixelFlächenErgänzung(eckpunkteGanz,pixelAnKante,imUhrzeigerSinn,letzterPunkt,punkt,nächsterPunkt);
 						richtigeFläche = richtigeFläche + flächenErgänzung;
-						System.out.println("Kante vor Punkt " + i + ", Block " + k + " : x: " +
+						if (ausgaben) System.out.println("Kante vor Punkt " + i + ", Block " + k + " : x: " +
 								pixelAnKante.getX() + "; z: " + pixelAnKante.getZ() + " : A   -    flächenErgänzung: " + flächenErgänzung);
 						k++;
 					}
@@ -188,7 +176,7 @@ public class ClaimUtils {
 						}
 						double flächenErgänzung = polygonRandPixelFlächenErgänzung(eckpunkteGanz,pixelAnKante,imUhrzeigerSinn,letzterPunkt,punkt,nächsterPunkt);
 						richtigeFläche = richtigeFläche + flächenErgänzung;
-						System.out.println("Kante vor Punkt " + i + ", Block " + k + " : x: " +
+						if (ausgaben) System.out.println("Kante vor Punkt " + i + ", Block " + k + " : x: " +
 								pixelAnKante.getX() + "; z: " + pixelAnKante.getZ() + " : B   -    flächenErgänzung: " + flächenErgänzung);
 						k++;
 					}
