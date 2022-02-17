@@ -179,53 +179,6 @@ public class Config {
 		}
 	}
 
-/*	protected void checkConfigBoolean(FileConfiguration cfg, String path, Boolean value) {
-		if ((cfg != null) && (path != null) && (!path.isEmpty()) && (value != null)) {
-			if (cfg.contains(path)) {
-				// Check value
-				String s = cfg.getString(path);
-				if (!(s.equalsIgnoreCase("true") || s.equalsIgnoreCase("false")))
-					cfg.set(path, value);
-			} else {
-				// Add Value
-				cfg.addDefault(path, value);
-			}
-		}
-	}
-
-	protected void checkConfigInteger(FileConfiguration cfg, String path, Integer value) {
-		if ((cfg != null) && (path != null) && (!path.isEmpty())) {
-			if (cfg.contains(path)) {
-				// Check value
-				String s = cfg.getString(path);
-				try {
-					Integer.valueOf(s);
-				} catch (NumberFormatException e) {
-					if (!s.equalsIgnoreCase("false"))
-						cfg.set(path, (value != null) ? value : false);
-				}
-			} else {
-				// Add Value
-				cfg.addDefault(path, (value != null) ? value : false);
-			}
-		}
-	}
-
-	protected void checkConfigString(FileConfiguration cfg, String path, String value) {
-		if ((cfg != null) && (path != null) && (!path.isEmpty())) {
-			if (cfg.contains(path)) {
-				// Check value
-				String s = cfg.getString(path);
-				if (s == null) {
-					cfg.set(path, value);
-				}
-			} else {
-				// Add Value
-				cfg.addDefault(path, value);
-			}
-		}
-	}*/
-
 	public static void load() {
 		Claims.inst().reloadConfig();
 		// clear cache

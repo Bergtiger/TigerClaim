@@ -12,6 +12,7 @@ public class RegionDeleteEvent extends Event implements Cancellable {
     private final ProtectedRegion region;
     private final Player player;
     private final double area;
+    private String message;
 
     @Override
     public HandlerList getHandlers() {
@@ -31,10 +32,11 @@ public class RegionDeleteEvent extends Event implements Cancellable {
         isCancelled = b;
     }
 
-    public RegionDeleteEvent(ProtectedRegion region, Player player, double area) {
+    public RegionDeleteEvent(ProtectedRegion region, Player player, double area, String message) {
         this.region = region;
         this.player = player;
         this.area = area;
+        this.message = message;
     }
 
     public Player getPlayer() {
@@ -47,5 +49,13 @@ public class RegionDeleteEvent extends Event implements Cancellable {
 
     public double getArea() {
         return area;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
     }
 }

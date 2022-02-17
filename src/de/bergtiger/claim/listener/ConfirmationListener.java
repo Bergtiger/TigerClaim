@@ -8,13 +8,10 @@ import de.bergtiger.claim.bdo.CheckQueue;
 import de.bergtiger.claim.bdo.DeleteQueue;
 import de.bergtiger.claim.cmd.CmdClaim;
 import de.bergtiger.claim.data.ClaimUtils;
-import de.bergtiger.claim.events.PreCheckConfirmationEvent;
 import de.bergtiger.claim.events.RegionCheckEvent;
 import de.bergtiger.claim.events.RegionClaimEvent;
 import de.bergtiger.claim.events.RegionDeleteEvent;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -48,8 +45,9 @@ public class ConfirmationListener implements Listener {
 		return instance;
 	}
 
-	private ConfirmationListener() {}
-	
+	private ConfirmationListener() {
+	}
+
 	private HashMap<Player, Object> queue;
 
 	@EventHandler
@@ -59,7 +57,7 @@ public class ConfirmationListener implements Listener {
 			if (e.getMessage().equalsIgnoreCase("/yes")) {
 				Object con = queue.remove(e.getPlayer());
 				if (con instanceof TigerClaim tc) {
-					 createRegionThread(tc);
+					createRegionThread(tc);
 				} else if (con instanceof DeleteQueue dq) {
 					deleteRegion(dq);
 				} else if (con instanceof CheckQueue cq) {
@@ -77,9 +75,10 @@ public class ConfirmationListener implements Listener {
 			}
 		}
 	}
-	
+
 	/**
 	 * add claim to queue.
+	 *
 	 * @param con to claim
 	 */
 	public void addConfirmation(TigerClaim con) {
@@ -92,6 +91,7 @@ public class ConfirmationListener implements Listener {
 
 	/**
 	 * add delete to queue.
+	 *
 	 * @param con to claim
 	 */
 	public void addConfirmation(DeleteQueue con) {
@@ -104,6 +104,7 @@ public class ConfirmationListener implements Listener {
 
 	/**
 	 * add check to queue.
+	 *
 	 * @param con to claim
 	 */
 	public void addConfirmation(CheckQueue con) {
@@ -124,6 +125,7 @@ public class ConfirmationListener implements Listener {
 
 	/**
 	 * clear claim queue
+	 *
 	 * @param p player to clear
 	 */
 	public void clearQueue(Player p) {
@@ -133,6 +135,7 @@ public class ConfirmationListener implements Listener {
 
 	/**
 	 * surround with Thread
+	 *
 	 * @param con to claim
 	 */
 	private void createRegionThread(TigerClaim con) {
@@ -141,6 +144,7 @@ public class ConfirmationListener implements Listener {
 
 	/**
 	 * create claim
+	 *
 	 * @param tc to claim
 	 */
 	private void createRegion(TigerClaim tc) {
@@ -151,13 +155,13 @@ public class ConfirmationListener implements Listener {
 			// same name/id
 			if (tc.hasRegionCounter()) {
 				// addCounter until value available (fills lower values)
-				while(regions.getRegion(tc.getId()) != null)
+				while (regions.getRegion(tc.getId()) != null)
 					tc.addRegionCounter();
 			} else {
 				if (regions.getRegion(tc.getId()) != null) {
 					// existing Region
 					tc.getPlayer().spigot()
-						.sendMessage(Lang.build(Lang.INSERT_EXISTING.replace(VALUE, tc.getId())));
+							.sendMessage(Lang.build(Lang.INSERT_EXISTING.replace(VALUE, tc.getId())));
 					return;
 				}
 			}
@@ -195,7 +199,7 @@ public class ConfirmationListener implements Listener {
 				List<ProtectedRegion> overlapping = null;
 				// isOverlapping false -> not allowed to overlap
 				// isOverlapping true -> allowed to overlap
-				if(!tc.isOverlapping())
+				if (!tc.isOverlapping())
 					overlapping = tc.getRegionWithGab().getIntersectingRegions(candidates);
 				// if overlapping is empty -> save region
 				if (overlapping == null || overlapping.isEmpty()) {
@@ -208,27 +212,22 @@ public class ConfirmationListener implements Listener {
 					// Add Flags
 					if (tc.getFlags() != null) {
 						HashMap<Flag<?>, Object> flags = new HashMap<>();
-						tc.getFlags().forEach((f,v) -> {
-							if(v instanceof String)
+						tc.getFlags().forEach((f, v) -> {
+							if (v instanceof String)
 								v = v.toString().replace("@p", tc.getPlayer().getName()).replace(PLAYER, tc.getPlayer().getName());
 							flags.put(f, v);
 						});
 						region.setFlags(flags);
 					}
 					//call RegionClaimEvent
-					RegionClaimEvent event = new RegionClaimEvent(region, tc.getPlayer(), tc.getArea(), null);
+					RegionClaimEvent event = new RegionClaimEvent(region, tc.getPlayer(), tc.getArea(), Lang.INSERT_SUCCESS.get());
 					Bukkit.getPluginManager().callEvent(event);
 					if (!event.isCancelled()) {
 						// Add Region to Manager - save
 						regions.addRegion(region);
-						String spielerBenachrichtigung = event.getSpielerBenachrichtigung();
-						if (spielerBenachrichtigung == null) {
-							tc.getPlayer().spigot().sendMessage(Lang.build(Lang.INSERT_SUCCESS,
-									"/rg i " + region.getId(), Lang.build(Lang.INSERT_HOVER_SUCCESS), null));
-						} else {
-							tc.getPlayer().spigot().sendMessage(Lang.build(spielerBenachrichtigung,
-									"/rg i " + region.getId(), Lang.build(Lang.INSERT_HOVER_SUCCESS), null));
-						}
+
+						tc.getPlayer().spigot().sendMessage(Lang.build(event.getMessage(),
+								"/rg i " + region.getId(), Lang.build(Lang.INSERT_HOVER_SUCCESS), null));
 					}
 				} else {
 					// is overlapping
@@ -243,82 +242,85 @@ public class ConfirmationListener implements Listener {
 		}
 	}
 
-	private void deleteRegion (DeleteQueue dq) {
-		RegionDeleteEvent event = new RegionDeleteEvent(dq.getRegion(), dq.getPlayer(), ClaimUtils.getArea(dq.getRegion()));
+	private void deleteRegion(DeleteQueue dq) {
+		RegionDeleteEvent event = new RegionDeleteEvent(dq.getRegion(), dq.getPlayer(), ClaimUtils.getArea(dq.getRegion()), Lang.DELETE_SUCCESS.get());
 		Bukkit.getPluginManager().callEvent(event);
 		if (!event.isCancelled()) {
 			// get RegionManager for world
 			RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
 			RegionManager regions = container.get(BukkitAdapter.adapt(dq.getPlayer().getWorld()));
 			regions.removeRegion(dq.getRegion().getId());
-			dq.getPlayer().sendMessage("Region " + dq.getRegion().getId() + " erfolgreich gelöscht.");
+			dq.getPlayer().spigot().sendMessage(Lang.build(event.getMessage().replace(VALUE, event.getRegion().getId())));
 		}
 	}
 
 	/**
 	 * check claim
+	 *
 	 * @param cq to check region
 	 */
 	private void checkRegion(CheckQueue cq) {
 		if (cq != null) {
-			//We call RegionCheckEvent
-			RegionCheckEvent event = new RegionCheckEvent(cq.getRegion(), cq.getRegion().getPlayer(), "");
+			// get RegionManager for world
+			RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
+			RegionManager regions = container.get(BukkitAdapter.adapt(cq.getRegion().getPlayer().getWorld()));
+			// add all regions to candidates
+			List<ProtectedRegion> candidates = Lists.newArrayList();
+			regions.getRegions().forEach((k, r) -> {
+				candidates.add(r);
+				if (r.getOwners().contains(cq.getRegion().getPlayer().getUniqueId()))
+					cq.getRegion().addPlayerRegionCount();
+			});
+			// Get Limit
+			Integer limit = null, length = Perm.CLAIM_LIMIT.get().split("\\.").length;
+			try {
+				limit = cq.getRegion().getPlayer().getEffectivePermissions().parallelStream().map(p -> p.getPermission())
+						.filter(p -> p.contains(Perm.CLAIM_LIMIT.get())).mapToInt(p -> {
+							try {
+								String[] s = p.split("\\.");
+								if (s.length == length + 2) {
+									// with world
+									if (cq.getRegion().getPlayer().getWorld().getName().equalsIgnoreCase(s[s.length - 2]))
+										return Integer.parseInt(s[s.length - 1]);
+									return 0;
+								}
+								// Without world
+								return Integer.parseInt(s[s.length - 1]);
+							} catch (NumberFormatException e) {
+								e.printStackTrace();
+							}
+							return 0;
+						}).max().getAsInt();
+			} catch (NoSuchElementException ignored) {
+			}
+			// Can claim
+			List<ProtectedRegion> overlapping = null;
+			// isOverlapping false -> not allowed to overlap
+			// isOverlapping true -> allowed to overlap
+			if (!cq.getRegion().isOverlapping())
+				overlapping = cq.getRegion().getRegionWithGab().getIntersectingRegions(candidates);
+
+			// call RegionCheckEvent
+			RegionCheckEvent event;
+			// if overlapping is empty -> save region
+			if (overlapping == null || overlapping.isEmpty()) {
+				if (Perm.hasPermission(cq.getRegion().getPlayer(), Perm.CLAIM_LIMITLESS) || ((limit != null) && (cq.getRegion().getPlayerRegionCount() < limit))) {
+					// not overlapping, not limit reached
+					event = new RegionCheckEvent(cq.getRegion(), cq.getRegion().getPlayer(), Lang.CHECK_AVAILABLE.get(), false, false);
+				} else {
+					// limit reached
+					event = new RegionCheckEvent(cq.getRegion(), cq.getRegion().getPlayer(), Lang.CHECK_LIMIT.replace(VALUE, Integer.toString(limit)), true, false);
+				}
+			} else {
+				// is overlapping
+				event = new RegionCheckEvent(cq.getRegion(), cq.getRegion().getPlayer(), Lang.CHECK_OVERLAPPING.get(), false, true);
+			}
+
 			Bukkit.getPluginManager().callEvent(event);
 			if (!event.isCancelled()) {
-				// get RegionManager for world
-				RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
-				RegionManager regions = container.get(BukkitAdapter.adapt(cq.getRegion().getPlayer().getWorld()));
-				// add all regions to candidates
-				List<ProtectedRegion> candidates = Lists.newArrayList();
-				regions.getRegions().forEach((k, r) -> {
-					candidates.add(r);
-					if (r.getOwners().contains(cq.getRegion().getPlayer().getUniqueId()))
-						cq.getRegion().addPlayerRegionCount();
-				});
-				// Get Limit
-				Integer limit = null, length = Perm.CLAIM_LIMIT.get().split("\\.").length;
-				try {
-					limit = cq.getRegion().getPlayer().getEffectivePermissions().parallelStream().map(p -> p.getPermission())
-							.filter(p -> p.contains(Perm.CLAIM_LIMIT.get())).mapToInt(p -> {
-								try {
-									String[] s = p.split("\\.");
-									if (s.length == length + 2) {
-										// with world
-										if (cq.getRegion().getPlayer().getWorld().getName().equalsIgnoreCase(s[s.length - 2]))
-											return Integer.parseInt(s[s.length - 1]);
-										return 0;
-									}
-									// Without world
-									return Integer.parseInt(s[s.length - 1]);
-								} catch (NumberFormatException e) {
-									e.printStackTrace();
-								}
-								return 0;
-							}).max().getAsInt();
-				} catch (NoSuchElementException ignored) {
-				}
-				// Can claim
-				List<ProtectedRegion> overlapping = null;
-				// isOverlapping false -> not allowed to overlap
-				// isOverlapping true -> allowed to overlap
-				if(!cq.getRegion().isOverlapping())
-					overlapping = cq.getRegion().getRegionWithGab().getIntersectingRegions(candidates);
-				// if overlapping is empty -> save region
-				if (overlapping == null || overlapping.isEmpty()) {
-					if (Perm.hasPermission(cq.getRegion().getPlayer(), Perm.CLAIM_LIMITLESS) || ((limit != null) && (cq.getRegion().getPlayerRegionCount() < limit))) {
-						cq.getRegion().getPlayer().sendMessage(event.getSpielerBenachrichtigung() +
-								ChatColor.GREEN + "Die ausgewählte Region ist verfügbar. ");
-						CmdClaim.claim(cq.getRegion().getPlayer(), true);
-					} else {
-						// limit reached
-						cq.getRegion().getPlayer().sendMessage(event.getSpielerBenachrichtigung() +
-								ChatColor.RED + "Die ausgewählte Region ist verfügbar. Du kannst allerdings keine weiteren Regionen mehr sichern.");
-					}
-				} else {
-					// is overlapping
-					cq.getRegion().getPlayer().sendMessage(event.getSpielerBenachrichtigung() +
-							ChatColor.RED + "Die ausgewählte Region überlappt sich mit anderen Grundstücken. ");
-				}
+				event.getPlayer().spigot().sendMessage(Lang.build(event.getMessage()));
+				if (event.continueClaim())
+					CmdClaim.claim(cq.getRegion().getPlayer(), true);
 			}
 		}
 	}

@@ -11,7 +11,10 @@ public class RegionCheckEvent extends Event implements Cancellable {
     private boolean isCancelled = false;
     private final TigerClaim tc;
     private final Player player;
-    private String spielerBenachrichtigung;
+    private String message;
+    private final boolean isLimit;
+    private final boolean isOverlapping;
+    private boolean continueClaim;
 
     @Override
     public HandlerList getHandlers() {
@@ -31,10 +34,13 @@ public class RegionCheckEvent extends Event implements Cancellable {
         isCancelled = b;
     }
 
-    public RegionCheckEvent(TigerClaim tc, Player player, String spielerBenachrichtigung) {
+    public RegionCheckEvent(TigerClaim tc, Player player, String message, boolean isLimit, boolean isOverlapping) {
         this.tc = tc;
         this.player = player;
-        this.spielerBenachrichtigung = spielerBenachrichtigung;
+        this.message = message;
+        this.isLimit = isLimit;
+        this.isOverlapping = isOverlapping;
+        this.continueClaim = !(isLimit || isOverlapping);
     }
 
     public Player getPlayer() {
@@ -45,11 +51,31 @@ public class RegionCheckEvent extends Event implements Cancellable {
         return tc;
     }
 
-    public String getSpielerBenachrichtigung() {
-        return spielerBenachrichtigung;
+    public String getMessage() {
+        return message;
     }
 
-    public void setSpielerBenachrichtigung(String spielerBenachrichtigung) {
-        this.spielerBenachrichtigung = spielerBenachrichtigung;
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public boolean isLimit() {
+        return isLimit;
+    }
+
+    public boolean isOverlapping() {
+        return isOverlapping;
+    }
+
+    public void setContinueClaim(boolean continueClaim) {
+        this.continueClaim = continueClaim;
+    }
+
+    /**
+     * When isLimit or isOverlapping is true, will normally not continue to claim
+     * @return true when continued to claim
+     */
+    public boolean continueClaim() {
+        return continueClaim;
     }
 }

@@ -46,23 +46,19 @@ public class CmdCheck {
                         tc = new TigerClaimRadius(p, p.getLocation());
                     }
                 } else {
-                    // Without WorlEdit
+                    // Without WorldEdit
                     tc = new TigerClaimRadius(p, p.getLocation());
                 }
-                //We call PreCheckConfirmationEvent
-                PreCheckConfirmationEvent event = new PreCheckConfirmationEvent(tc, p, null);
+                // call PreCheckConfirmationEvent
+                PreCheckConfirmationEvent event = new PreCheckConfirmationEvent(tc, p, Lang.CHECK_MESSAGE.get());
                 Bukkit.getPluginManager().callEvent(event);
-                String spielerBenachrichtigung = "&eWillst du die ausgewählte Fläche überprüfen? ";
-                if (event.getSpielerBenachrichtigung() != null) {
-                    spielerBenachrichtigung = event.getSpielerBenachrichtigung();
-                }
                 if (!event.isCancelled()) {
                     // send Confirmation
                     ConfirmationListener.inst().addConfirmation(new CheckQueue(tc));
                     // inform Player
-                    p.spigot().sendMessage(Lang.build(spielerBenachrichtigung, null, Lang.build(tc.buildHover()), null),
-                            Lang.build(Lang.INSERT_YES, "/yes", Lang.build(Lang.INSERT_HOVER_YES), null),
-                            Lang.build(Lang.INSERT_NO, "/no", Lang.build(Lang.INSERT_HOVER_NO), null));
+                    p.spigot().sendMessage(Lang.build(event.getMessage(), null, Lang.build(tc.buildHover()), null),
+                            Lang.build(Lang.CHECK_YES, "/yes", Lang.build(Lang.CHECK_HOVER_YES), null),
+                            Lang.build(Lang.CHECK_NO, "/no", Lang.build(Lang.CHECK_HOVER_NO), null));
                 }
             } else {
                 // Not a player

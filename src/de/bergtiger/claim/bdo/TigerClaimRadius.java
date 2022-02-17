@@ -1,7 +1,5 @@
 package de.bergtiger.claim.bdo;
 
-import javax.annotation.Nonnull;
-
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -19,14 +17,14 @@ public class TigerClaimRadius extends TigerClaim {
 	private final Location loc;
 	private final int radius;
 	
-	public TigerClaimRadius(@Nonnull Player player, @Nonnull Location loc) {
+	public TigerClaimRadius(Player player, Location loc) {
 		super(player, loc.getWorld());
 		this.loc = loc;
 		// load missing value Radius from Configuration
 		radius = Config.getInt(Config.REGION_RADIUS);
 	}
 	
-	public TigerClaimRadius(@Nonnull Player player, @Nonnull World world, @Nonnull Location loc, int radius) {
+	public TigerClaimRadius(Player player, World world, Location loc, int radius) {
 		super(player, world);
 		this.loc = loc;
 		this.radius = radius;

@@ -24,8 +24,8 @@ public enum Perm {
 	CLAIM_PLUGIN	("tclaim.plugin"),
 	CLAIM_RELOAD	("tclaim.reload"),
 	CLAIM_WORLDEDIT	("tclaim.worldedit"),
-	CLAIM_DELETE ("tclaim.delete"),
-	CLAIM_CHECK ("tclaim.check");
+	CLAIM_DELETE	("tclaim.delete"),
+	CLAIM_CHECK		("tclaim.check");
 	
 	private final String value;
 	

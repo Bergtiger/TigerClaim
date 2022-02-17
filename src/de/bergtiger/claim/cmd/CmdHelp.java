@@ -41,6 +41,18 @@ public class CmdHelp {
 						Lang.build(Lang.CMD_LIST, String.format("/claim %s", Claim.LIST), Lang.build(Lang.CMD_HOVER_LIST), null));
 				components.add(Lang.newLine());
 			}
+			// Check
+			if (Perm.hasPermission(cs, Perm.CLAIM_ADMIN, Perm.CLAIM_CHECK)) {
+				components.add(
+						Lang.build(Lang.CMD_CHECK, String.format("/claim %s", Claim.CHECK), Lang.build(Lang.CMD_HOVER_CHECK), null));
+				components.add(Lang.newLine());
+			}
+			// Delete
+			if (Perm.hasPermission(cs, Perm.CLAIM_ADMIN, Perm.CLAIM_DELETE)) {
+				components.add(
+						Lang.build(Lang.CMD_DELETE, String.format("/claim %s", Claim.DELETE), Lang.build(Lang.CMD_HOVER_DELETE), null));
+				components.add(Lang.newLine());
+			}
 			// Set
 			if (Perm.hasPermission(cs, Perm.CLAIM_ADMIN, Perm.CLAIM_SET)) {
 				components.add(

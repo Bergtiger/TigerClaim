@@ -11,12 +11,13 @@ public class PreClaimConfirmationEvent extends Event implements Cancellable {
     private boolean isCancelled = false;
     private final TigerClaim tc;
     private final Player player;
-    private String spielerBenachrichtigung;
+    private String message;
 
     @Override
     public HandlerList getHandlers() {
         return HANDLERS;
     }
+
     public static HandlerList getHandlerList() {
         return HANDLERS;
     }
@@ -31,9 +32,10 @@ public class PreClaimConfirmationEvent extends Event implements Cancellable {
         isCancelled = b;
     }
 
-    public PreClaimConfirmationEvent(TigerClaim tc, Player player, String spielerBenachrichtigung) {
+    public PreClaimConfirmationEvent(TigerClaim tc, Player player, String message) {
         this.tc = tc;
         this.player = player;
+        this.message = message;
     }
 
     public Player getPlayer() {
@@ -44,11 +46,11 @@ public class PreClaimConfirmationEvent extends Event implements Cancellable {
         return tc;
     }
 
-    public String getSpielerBenachrichtigung() {
-        return spielerBenachrichtigung;
+    public String getMessage() {
+        return message;
     }
 
-    public void setSpielerBenachrichtigung(String spielerBenachrichtigung) {
-        this.spielerBenachrichtigung = spielerBenachrichtigung;
+    public void setMessage(String message) {
+        this.message = message;
     }
 }

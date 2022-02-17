@@ -5,8 +5,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.logging.Level;
 
-import javax.annotation.Nonnull;
-
 import de.bergtiger.claim.data.logger.TigerLogger;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -37,7 +35,7 @@ public abstract class TigerClaim {
 	protected final int minHeight = Config.getInt(Config.REGION_MIN_HEIGHT);
 	protected final int maxHeight = Config.getInt(Config.REGION_MAX_HEIGHT);
 
-	public TigerClaim(@Nonnull Player player, World world) {
+	public TigerClaim(Player player, World world) {
 		this.player = player;
 		this.world = world;
 		// load missing values from Configuration
@@ -55,7 +53,7 @@ public abstract class TigerClaim {
 		if(Config.hasValue(Config.REGION_GAP)) {
 			Integer i = null;
 			try {
-				i = Integer.valueOf(Config.getValue(Config.REGION_GAP).toString());
+				i = Config.getInt(Config.REGION_GAP);
 			} catch (NumberFormatException e) {
 				TigerLogger.log(Level.SEVERE, String.format("&6'&e%s&6' &chas to be a Number.", Config.REGION_GAP), e);
 			}
@@ -69,14 +67,14 @@ public abstract class TigerClaim {
 		overlapping = Config.getBoolean(Config.REGION_OVERLAPPING);
 	}
 	
-	public TigerClaim(@Nonnull Player player, World world, HashMap<Flag<?>, Object> flags, String time, String pattern, Integer gab, Boolean expantVert, Boolean overlapping) {
+	public TigerClaim(Player player, World world, HashMap<Flag<?>, Object> flags, String time, String pattern, Integer gab, Boolean expandVert, Boolean overlapping) {
 		this.player = player;
 		this.world = world;
 		this.flags = flags;
 		this.timePattern = time;
 		this.pattern = pattern;
 		this.gap = gab;
-		this.expandVert = expantVert;
+		this.expandVert = expandVert;
 		this.overlapping = overlapping;
 	}
 
@@ -174,7 +172,7 @@ public abstract class TigerClaim {
 	
 	/**
 	 * Region is allowed to overlap other regions.
-	 * @return false if not allowed to overlap
+	 * @return false if not allowed overlapping
 	 */
 	public boolean isOverlapping() {
 		return overlapping;
@@ -198,5 +196,9 @@ public abstract class TigerClaim {
 	 */
 	public abstract String buildHover();
 
+	/**
+	 * Get the area from this region
+	 * @return double
+	 */
 	public abstract double getArea();
 }

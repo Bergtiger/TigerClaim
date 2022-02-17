@@ -17,15 +17,18 @@ import net.md_5.bungee.api.chat.ClickEvent.Action;
  */
 public enum Lang implements Cons {
 	
-	NOPERMISSION		("&cYou have no Permission"),
+	NOPERMISSION		("&cYou have no permission"),
 	
-	NOARGUMENT			("&cNot a valid Option &e'&4" + VALUE + "&e'"),
-	NONUMBER			("&cNot a Number"),
-	NONUMBERVALUE		("&e'&4" + VALUE + "&e' &cis not a Number"),
-	NOSUCHFLAG			("&e'&4" + VALUE + "&e' &cis not a Flag"),
-	NOFLAGVALUE			("&e'&4" + VALUE + "&e' &cis not a valid value for &6" + TYPE),
-	NOPLAYER			("&cYou have to be a Player to perform this command."),
-	NOREGIONS			("&cNo Regions"),
+	NOARGUMENT			(String.format("&cNot a valid option &e'&4%s&e'", VALUE)),
+	NONUMBER			("&cNot a number"),
+	NONUMBERVALUE		(String.format("&e'&4%s&e' &cis not a number", VALUE)),
+	NOSUCHFLAG			(String.format("&e'&4%s&e' &cis not a flag", VALUE)),
+	NOFLAGVALUE			(String.format("&e'&4%s&e' &cis not a valid value for &6%s", VALUE, TYPE)),
+	NOPLAYER			("&cYou have to be a player to perform this command."),
+	NOREGIONS			("&cNo regions"),
+	NOSUCHREGION		(String.format("&cNo such region &e'&4%s&e'", VALUE)),
+	NOTINREGION			("&cYou are not standing in a region"),
+	TOMANYREGIONS		("&cYou are standing in several regions, please specify one of them."),
 	// Config
 	CONFIG_LOAD_START	("Loading Config"),
 	CONFIG_LOAD_FINISH	("Finished loading"),
@@ -44,6 +47,8 @@ public enum Lang implements Cons {
 	CMD_FOOTER			("&a---------------------------"),
 	CMD_SET				("&7set"),
 	CMD_LIST			("&7list [page]"),
+	CMD_CHECK			("&7check"),
+	CMD_DELETE			("&7delete"),
 	CMD_INFO			("&7info"),
 	CMD_INSERT			("&7claim"),
 	CMD_RELOAD			("&7reload"),
@@ -51,8 +56,10 @@ public enum Lang implements Cons {
 	CMD_WIKI			("&7more information in the wiki"),
 	// Commands Hover
 	CMD_HOVER_SET		("set config."),
-	CMD_HOVER_INFO		("informatio how you create a Claim."),
+	CMD_HOVER_INFO		("information how you create a Claim."),
 	CMD_HOVER_LIST		("list all Regions where you are an owner."),
+	CMD_HOVER_CHECK		("checks if you can claim your selection."),
+	CMD_HOVER_DELETE	("deletes your region."),
 	CMD_HOVER_INSERT	("created a new Claim around your Position."),
 	CMD_HOVER_RELOAD	("reloads TigerClaimPlugin(config and cache)"),
 	CMD_HOVER_PLUGIN	("shows plugin info"),
@@ -63,13 +70,14 @@ public enum Lang implements Cons {
 	INSERT_EXISTING		("&cClaim &e'&6" + VALUE + "&e' &calready exists."),
 	INSERT_CANCEL		("&cClaim canceled."),
 	INSERT_LIMIT		("&cYou reached your claim-limit&e[&6" + VALUE + "&e/&6" + LIMIT + "&e]"),
-	INSERT_TEXT			("&eConfirm Claim&f: "),
-	INSERT_YES			("&aYes"),
-	INSERT_NO			(" &cNo"),
+	// claim insert
+	CLAIM_MESSAGE		("&eConfirm Claim&f:"),
+	CLAIM_YES			(" &aYes"),
+	CLAIM_NO			(" &cNo"),
 	INSERT_HOVER_SUCCESS("&aShow Claim."),
-	INSERT_HOVER_TEXT	("&eClaim at your position."),
-	INSERT_HOVER_YES	("&ecreates Claim."),
-	INSERT_HOVER_NO		("&eabort Claim."),
+	CLAIM_HOVER_TEXT	("&ecreates a claim at your position."),
+	CLAIM_HOVER_YES		("&ecreates your claim."),
+	CLAIM_HOVER_NO		("&eabort claim."),
 	// Info
 	INFO				("How to claim a region?\n"),
 	// List
@@ -90,6 +98,27 @@ public enum Lang implements Cons {
 	CLAIM_RADIUS		("&aRegion&e: &6" + ID + "\n&aCenter&e: " + POS1 + "\n&aradius&e: &6" + VALUE),
 	CLAIM_PATTERN_POINTS("  &6" + X + "&f, &6" + Z),
 	CLAIM_PATTERN_LOC	("&6" + X + "&f, &6" + Y + "&f, &6" + Z),
+	// Check
+	CHECK_MESSAGE		("&eDo you want to check this region?"),
+	CHECK_YES			(" &aYes"),
+	CHECK_NO			(" &cNo"),
+	CHECK_HOVER_TEXT	("&eCheck if this region is empty and if you can claim this region."),
+	CHECK_HOVER_YES		("&eperforms check."),
+	CHECK_HOVER_NO		("&eaborts check."),
+
+	CHECK_LIMIT			(String.format("&cYou reached your limit of &e'&6%s&e' regions and you can not claim another one.", VALUE)),
+	CHECK_AVAILABLE		("&aYour selection is available."),
+	CHECK_OVERLAPPING	("&cYour selection is overlapping with another region."),
+
+	// Delete
+	DELETE_MESSAGE		(String.format("&eDo you really want to delete this region &e'&e%s&6'&e?", VALUE)),
+	DELETE_YES			(" &aYes"),
+	DELETE_NO			(" &cNo"),
+	DELETE_HOVER_TEXT	("&eDeletes your region. There is no way back. Be sure you really want this."),
+	DELETE_HOVER_YES	("&eWill delete your region forever. It is a really long time."),
+	DELETE_HOVER_NO		("&eaborts delete."),
+	DELETE_SUCCESS		(String.format("&aRemoved region &e'&6%s&e' &asuccessfully.", VALUE)),
+
 	// Reload
 	RELOAD_FINISHED		("&aReload finished."),
 	// PluginInfo
@@ -217,9 +246,12 @@ public enum Lang implements Cons {
 			if (cmd != null && !cmd.isEmpty())
 				tc.setClickEvent(new ClickEvent(Action.RUN_COMMAND, cmd));
 			if (hover != null) {
-				if (hover instanceof String hs)
+				if (hover instanceof String s)
 					tc.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-							new Text(hs)));
+							new Text(new BaseComponent[] {build(s)})));
+				if (hover instanceof Lang l)
+					tc.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+							new Text(new BaseComponent[] {build(l)})));
 				if (hover instanceof BaseComponent hb)
 					tc.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
 							new Text(new BaseComponent[] {hb})));

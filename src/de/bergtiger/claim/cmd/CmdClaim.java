@@ -1,6 +1,5 @@
 package de.bergtiger.claim.cmd;
 
-import de.bergtiger.claim.events.PreCheckConfirmationEvent;
 import de.bergtiger.claim.events.PreClaimConfirmationEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -55,20 +54,16 @@ public class CmdClaim {
 					// Without WorlEdit
 					tc = new TigerClaimRadius(p, p.getLocation());
 				}
-				//We call PreConfirmationEvent
-				PreClaimConfirmationEvent event = new PreClaimConfirmationEvent(tc, p, null);
+				// call PreConfirmationEvent
+				PreClaimConfirmationEvent event = new PreClaimConfirmationEvent(tc, p, Lang.CLAIM_MESSAGE.get());
 				Bukkit.getPluginManager().callEvent(event);
-				String spielerBenachrichtigung = "&eWillst du die ausgewählte Fläche sichern? ";
-				if (event.getSpielerBenachrichtigung() != null) {
-					spielerBenachrichtigung = event.getSpielerBenachrichtigung();
-				}
 				if (!event.isCancelled()) {
 					// send Confirmation
 					ConfirmationListener.inst().addConfirmation(tc);
 					// inform Player
-					p.spigot().sendMessage(Lang.build(spielerBenachrichtigung, null, Lang.build(tc.buildHover()), null),
-							Lang.build(Lang.INSERT_YES, "/yes", Lang.build(Lang.INSERT_HOVER_YES), null),
-							Lang.build(Lang.INSERT_NO, "/no", Lang.build(Lang.INSERT_HOVER_NO), null));
+					p.spigot().sendMessage(Lang.build(event.getMessage(), null, Lang.build(tc.buildHover()), null),
+							Lang.build(Lang.CLAIM_YES, "/yes", Lang.build(Lang.CLAIM_HOVER_YES), null),
+							Lang.build(Lang.CLAIM_NO, "/no", Lang.build(Lang.CLAIM_HOVER_NO), null));
 				}
 			} else {
 				// Not a player

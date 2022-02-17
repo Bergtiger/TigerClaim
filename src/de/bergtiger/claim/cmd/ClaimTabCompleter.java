@@ -25,6 +25,12 @@ public class ClaimTabCompleter implements TabCompleter {
 	public List<String> onTabComplete(CommandSender cs, Command cmd, String alias, String[] args) {
 		List<String> list = new ArrayList<>();
 		if (args.length <= 1) {
+			// Check
+			if (Perm.hasPermission(cs, Perm.CLAIM_ADMIN, Perm.CLAIM_CHECK))
+				list.add(Claim.CHECK);
+			// Delete
+			if (Perm.hasPermission(cs, Perm.CLAIM_ADMIN, Perm.CLAIM_DELETE))
+				list.add(Claim.DELETE);
 			// Claim
 			if (Perm.hasPermission(cs, Perm.CLAIM_ADMIN, Perm.CLAIM_CLAIM))
 				list.add(Claim.CLAIM);
@@ -44,7 +50,7 @@ public class ClaimTabCompleter implements TabCompleter {
 			if (Perm.hasPermission(cs, Perm.CLAIM_ADMIN, Perm.CLAIM_RELOAD))
 				list.add(Claim.RELOAD);
 			if (args.length == 1) {
-				return list.stream().filter(s -> s.startsWith(args[0])).collect(Collectors.toList());
+				return list.stream().filter(s -> s.startsWith(args[0].toLowerCase())).collect(Collectors.toList());
 			}
 		} else {
 			if (args[0].equalsIgnoreCase(Claim.SET) && Perm.hasPermission(cs, Perm.CLAIM_ADMIN, Perm.CLAIM_SET)) {

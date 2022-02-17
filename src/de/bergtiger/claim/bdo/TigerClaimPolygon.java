@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nonnull;
-
 import de.bergtiger.claim.data.ClaimUtils;
 import de.bergtiger.claim.data.logger.TigerLogger;
 import org.bukkit.World;
@@ -83,12 +81,12 @@ public class TigerClaimPolygon extends TigerClaim {
 	
 	private Vector2 intersection(Vector2 a, Vector2 b, Vector2 c) {
 		Vector2 ab = a.subtract(b);
-		Vector2 o = orthogonal(ab, 90, getGap());
+		Vector2 o = orthogonal(ab, getGap());
 		Vector2 a1 = a.add(o);
 		Vector2 b1 = b.add(o);
 		
 		Vector2 bc = b.subtract(c);
-		Vector2 o2 = orthogonal(bc, 90, getGap());
+		Vector2 o2 = orthogonal(bc, getGap());
 		Vector2 b2 = b.add(o2);
 		Vector2 c2 = c.add(o2);
 		
@@ -103,29 +101,29 @@ public class TigerClaimPolygon extends TigerClaim {
 	
 	/**
 	 * Rotate vector(angle) and set vector length to length.
-	 * @param vector
-	 * @param angle
-	 * @param length
-	 * @return
+	 * @param vector vector to transform
+	 * @param length length of the vector in the end
+	 * @return vector rotated, normalized and stretched to the given length
 	 */
-	private Vector2 orthogonal(@Nonnull Vector2 vector, @Nonnull double angle, @Nonnull double length) {
-		return vector.transform2D(angle, 0, 0, 0, 0).normalize().multiply(length);
+	private Vector2 orthogonal(Vector2 vector, double length) {
+		return vector.transform2D(90, 0, 0, 0, 0).normalize().multiply(length);
 	}
 
 	@Override
 	public double getArea() {
+		// TODO
 		if (points != null && points.size() >= 3) {
 			double summe = 0;
-			BlockVector2 letzterPunkt = null;
+			BlockVector2 lastPoint = null;
 			for (int i = 0; i < points.size(); i++) {
-				BlockVector2 punkt = points.get(i);
+				BlockVector2 point = points.get(i);
 				if (i != 0) {
-					summe = summe + letzterPunkt.getBlockX() * punkt.getBlockZ() - letzterPunkt.getBlockZ() * punkt.getBlockX();
+					summe = summe + lastPoint.getBlockX() * point.getBlockZ() - lastPoint.getBlockZ() * point.getBlockX();
 				}
-				letzterPunkt = punkt;
+				lastPoint = point;
 			}
-			BlockVector2 ersterPunkt = points.get(0);
-			summe = summe + letzterPunkt.getBlockX() * ersterPunkt.getBlockZ() - letzterPunkt.getBlockZ() * ersterPunkt.getBlockX();
+			BlockVector2 firstPoint = points.get(0);
+			summe = summe + lastPoint.getBlockX() * firstPoint.getBlockZ() - lastPoint.getBlockZ() * firstPoint.getBlockX();
 			double scharfeFläche = Math.abs(summe / 2.0);
 			TigerLogger.log(Level.INFO, "TigerClaimPolygon: scharfeFläche: " + scharfeFläche);
 			double genaueFläche = ClaimUtils.flächeEinesPixelPolygons(scharfeFläche, points);

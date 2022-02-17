@@ -5,8 +5,6 @@ import org.bukkit.command.CommandSender;
 import de.bergtiger.claim.data.configuration.Config;
 import de.bergtiger.claim.data.language.Lang;
 import de.bergtiger.claim.data.permission.Perm;
-import de.bergtiger.claim.data.ReadMe;
-import de.bergtiger.claim.listener.ConfirmationListener;
 
 public class CmdReload {
 
