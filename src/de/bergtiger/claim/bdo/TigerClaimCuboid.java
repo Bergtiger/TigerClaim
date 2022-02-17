@@ -1,7 +1,5 @@
 package de.bergtiger.claim.bdo;
 
-import javax.annotation.Nonnull;
-
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 
@@ -17,7 +15,7 @@ public class TigerClaimCuboid extends TigerClaim {
 	
 	private final BlockVector3 min, max;
 	
-	public TigerClaimCuboid(@Nonnull Player player, @Nonnull World world, @Nonnull CuboidRegion cr) {
+	public TigerClaimCuboid(Player player, World world, CuboidRegion cr) {
 		super(player, world);
 		min = cr.getMinimumPoint();
 		max = cr.getMaximumPoint();

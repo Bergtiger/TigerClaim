@@ -48,7 +48,6 @@ public class CmdSet {
 	public void serConfigValue(CommandSender cs, String[] args) {
 		if (Perm.hasPermission(cs, Perm.CLAIM_ADMIN, Perm.CLAIM_SET)) {
 			if (args.length >= 3) {
-//				Config c = Config.inst();
 				switch (args[1].toLowerCase()) {
 					case CMD_PAGE_LENGTH -> {
 						try {
@@ -167,9 +166,7 @@ public class CmdSet {
 							cs.spigot().sendMessage(Lang.build(Lang.SET_FLAG_MISSING));
 						}
 					}
-					default -> {
-						cs.spigot().sendMessage(Lang.build(Lang.NOARGUMENT.replace(Lang.VALUE, args[1])));
-					}
+					default -> cs.spigot().sendMessage(Lang.build(Lang.NOARGUMENT.replace(Lang.VALUE, args[1])));
 				}
 			} else {
 				cs.spigot().sendMessage(Lang.build(Lang.SET_MISSING));

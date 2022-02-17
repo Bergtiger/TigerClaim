@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nonnull;
-
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 
@@ -105,7 +103,7 @@ public class TigerClaimPolygon extends TigerClaim {
 	 * @param length
 	 * @return
 	 */
-	private Vector2 orthogonal(@Nonnull Vector2 vector, @Nonnull double angle, @Nonnull double length) {
+	private Vector2 orthogonal(Vector2 vector, double angle, double length) {
 		return vector.transform2D(angle, 0, 0, 0, 0).normalize().multiply(length);
 	}
 }

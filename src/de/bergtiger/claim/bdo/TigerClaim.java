@@ -5,8 +5,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.logging.Level;
 
-import javax.annotation.Nonnull;
-
 import de.bergtiger.claim.data.logger.TigerLogger;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -37,7 +35,7 @@ public abstract class TigerClaim {
 	protected final int minHeight = Config.getInt(Config.REGION_MIN_HEIGHT);
 	protected final int maxHeight = Config.getInt(Config.REGION_MAX_HEIGHT);
 
-	public TigerClaim(@Nonnull Player player, World world) {
+	public TigerClaim(Player player, World world) {
 		this.player = player;
 		this.world = world;
 		// load missing values from Configuration
@@ -69,7 +67,7 @@ public abstract class TigerClaim {
 		overlapping = Config.getBoolean(Config.REGION_OVERLAPPING);
 	}
 	
-	public TigerClaim(@Nonnull Player player, World world, HashMap<Flag<?>, Object> flags, String time, String pattern, Integer gab, Boolean expantVert, Boolean overlapping) {
+	public TigerClaim(Player player, World world, HashMap<Flag<?>, Object> flags, String time, String pattern, Integer gab, Boolean expantVert, Boolean overlapping) {
 		this.player = player;
 		this.world = world;
 		this.flags = flags;
