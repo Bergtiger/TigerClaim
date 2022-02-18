@@ -77,7 +77,7 @@ public class CmdDelete {
 							if (!event.isCancelled()) {
 								ConfirmationListener.inst().addConfirmation(new DeleteQueue(region, p));
 								// inform Player
-								p.spigot().sendMessage(Lang.build(event.getMessage(), null, Lang.DELETE_HOVER_TEXT, null),
+								p.spigot().sendMessage(Lang.build(event.getMessage().replace(Lang.VALUE, region.getId()), null, Lang.DELETE_HOVER_TEXT, null),
 										Lang.build(Lang.DELETE_YES, "/yes", Lang.build(Lang.DELETE_HOVER_YES), null),
 										Lang.build(Lang.DELETE_NO, "/no", Lang.build(Lang.DELETE_HOVER_NO), null));
 							}

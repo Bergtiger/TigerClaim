@@ -33,6 +33,7 @@ public class PreDeleteConfirmationEvent extends Event implements Cancellable {
 	}
 
 	public PreDeleteConfirmationEvent(ProtectedRegion pr, Player player, String message) {
+		super(true);
 		this.pr = pr;
 		this.player = player;
 		this.message = message;
