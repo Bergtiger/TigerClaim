@@ -8,6 +8,7 @@ import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import com.sk89q.worldguard.protection.regions.RegionContainer;
 import de.bergtiger.claim.Claims;
 import de.bergtiger.claim.bdo.DeleteQueue;
+import de.bergtiger.claim.data.ClaimUtils;
 import de.bergtiger.claim.data.language.Lang;
 import de.bergtiger.claim.data.permission.Perm;
 import de.bergtiger.claim.events.PreDeleteConfirmationEvent;
@@ -41,7 +42,7 @@ public class CmdDelete {
 						ProtectedRegion region = regions.getRegion(regionName);
 						if (region.getOwners().contains(p.getUniqueId()) || Perm.hasPermission(cs, Perm.CLAIM_ADMIN)) {
 							//call RegionDeleteEvent
-							PreDeleteConfirmationEvent event = new PreDeleteConfirmationEvent(region, p, Lang.DELETE_MESSAGE.get());
+							PreDeleteConfirmationEvent event = new PreDeleteConfirmationEvent(region, p, ClaimUtils.getArea(region), Lang.DELETE_MESSAGE.get());
 							Bukkit.getPluginManager().callEvent(event);
 							if (!event.isCancelled()) {
 								ConfirmationListener.inst().addConfirmation(new DeleteQueue(region, p.getWorld(), p));
@@ -72,7 +73,7 @@ public class CmdDelete {
 						ProtectedRegion region = set.getRegions().stream().findFirst().get();
 						if (region.getOwners().contains(p.getUniqueId()) || Perm.hasPermission(cs, Perm.CLAIM_ADMIN)) {
 							//call RegionDeleteEvent
-							PreDeleteConfirmationEvent event = new PreDeleteConfirmationEvent(region, p, Lang.DELETE_MESSAGE.get());
+							PreDeleteConfirmationEvent event = new PreDeleteConfirmationEvent(region, p, ClaimUtils.getArea(region), Lang.DELETE_MESSAGE.get());
 							Bukkit.getPluginManager().callEvent(event);
 							if (!event.isCancelled()) {
 								ConfirmationListener.inst().addConfirmation(new DeleteQueue(region, p.getWorld(), p));

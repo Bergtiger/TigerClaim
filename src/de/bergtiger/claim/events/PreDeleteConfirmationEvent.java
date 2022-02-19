@@ -11,6 +11,7 @@ public class PreDeleteConfirmationEvent extends Event implements Cancellable {
 	private boolean isCancelled = false;
 	private final ProtectedRegion pr;
 	private final Player player;
+	private final double area;
 	private String message;
 
 	@Override
@@ -32,10 +33,11 @@ public class PreDeleteConfirmationEvent extends Event implements Cancellable {
 		isCancelled = b;
 	}
 
-	public PreDeleteConfirmationEvent(ProtectedRegion pr, Player player, String message) {
+	public PreDeleteConfirmationEvent(ProtectedRegion pr, Player player, double area, String message) {
 		super(true);
 		this.pr = pr;
 		this.player = player;
+		this.area = area;
 		this.message = message;
 	}
 
@@ -45,6 +47,10 @@ public class PreDeleteConfirmationEvent extends Event implements Cancellable {
 
 	public ProtectedRegion getRegion() {
 		return pr;
+	}
+
+	public double getArea() {
+		return area;
 	}
 
 	public String getMessage() {
