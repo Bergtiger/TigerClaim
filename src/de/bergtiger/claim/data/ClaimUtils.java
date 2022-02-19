@@ -3,9 +3,9 @@ package de.bergtiger.claim.data;
 import static de.bergtiger.claim.data.language.Cons.ID;
 
 import com.sk89q.worldedit.math.BlockVector2;
+import com.sk89q.worldedit.math.Vector2;
 import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
-import de.bergtiger.claim.TigerVector2;
 import de.bergtiger.claim.data.language.Lang;
 import de.bergtiger.claim.data.logger.TigerLogger;
 
@@ -65,21 +65,21 @@ public class ClaimUtils {
 
 	public static double flächeEinesPixelPolygons(double scharfeFläche, List<BlockVector2> eckpunkteGanz) {
 		boolean ausgaben = false;
-		ArrayList<TigerVector2> eckpunkte = new ArrayList<>();
+		ArrayList<Vector2> eckpunkte = new ArrayList<>();
 		for (BlockVector2 blockVector2 : eckpunkteGanz) {
-			eckpunkte.add(new TigerVector2( blockVector2.getX() + 0.5,blockVector2.getZ() + 0.5));
+			eckpunkte.add(Vector2.at( blockVector2.getX() + 0.5,blockVector2.getZ() + 0.5));
 		}
 		int anzahlLinksKnicke = 0;
 		int anzahlRechtsKnicke = 0;
-		TigerVector2 letzterPunkt = eckpunkte.get(eckpunkte.size() - 1);
+		Vector2 letzterPunkt = eckpunkte.get(eckpunkte.size() - 1);
 		for (int i = 0; i < eckpunkte.size(); i++) {
-			TigerVector2 punkt = eckpunkte.get(i);
-			TigerVector2 nächsterPunkt = eckpunkte.get(0);
+			Vector2 punkt = eckpunkte.get(i);
+			Vector2 nächsterPunkt = eckpunkte.get(0);
 			if (i < eckpunkte.size() - 1) {
 				nächsterPunkt = eckpunkte.get(i+1);
 			}
-			TigerVector2 kantenVektorVorPunkt = punkt.subtract(letzterPunkt);
-			TigerVector2 kantenVektorNachPunkt = letzterPunkt.subtract(nächsterPunkt);
+			Vector2 kantenVektorVorPunkt = punkt.subtract(letzterPunkt);
+			Vector2 kantenVektorNachPunkt = letzterPunkt.subtract(nächsterPunkt);
 			double quasiKreuzProdukt = kantenVektorVorPunkt.getX() * kantenVektorNachPunkt.getZ() - kantenVektorVorPunkt.getZ() * kantenVektorNachPunkt.getX();
 			if (quasiKreuzProdukt > 0) {
 				//spitzer Winkel ==> Linksknick
@@ -104,8 +104,8 @@ public class ClaimUtils {
 		letzterPunkt = eckpunkte.get(eckpunkte.size() - 1);
 		//Für alle Kanten:
 		for (int i = 0; i < eckpunkte.size(); i++) {
-			TigerVector2 punkt = eckpunkte.get(i);
-			TigerVector2 nächsterPunkt = eckpunkte.get(0);
+			Vector2 punkt = eckpunkte.get(i);
+			Vector2 nächsterPunkt = eckpunkte.get(0);
 			if (i < eckpunkte.size() - 1) {
 				nächsterPunkt = eckpunkte.get(i+1);
 			}
@@ -188,22 +188,22 @@ public class ClaimUtils {
 	}
 
 	private static double polygonRandPixelFlächenErgänzung(
-			List<BlockVector2> eckpunkteGanz, BlockVector2 pixelPos, boolean uhrzeigersinn, TigerVector2 ecke0, TigerVector2 ecke1, TigerVector2 ecke2) {
+			List<BlockVector2> eckpunkteGanz, BlockVector2 pixelPos, boolean uhrzeigersinn, Vector2 ecke0, Vector2 ecke1, Vector2 ecke2) {
 		boolean ausgaben = false;
 		boolean ecke1LiegtInPixel = pixelPos.equals(BlockVector2.at((int)(ecke1.getX() - 0.5),(int)(ecke1.getZ() - 0.5)));
-		TigerVector2 kante1 = ecke1.subtract(ecke0);
-		TigerVector2 kante2 = ecke2.subtract(ecke1);
+		Vector2 kante1 = ecke1.subtract(ecke0);
+		Vector2 kante2 = ecke2.subtract(ecke1);
 		boolean linksKnick = kante1.getX() * kante2.getZ() - kante1.getZ() * kante2.getX() < 0;
 		if (ausgaben) System.out.println("linksKnick: " + linksKnick + "; pixelPos: (" + pixelPos.getX() + ";" + pixelPos.getZ() + ")");
 		if (ecke1LiegtInPixel) {
 			boolean größereFlächeLiegtInnen = !linksKnick ^ uhrzeigersinn;
-			ArrayList<TigerVector2> kantenAnEcke1 = new ArrayList<>();
+			ArrayList<Vector2> kantenAnEcke1 = new ArrayList<>();
 			kantenAnEcke1.add(kante1.multiply(-1));
 			kantenAnEcke1.add(kante2);
 			double teilflächeDesPixelsAmPolygon = 0.0;
 			boolean ersteKante = true;
 			int anzahlDreiecke = 0;
-			for (TigerVector2 kante : kantenAnEcke1) {
+			for (Vector2 kante : kantenAnEcke1) {
 				int sgnXSteigung = (int) Math.signum(kante.getX());
 				int sgnZSteigung = (int) Math.signum(kante.getZ());
 				double deltaX = Math.abs(kante.getX());
@@ -426,21 +426,21 @@ public class ClaimUtils {
 			} else {
 				//Pixel unterteilt in Dreieck und Fünfeck
 				Double dreiecksFläche = null;
-				TigerVector2 pixelEckPunktBeiDreieck = null;
+				Vector2 pixelEckPunktBeiDreieck = null;
 				if (pixelGeschnittenBeiX1 && pixelGeschnittenBeiZ1) {
-					pixelEckPunktBeiDreieck = new TigerVector2(pixelRandX1, pixelRandZ1);
+					pixelEckPunktBeiDreieck = Vector2.at(pixelRandX1, pixelRandZ1);
 					dreiecksFläche = 0.5 * (zVonX1 - pixelRandZ1) * (xVonZ1 - pixelRandX1);
 				} else if (pixelGeschnittenBeiX1 && pixelGeschnittenBeiZ2) {
-					pixelEckPunktBeiDreieck = new TigerVector2(pixelRandX1, pixelRandZ2);
+					pixelEckPunktBeiDreieck = Vector2.at(pixelRandX1, pixelRandZ2);
 					dreiecksFläche = 0.5 * (xVonZ2 - pixelRandX1) * (pixelRandZ2 - zVonX1);
 				} else if (pixelGeschnittenBeiX2 && pixelGeschnittenBeiZ1) {
-					pixelEckPunktBeiDreieck = new TigerVector2(pixelRandX2, pixelRandZ1);
+					pixelEckPunktBeiDreieck = Vector2.at(pixelRandX2, pixelRandZ1);
 					dreiecksFläche = 0.5 * (pixelRandX2 - xVonZ1) * (zVonX2 - pixelRandZ1);
 				} else if (pixelGeschnittenBeiX2 && pixelGeschnittenBeiZ2) {
-					pixelEckPunktBeiDreieck = new TigerVector2(pixelRandX2, pixelRandZ2);
+					pixelEckPunktBeiDreieck = Vector2.at(pixelRandX2, pixelRandZ2);
 					dreiecksFläche = 0.5 * (pixelRandZ2 - zVonX2) * (pixelRandX2 - xVonZ2);
 				}
-				TigerVector2 rechtsLinksVektor = pixelEckPunktBeiDreieck.subtract(ecke0);
+				Vector2 rechtsLinksVektor = pixelEckPunktBeiDreieck.subtract(ecke0);
 				boolean dreieckLinksVonKante  = kante1.getX() * rechtsLinksVektor.getZ() - kante1.getZ() * rechtsLinksVektor.getX() > 0;
 				Double flächeInPixelLinksVonKante = null;
 				Double flächeInPixelRechtsVonKante = null;
