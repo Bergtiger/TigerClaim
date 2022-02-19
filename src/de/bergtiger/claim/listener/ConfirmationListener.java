@@ -220,7 +220,7 @@ public class ConfirmationListener implements Listener {
 						region.setFlags(flags);
 					}
 					//call RegionClaimEvent
-					RegionClaimEvent event = new RegionClaimEvent(region, tc.getPlayer(), tc.getArea(), Lang.INSERT_SUCCESS.get());
+					RegionClaimEvent event = new RegionClaimEvent(region, tc.getWorld(), tc.getPlayer(), tc.getArea(), Lang.INSERT_SUCCESS.get());
 					Bukkit.getPluginManager().callEvent(event);
 					if (!event.isCancelled()) {
 						// Add Region to Manager - save
@@ -243,12 +243,12 @@ public class ConfirmationListener implements Listener {
 	}
 
 	private void deleteRegion(DeleteQueue dq) {
-		RegionDeleteEvent event = new RegionDeleteEvent(dq.getRegion(), dq.getPlayer(), ClaimUtils.getArea(dq.getRegion()), Lang.DELETE_SUCCESS.get());
+		RegionDeleteEvent event = new RegionDeleteEvent(dq.getRegion(), dq.getWorld(), dq.getPlayer(), ClaimUtils.getArea(dq.getRegion()), Lang.DELETE_SUCCESS.get());
 		Bukkit.getPluginManager().callEvent(event);
 		if (!event.isCancelled()) {
 			// get RegionManager for world
 			RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
-			RegionManager regions = container.get(BukkitAdapter.adapt(dq.getPlayer().getWorld()));
+			RegionManager regions = container.get(BukkitAdapter.adapt(dq.getWorld()));
 			regions.removeRegion(dq.getRegion().getId());
 			dq.getPlayer().spigot().sendMessage(Lang.build(event.getMessage().replace(VALUE, event.getRegion().getId())));
 		}

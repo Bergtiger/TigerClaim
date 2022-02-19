@@ -44,7 +44,7 @@ public class CmdDelete {
 							PreDeleteConfirmationEvent event = new PreDeleteConfirmationEvent(region, p, Lang.DELETE_MESSAGE.get());
 							Bukkit.getPluginManager().callEvent(event);
 							if (!event.isCancelled()) {
-								ConfirmationListener.inst().addConfirmation(new DeleteQueue(region, p));
+								ConfirmationListener.inst().addConfirmation(new DeleteQueue(region, p.getWorld(), p));
 								// inform Player
 								p.spigot().sendMessage(Lang.build(event.getMessage().replace(Lang.VALUE, region.getId()), null, Lang.DELETE_HOVER_TEXT, null),
 										Lang.build(Lang.DELETE_YES, "/yes", Lang.build(Lang.DELETE_HOVER_YES), null),
@@ -75,7 +75,7 @@ public class CmdDelete {
 							PreDeleteConfirmationEvent event = new PreDeleteConfirmationEvent(region, p, Lang.DELETE_MESSAGE.get());
 							Bukkit.getPluginManager().callEvent(event);
 							if (!event.isCancelled()) {
-								ConfirmationListener.inst().addConfirmation(new DeleteQueue(region, p));
+								ConfirmationListener.inst().addConfirmation(new DeleteQueue(region, p.getWorld(), p));
 								// inform Player
 								p.spigot().sendMessage(Lang.build(event.getMessage().replace(Lang.VALUE, region.getId()), null, Lang.DELETE_HOVER_TEXT, null),
 										Lang.build(Lang.DELETE_YES, "/yes", Lang.build(Lang.DELETE_HOVER_YES), null),

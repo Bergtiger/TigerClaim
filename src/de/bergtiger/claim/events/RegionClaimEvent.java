@@ -1,6 +1,7 @@
 package de.bergtiger.claim.events;
 
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
@@ -13,6 +14,7 @@ public class RegionClaimEvent extends Event implements Cancellable {
     private final Player player;
     private final double area;
     private String message;
+    private final World world;
 
     @Override
     public HandlerList getHandlers() {
@@ -32,8 +34,9 @@ public class RegionClaimEvent extends Event implements Cancellable {
         isCancelled = b;
     }
 
-    public RegionClaimEvent(ProtectedRegion region, Player player, double area, String message) {
+    public RegionClaimEvent(ProtectedRegion region, World world, Player player, double area, String message) {
         this.region = region;
+        this.world = world;
         this.player = player;
         this.area = area;
         this.message = message;
@@ -45,6 +48,10 @@ public class RegionClaimEvent extends Event implements Cancellable {
 
     public ProtectedRegion getRegion() {
         return region;
+    }
+
+    public World getWorld() {
+        return world;
     }
 
     public double getArea() {
