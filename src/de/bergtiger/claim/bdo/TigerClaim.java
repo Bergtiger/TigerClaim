@@ -22,7 +22,7 @@ public abstract class TigerClaim {
 	
 	private final Player player;
 	private final World world;
-	private final HashMap<Flag<?>, Object> flags;
+	private HashMap<Flag<?>, Object> flags;
 	private final Boolean expandVert;
 	private final Boolean overlapping;
 	private final String pattern;

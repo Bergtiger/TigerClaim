@@ -119,6 +119,10 @@ public enum Lang implements Cons {
 	DELETE_HOVER_NO		("&eaborts delete."),
 	DELETE_SUCCESS		(String.format("&aRemoved region &e'&6%s&e' &asuccessfully.", VALUE)),
 
+	// Expand
+	EXPAND_YES			(" &aYes"),
+	EXPAND_NO			(" &cNo"),
+
 	// Reload
 	RELOAD_FINISHED		("&aReload finished."),
 	// PluginInfo

@@ -4,10 +4,15 @@ import static de.bergtiger.claim.data.language.Cons.ID;
 
 import com.sk89q.worldedit.math.BlockVector2;
 import com.sk89q.worldedit.math.Vector2;
+import com.sk89q.worldedit.regions.CuboidRegion;
+import com.sk89q.worldedit.regions.Polygonal2DRegion;
+import com.sk89q.worldedit.world.World;
+import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import de.bergtiger.claim.data.language.Lang;
 import de.bergtiger.claim.data.logger.TigerLogger;
+import org.bukkit.Bukkit;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,7 +56,7 @@ public class ClaimUtils {
 				BlockVector2 ersterPunkt = polyRegion.getPoints().get(0);
 				summe = summe + letzterPunkt.getBlockX() * ersterPunkt.getBlockZ() - letzterPunkt.getBlockZ() * ersterPunkt.getBlockX();
 				double scharfeFläche = Math.abs(summe / 2.0);
-				return flächeEinesPixelPolygons(scharfeFläche, polyRegion.getPoints());
+				return flächeEinesPixelPolygons(scharfePolgonFläche(polyRegion.getPoints()), polyRegion.getPoints());
 			} else {
 				//Rechtecks-Grundfläche
 				double area = (1 + Math.abs((region.getMinimumPoint().getX() - region.getMaximumPoint().getX()))) *
@@ -63,45 +68,54 @@ public class ClaimUtils {
 		return 0.0;
 	}
 
+	public static double scharfePolgonFläche (List<BlockVector2> eckpunkteGanz) {
+		double summe = 0;
+		BlockVector2 letzterPunkt = null;
+		for (int i = 0; i < eckpunkteGanz.size(); i++) {
+			BlockVector2 punkt = eckpunkteGanz.get(i);
+			if (i != 0) {
+				summe = summe + letzterPunkt.getBlockX() * punkt.getBlockZ() - letzterPunkt.getBlockZ() * punkt.getBlockX();
+			}
+			letzterPunkt = punkt;
+		}
+		BlockVector2 ersterPunkt = eckpunkteGanz.get(0);
+		summe = summe + letzterPunkt.getBlockX() * ersterPunkt.getBlockZ() - letzterPunkt.getBlockZ() * ersterPunkt.getBlockX();
+		double scharfeFläche = Math.abs(summe / 2.0);
+		return scharfeFläche;
+	}
+
+	public static double scharfePolgonFläche (ArrayList<Vector2> eckpunkte) {
+		double summe = 0;
+		Vector2 letzterPunkt = null;
+		for (int i = 0; i < eckpunkte.size(); i++) {
+			Vector2 punkt = eckpunkte.get(i);
+			if (i != 0) {
+				summe = summe + letzterPunkt.getX() * punkt.getZ() - letzterPunkt.getZ() * punkt.getX();
+			}
+			letzterPunkt = punkt;
+		}
+		Vector2 ersterPunkt = eckpunkte.get(0);
+		summe = summe + letzterPunkt.getX() * ersterPunkt.getZ() - letzterPunkt.getZ() * ersterPunkt.getX();
+		double scharfeFläche = Math.abs(summe / 2.0);
+		return scharfeFläche;
+	}
+
 	public static double flächeEinesPixelPolygons(double scharfeFläche, List<BlockVector2> eckpunkteGanz) {
 		boolean ausgaben = false;
 		ArrayList<Vector2> eckpunkte = new ArrayList<>();
 		for (BlockVector2 blockVector2 : eckpunkteGanz) {
 			eckpunkte.add(Vector2.at( blockVector2.getX() + 0.5,blockVector2.getZ() + 0.5));
 		}
-		int anzahlLinksKnicke = 0;
-		int anzahlRechtsKnicke = 0;
-		Vector2 letzterPunkt = eckpunkte.get(eckpunkte.size() - 1);
-		for (int i = 0; i < eckpunkte.size(); i++) {
-			Vector2 punkt = eckpunkte.get(i);
-			Vector2 nächsterPunkt = eckpunkte.get(0);
-			if (i < eckpunkte.size() - 1) {
-				nächsterPunkt = eckpunkte.get(i+1);
-			}
-			Vector2 kantenVektorVorPunkt = punkt.subtract(letzterPunkt);
-			Vector2 kantenVektorNachPunkt = letzterPunkt.subtract(nächsterPunkt);
-			double quasiKreuzProdukt = kantenVektorVorPunkt.getX() * kantenVektorNachPunkt.getZ() - kantenVektorVorPunkt.getZ() * kantenVektorNachPunkt.getX();
-			if (quasiKreuzProdukt > 0) {
-				//spitzer Winkel ==> Linksknick
-				anzahlLinksKnicke++;
-			} else if (quasiKreuzProdukt < 0) {
-				//stumpfer Winkel ==> Rechtsknick
-				anzahlRechtsKnicke++;
-			}
-			letzterPunkt = punkt;
-		}
-		if (anzahlLinksKnicke == anzahlRechtsKnicke) {
-			//Fehler: Polygon überschneidet sich
-			return  -1.0;
-		}
-		boolean imUhrzeigerSinn = false;
-		if (anzahlLinksKnicke < anzahlRechtsKnicke) {
-			imUhrzeigerSinn = true;
+
+		Boolean imUhrzeigerSinn = verläuftPolygonImUhrzeigersinn(eckpunkte);
+		if (imUhrzeigerSinn == null) {
+			System.out.println("ERROR: PolyRegion überschneidet sich selbst.");
+			return -1.0;
 		}
 		if (ausgaben) System.out.println("imUhrzeigerSinn: " + imUhrzeigerSinn);
 
 		double richtigeFläche = scharfeFläche;
-		letzterPunkt = eckpunkte.get(eckpunkte.size() - 1);
+		Vector2 letzterPunkt = eckpunkte.get(eckpunkte.size() - 1);
 		//Für alle Kanten:
 		for (int i = 0; i < eckpunkte.size(); i++) {
 			Vector2 punkt = eckpunkte.get(i);
@@ -474,5 +488,307 @@ public class ClaimUtils {
 		}
 	}
 
+	public static Boolean verläuftPolygonImUhrzeigersinn(ArrayList<Vector2> eckpunkte) {
+		int anzahlLinksKnicke = 0;
+		int anzahlRechtsKnicke = 0;
+		Vector2 letzterPunkt = eckpunkte.get(eckpunkte.size() - 1);
+		for (int i = 0; i < eckpunkte.size(); i++) {
+			Vector2 punkt = eckpunkte.get(i);
+			Vector2 nächsterPunkt = eckpunkte.get(0);
+			if (i < eckpunkte.size() - 1) {
+				nächsterPunkt = eckpunkte.get(i+1);
+			}
+			Vector2 kantenVektorVorPunkt = punkt.subtract(letzterPunkt);
+			Vector2 kantenVektorNachPunkt = letzterPunkt.subtract(nächsterPunkt);
+			double quasiKreuzProdukt = kantenVektorVorPunkt.getX() * kantenVektorNachPunkt.getZ() - kantenVektorVorPunkt.getZ() * kantenVektorNachPunkt.getX();
+			if (quasiKreuzProdukt > 0) {
+				//spitzer Winkel ==> Linksknick
+				anzahlLinksKnicke++;
+			} else if (quasiKreuzProdukt < 0) {
+				//stumpfer Winkel ==> Rechtsknick
+				anzahlRechtsKnicke++;
+			}
+			letzterPunkt = punkt;
+		}
+		if (anzahlLinksKnicke == anzahlRechtsKnicke) {
+			//Fehler: Polygon überschneidet sich
+			return  null;
+		}
+		if (anzahlLinksKnicke < anzahlRechtsKnicke) {
+			return true;
+		}
+		return false;
+	}
 
+	public static ArrayList<Vector2> punktListeInvertiert (ArrayList<Vector2> punktListe) {
+		if (punktListe == null) {
+			return null;
+		} else if (punktListe.size() <= 1) {
+			return punktListe;
+		}
+		ArrayList<Vector2> punktListeInvertiert = new ArrayList<>();
+		for (int i = punktListe.size() - 1; i >= 0; i--) {
+			punktListeInvertiert.add(punktListe.get(i));
+		}
+		return punktListeInvertiert;
+	}
+
+	public static Vector2 schnittpunktVonZweiStrecken (Vector2 strecke1punkt1, Vector2 strecke1punkt2, Vector2 strecke2punkt1, Vector2 strecke2punkt2) {
+		Vector2 strecke1vector = strecke1punkt2.subtract(strecke1punkt1);
+		Vector2 strecke2vector = strecke2punkt2.subtract(strecke2punkt1);
+		System.out.println("schnittpunktVonZweiStrecken: ");
+		System.out.println("Strecke 1: (" + strecke1punkt1.getX() + "," + strecke1punkt1.getZ() + ") --> (" + strecke1punkt2.getX() + "," + strecke1punkt2.getZ());
+		System.out.println("Strecke 2: (" + strecke2punkt1.getX() + "," + strecke2punkt1.getZ() + ") --> (" + strecke2punkt2.getX() + "," + strecke2punkt2.getZ());
+		if (Math.abs(strecke1vector.dot(strecke2vector)) == strecke1vector.length() * strecke2vector.length()) {
+			System.out.println("(Strecken sind parallel)");
+			//(Strecken sind parallel)
+			if (((strecke1punkt1.getX() <= strecke2punkt1.getX() && strecke2punkt1.getX() <= strecke1punkt2.getX()) ||
+					(strecke1punkt1.getX() >= strecke2punkt1.getX() && strecke2punkt1.getX() >= strecke1punkt2.getX()))
+				&&
+				((strecke1punkt1.getZ() <= strecke2punkt1.getZ() && strecke2punkt1.getZ() <= strecke1punkt2.getZ()) ||
+					(strecke1punkt1.getZ() >= strecke2punkt1.getZ() && strecke2punkt1.getZ() >= strecke1punkt2.getZ()))
+			) {
+				//Strecken haben unendlich viele Schnittpunkte oder genau einen und bilden eine gesamte Strecke:
+				//Gib ersten Punkt von Strecke2 auf Strecke1 zurück
+				if (strecke1punkt1.distance(strecke2punkt1) < strecke1punkt1.distance(strecke2punkt2)) {
+					System.out.println("Strecken haben unendlich viele Schnittpunkte oder genau einen und bilden eine gesamte Strecke; " +
+							"ersterSchnittpunkt: (" + strecke2punkt1.getX() + "," + strecke2punkt1.getZ() + ")");
+					return strecke2punkt1;
+				} else {
+					System.out.println("Strecken haben unendlich viele Schnittpunkte oder genau einen und bilden eine gesamte Strecke; " +
+							"ersterSchnittpunkt: (" + strecke2punkt2.getX() + "," + strecke2punkt2.getZ() + ")");
+					return strecke2punkt2;
+				}
+			} else {
+				System.out.println("Strecken haben 0 Schnittpunkte");
+				//Strecken haben 0 Schnittpunkte
+				return null;
+			}
+		}
+		double m1 = strecke1vector.getZ() / strecke1vector.getX();
+		double m2 = strecke2vector.getZ() / strecke2vector.getX();
+		//b=z-m*x
+		double b1 = strecke1punkt1.getZ() - m1 * strecke1punkt1.getX();
+		double b2 = strecke2punkt1.getZ() - m2 * strecke2punkt1.getX();
+		Double x = null;
+		Double z = null;
+		if (m1 != Double.POSITIVE_INFINITY && m1 != Double.NEGATIVE_INFINITY && m2 != Double.POSITIVE_INFINITY && m2 != Double.NEGATIVE_INFINITY) {
+			//m1*x+b1=m2*x+b2 ==> x=(b2-b1)/(m1-m2)
+			x = (b2 - b1) / (m1 - m2);
+			z = m1 * x + b1;
+		} else if ((m1 == Double.POSITIVE_INFINITY || m1 == Double.NEGATIVE_INFINITY) && m2 != Double.POSITIVE_INFINITY && m2 != Double.NEGATIVE_INFINITY) {
+			x = strecke1punkt1.getX();
+			z = m2 * x + b2;
+		} else if (m1 != Double.POSITIVE_INFINITY && m1 != Double.NEGATIVE_INFINITY && (m2 == Double.POSITIVE_INFINITY || m2 == Double.NEGATIVE_INFINITY)) {
+			x = strecke2punkt1.getX();
+			z = m1 * x + b1;
+		} else {
+			System.out.println("ERROR: ClaimUtils.schnittpunktVonZweiStrecken: Die Steigungen der beiden Strecken sind unendlich, aber die Strecken sind auch nicht parallel.");
+		}
+		System.out.println("m1: " + m1 + "; m2: " + m2 + "; b1: " + b1 + "; b2: " + b2 + "; x: " + x + "; z: " + z);
+		if (((strecke1punkt1.getX() <= x && x <= strecke1punkt2.getX()) || (strecke1punkt1.getX() >= x && x >= strecke1punkt2.getX())) &&
+			((strecke1punkt1.getZ() <= z && z <= strecke1punkt2.getZ()) || (strecke1punkt1.getZ() >= z && z >= strecke1punkt2.getZ())) &&
+			((strecke2punkt1.getX() <= x && x <= strecke2punkt2.getX()) || (strecke2punkt1.getX() >= x && x >= strecke2punkt2.getX())) &&
+			((strecke2punkt1.getZ() <= z && z <= strecke2punkt2.getZ()) || (strecke2punkt1.getZ() >= z && z >= strecke2punkt2.getZ()))
+		) {
+			//Strecken schneiden oder berühren sich
+			System.out.println("Strecken schneiden oder berühren sich");
+			return Vector2.at(x,z);
+		} else {
+			System.out.println("Strecken haben 0 Schnittpunkte");
+			//Strecken haben 0 Schnittpunkte
+			return null;
+		}
+	}
+
+	public static Boolean liegtPunktInPolygon (Vector2 testpunkt, ArrayList<Vector2> polygon) {
+		//Punkt-in-Polygon-Test nach Jordan
+		Vector2 parallelZuKeinerWorldEditKante = Vector2.at(2,Math.PI);
+		double deltaXMax = 0;
+		double deltaZMax = 0;
+		for (Vector2 eckpunkt : polygon) {
+			if (Math.abs(testpunkt.getX() - eckpunkt.getX()) > deltaXMax) {
+				deltaXMax = Math.abs(testpunkt.getX() - eckpunkt.getX());
+			}
+			if (Math.abs(testpunkt.getZ() - eckpunkt.getZ()) > deltaZMax) {
+				deltaZMax = Math.abs(testpunkt.getZ() - eckpunkt.getZ());
+			}
+		}
+		parallelZuKeinerWorldEditKante.multiply(Vector2.at(deltaXMax,deltaZMax));
+		Vector2 fernerPunkt = testpunkt.add(parallelZuKeinerWorldEditKante);
+		Vector2 letzterEckpunkt = polygon.get(polygon.size() - 1);
+		int anzahlSchnitte = 0;
+		for (Vector2 eckpunkt : polygon) {
+			if (schnittpunktVonZweiStrecken(letzterEckpunkt, eckpunkt, testpunkt, fernerPunkt) != null) {
+				anzahlSchnitte ++;
+			}
+			letzterEckpunkt = eckpunkt;
+		}
+		if (anzahlSchnitte % 2 == 0) {
+			return false;
+		} else {
+			return true;
+		}
+	}
+
+	public static Vector2 nächsterEckpunkt (Vector2 eckpunkt, ArrayList<Vector2> polygon) {
+		for (int i = 0; i < polygon.size(); i++) {
+			Vector2 ecke = polygon.get(i);
+			if (ecke.equals(eckpunkt)) {
+				if (i == polygon.size() - 1) {
+					return polygon.get(0);
+				} else {
+					return polygon.get(i+1);
+				}
+			}
+		}
+		return null;
+	}
+
+	public static BlockVector2 nächsterEckpunkt (BlockVector2 eckpunkt, List<BlockVector2> polygon) {
+		for (int i = 0; i < polygon.size(); i++) {
+			BlockVector2 ecke = polygon.get(i);
+			if (ecke.equals(eckpunkt)) {
+				if (i == polygon.size() - 1) {
+					return polygon.get(0);
+				} else {
+					return polygon.get(i+1);
+				}
+			}
+		}
+		return null;
+	}
+
+	public static IntersectionResult ersterSchnittpunktMitPolygonAufStrecke (Vector2 startpunkt, Vector2 zielpunkt, ArrayList<Vector2> polygon) {
+		Vector2 ersterSchnittpunkt = null;
+		Vector2 eckpunkt1VonSchnittpunktKante = null;
+		Vector2 eckpunkt2VonSchnittpunktKante = null;
+		for (Vector2 eckpunkt : polygon) {
+			Vector2 nächsterEckpunkt = nächsterEckpunkt(eckpunkt, polygon);
+			Vector2 schnittpunkt = schnittpunktVonZweiStrecken(startpunkt, zielpunkt, eckpunkt, nächsterEckpunkt);
+			if (schnittpunkt != null) {
+				if (ersterSchnittpunkt == null) {
+					ersterSchnittpunkt = schnittpunkt;
+					eckpunkt1VonSchnittpunktKante = eckpunkt;
+					eckpunkt2VonSchnittpunktKante = nächsterEckpunkt;
+				} else {
+					if (startpunkt.distance(schnittpunkt) <= startpunkt.distance(ersterSchnittpunkt)) {
+						if (startpunkt.distance(schnittpunkt) == startpunkt.distance(ersterSchnittpunkt)) {
+							//Wenn von zwei Kanten vom Polygon der Schnittpunkt mit der Kante der selbe ist,
+							//soll die Kante ausgewählt werden, die weiter rechts führt (Da beim Vereinen von 2 Polygons Richtung gegen den Uhrzeigersinn gewählt wurde)
+							if (eckpunkt2VonSchnittpunktKante.equals(schnittpunkt)) {
+								//Wenn der Eckpunkt von kante1 der Schnittpunkt ist, ist die Richtung somit schon vorgegeben und der Schnittpunkt soll sich auf kante2 beziehen
+								ersterSchnittpunkt = schnittpunkt;
+								eckpunkt1VonSchnittpunktKante = eckpunkt;
+								eckpunkt2VonSchnittpunktKante = nächsterEckpunkt;
+							} else if (nächsterEckpunkt.equals(schnittpunkt)) {
+								//Wenn der Eckpunkt von kante2 der Schnittpunkt ist, ist die Richtung somit schon vorgegeben und der Schnittpunkt soll sich auf kante1 beziehen
+								//nichts tun, da Kante1 schon ausgewählt
+							} else {
+								System.out.println("ersterSchnittpunktMitPolygonAufStrecke: Dieser Fall sollte eigentlich nicht eintreten. " +
+										"Bitte vervollständigen, jetzt wo er scheinbar doch eintritt.");
+								Vector2 kante1 = eckpunkt2VonSchnittpunktKante.subtract(schnittpunkt);
+								Vector2 kante2 = nächsterEckpunkt.subtract(schnittpunkt);
+								boolean rechtsKnick = kante1.getX() * kante2.getZ() - kante1.getZ() * kante2.getX() > 0;
+							}
+						} else {
+							ersterSchnittpunkt = schnittpunkt;
+							eckpunkt1VonSchnittpunktKante = eckpunkt;
+							eckpunkt2VonSchnittpunktKante = nächsterEckpunkt;
+						}
+					}
+				}
+			}
+		}
+		if (ersterSchnittpunkt == null) {
+			return null;
+		}
+		IntersectionResult result = new IntersectionResult(ersterSchnittpunkt, eckpunkt1VonSchnittpunktKante, eckpunkt2VonSchnittpunktKante);
+		return result;
+	}
+
+	public static List<BlockVector2> eckpunkteGanzAusEckpunkteExakt (ArrayList<Vector2> eckpunkteExakt) {
+		ArrayList<BlockVector2> list = new ArrayList<>();
+		if (eckpunkteExakt == null) {
+			return null;
+		}
+		for (Vector2 eckpunktExakt : eckpunkteExakt) {
+			list.add(BlockVector2.at((int)(eckpunktExakt.getX() - 0.5),(int)(eckpunktExakt.getZ() - 0.5)));
+		}
+		List<BlockVector2> targetList = new ArrayList<>(list.size());
+		targetList.addAll(list);
+		return targetList;
+	}
+
+	public static ArrayList<Vector2> eckpunkteExaktAusEckpunkteGanz (List<BlockVector2> eckpunkteGanz) {
+		ArrayList<Vector2> list = new ArrayList<>();
+		if (eckpunkteGanz == null) {
+			return null;
+		}
+		for (BlockVector2 eckpunktExakt : eckpunkteGanz) {
+			list.add(Vector2.at(eckpunktExakt.getBlockX() + 0.5, eckpunktExakt.getBlockZ() + 0.5));
+		}
+		return list;
+	}
+
+	public static List<BlockVector2> polygonAusKuboidRegion (CuboidRegion cuboidRegion) {
+		List<BlockVector2> eckpunkte = new ArrayList<>(4);
+		eckpunkte.add(BlockVector2.at(cuboidRegion.getMinimumPoint().getX(),cuboidRegion.getMinimumPoint().getZ()));
+		eckpunkte.add(BlockVector2.at(cuboidRegion.getMinimumPoint().getX(),cuboidRegion.getMaximumPoint().getZ()));
+		eckpunkte.add(BlockVector2.at(cuboidRegion.getMaximumPoint().getX(),cuboidRegion.getMaximumPoint().getZ()));
+		eckpunkte.add(BlockVector2.at(cuboidRegion.getMaximumPoint().getX(),cuboidRegion.getMinimumPoint().getZ()));
+		return eckpunkte;
+	}
+
+	public static List<BlockVector2> polygonAusKuboidRegion (ProtectedCuboidRegion cuboidRegion) {
+		List<BlockVector2> eckpunkte = new ArrayList<>(4);
+		eckpunkte.add(BlockVector2.at(cuboidRegion.getMinimumPoint().getX(),cuboidRegion.getMinimumPoint().getZ()));
+		eckpunkte.add(BlockVector2.at(cuboidRegion.getMinimumPoint().getX(),cuboidRegion.getMaximumPoint().getZ()));
+		eckpunkte.add(BlockVector2.at(cuboidRegion.getMaximumPoint().getX(),cuboidRegion.getMaximumPoint().getZ()));
+		eckpunkte.add(BlockVector2.at(cuboidRegion.getMaximumPoint().getX(),cuboidRegion.getMinimumPoint().getZ()));
+		return eckpunkte;
+	}
+
+	public static boolean polygonHatEckpunkteMehrfach (List<BlockVector2> eckpunkte) {
+		if (eckpunkte == null) {
+			return false;
+		}
+ 		List<BlockVector2> eckpunkteClon = new ArrayList<>();
+		for (BlockVector2 punkt : eckpunkte) {
+			eckpunkteClon.add(punkt);
+		}
+		int anzahlPunkte = eckpunkte.size();
+		for (BlockVector2 punkt : eckpunkte) {
+			eckpunkteClon.remove(punkt);
+			if (eckpunkteClon.contains(punkt)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public static List<BlockVector2> polygonOhneRedundantePunkte (List<BlockVector2> eckpunkte) {
+		BlockVector2 letzterPunkt = eckpunkte.get(eckpunkte.size() - 1);
+		List<BlockVector2> polygonOhneRedundantePunkte = new ArrayList<>();
+		for	(BlockVector2 punkt : eckpunkte) {
+			BlockVector2 nächsterPunkt = nächsterEckpunkt(punkt,eckpunkte);
+			if (!punkt.equals(letzterPunkt)) {
+				BlockVector2 kante1 = punkt.subtract(letzterPunkt);
+				BlockVector2 kante2 = nächsterPunkt.subtract(punkt);
+				//Sind kante1 und kante2 nicht parallel?
+				if ((Math.abs(kante1.dot(kante2)) != kante1.length() * kante2.length()) || kante2.length() == 0.0) {
+					polygonOhneRedundantePunkte.add(punkt);
+				} else {
+					Bukkit.broadcastMessage("Punkt ist redundant (liegt auf Strecke der Nachbarpunkte." +
+							"punkt: (" + punkt.getX() + "," + punkt.getZ() + "); " +
+							"letzterPunkt: (" + letzterPunkt.getX() + "," + letzterPunkt.getZ() + "); " +
+							"nächsterPunkt: (" + nächsterPunkt.getX() + "," + nächsterPunkt.getZ() + "); " +
+							"kante1: (" + kante1.getX() + "," + kante1.getZ() + "); " +
+							"kante2: (" + kante2.getX() + "," + kante2.getZ() + "); ");
+				}
+			}
+			letzterPunkt = punkt;
+		}
+		return polygonOhneRedundantePunkte;
+	}
 }
