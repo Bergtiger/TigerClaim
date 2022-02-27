@@ -31,22 +31,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CmdExpand {
-    public static void expand(CommandSender cs, String[] args) {
-        if (args.length == 9) {
-            ///claim expand 1 0 -1 0 0 1 0 -1
-            Vector2 schnittpunkt = ClaimUtils.schnittpunktVonZweiStrecken(
-                    Vector2.at(Double.valueOf(args[1]),Double.valueOf(args[2])),
-                    Vector2.at(Double.valueOf(args[3]),Double.valueOf(args[4])),
-                    Vector2.at(Double.valueOf(args[5]),Double.valueOf(args[6])),
-                    Vector2.at(Double.valueOf(args[7]),Double.valueOf(args[8])));
-            if (schnittpunkt != null) {
-                Bukkit.broadcastMessage(ChatColor.DARK_BLUE + "schnittpunktVonZweiStrecken: (" + schnittpunkt.getX() + "," + schnittpunkt.getZ() + ")");
-            } else {
-                Bukkit.broadcastMessage(ChatColor.DARK_BLUE + "schnittpunktVonZweiStrecken: null");
-            }
-            return;
-        }
-        if (Perm.hasPermission(cs, Perm.CLAIM_ADMIN, Perm.CLAIM_EXPAND)) {
+    public static void expand(CommandSender cs, String[] args, boolean thisIsACheck, boolean priorityPermission) {
+        if (Perm.hasPermission(cs, Perm.CLAIM_ADMIN) || priorityPermission ||
+                (thisIsACheck && Perm.hasPermission(cs, Perm.CLAIM_EXPANDCHECK)) ||
+                (!thisIsACheck && Perm.hasPermission(cs, Perm.CLAIM_CHECK))
+        ) {
             if (cs instanceof Player p) {
                 // get RegionManager for world
                 RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
@@ -149,9 +138,6 @@ public class CmdExpand {
                     }
                 }
                 if (directionalExpand) {
-                    ConfirmationListener.inst().addConfirmation(new ExpandDirectionalQueue(oldRegion, p.getWorld(), p, direction, extendLength, regionAngegeben));
-                    CuboidRegion newRegion = null;
-
                     double alteFläche = ClaimUtils.getArea(oldRegion);
                     double breite = 0;
                     if (direction.equals("north") || direction.equals("south")) {
@@ -160,16 +146,30 @@ public class CmdExpand {
                         breite = 1 + oldRegion.getMaximumPoint().getZ() - oldRegion.getMinimumPoint().getZ();
                     }
                     double neueFläche = alteFläche + breite * extendLength;
-                    if (regionAngegeben) {
-                        p.spigot().sendMessage(Lang.build("Möchtest du die angegebene Region (Fläche: " + ClaimUtils.getArea(oldRegion) + "m^2) um " + extendLength + " Blöcke in Richtung " + direction + " erweitern? " +
-                                        "Die neue Region hätte eine Fläche von " + neueFläche + "m^2."),
-                                Lang.build(Lang.EXPAND_YES, "/yes", null, null),
-                                Lang.build(Lang.EXPAND_NO, "/no", null, null));
+                    if (thisIsACheck) {
+                        ConfirmationListener.inst().addConfirmation(new ExpandDirectionalQueue(oldRegion, p.getWorld(), p, direction, extendLength, regionAngegeben, true));
+                        if (regionAngegeben) {
+                            p.spigot().sendMessage(Lang.build("Möchtest du überprüfen, ob die angegebene Region sich um " + extendLength + " Blöcke in Richtung " + direction + " erweitern lässt? "),
+                                    Lang.build(Lang.EXPAND_YES, "/yes", null, null),
+                                    Lang.build(Lang.EXPAND_NO, "/no", null, null));
+                        } else {
+                            p.spigot().sendMessage(Lang.build("Möchtest du überprüfen, ob die Region, in der du stehst, sich um " + extendLength + " Blöcke in Richtung " + direction + " erweitern lässt? "),
+                                    Lang.build(Lang.EXPAND_YES, "/yes", null, null),
+                                    Lang.build(Lang.EXPAND_NO, "/no", null, null));
+                        }
                     } else {
-                        p.spigot().sendMessage(Lang.build("Möchtest du die Region, auf der du stehst (Fläche: " + ClaimUtils.getArea(oldRegion) + "m^2), um " + extendLength + " Blöcke in Richtung " + direction + " erweitern? " +
-                                        "Die neue Region hätte eine Fläche von " + neueFläche + "m^2."),
-                                Lang.build(Lang.EXPAND_YES, "/yes", null, null),
-                                Lang.build(Lang.EXPAND_NO, "/no", null, null));
+                        ConfirmationListener.inst().addConfirmation(new ExpandDirectionalQueue(oldRegion, p.getWorld(), p, direction, extendLength, regionAngegeben, false));
+                        if (regionAngegeben) {
+                            p.spigot().sendMessage(Lang.build("Möchtest du die angegebene Region (Fläche: " + ClaimUtils.getArea(oldRegion) + "m^2) um " + extendLength + " Blöcke in Richtung " + direction + " erweitern? " +
+                                            "Die neue Region hätte eine Fläche von " + neueFläche + "m^2."),
+                                    Lang.build(Lang.EXPAND_YES, "/yes", null, null),
+                                    Lang.build(Lang.EXPAND_NO, "/no", null, null));
+                        } else {
+                            p.spigot().sendMessage(Lang.build("Möchtest du die Region, auf der du stehst (Fläche: " + ClaimUtils.getArea(oldRegion) + "m^2), um " + extendLength + " Blöcke in Richtung " + direction + " erweitern? " +
+                                            "Die neue Region hätte eine Fläche von " + neueFläche + "m^2."),
+                                    Lang.build(Lang.EXPAND_YES, "/yes", null, null),
+                                    Lang.build(Lang.EXPAND_NO, "/no", null, null));
+                        }
                     }
                 } else {
                     try {
@@ -188,6 +188,8 @@ public class CmdExpand {
                             if (markierung instanceof CuboidRegion) {
                                 // Wenn Rechtecks-Markierung nur ein Block breit ist, dann wird sie in jede Richtung um einen Block breiter gemacht, wo sie auf das Polygon trifft:
                                 CuboidRegion rechteckMarkierung = (CuboidRegion) markierung.clone();
+                                boolean markierungNichtMitRegionVerbunden = false;
+                                System.out.println("markierung instanceof CuboidRegion");
                                 if (rechteckMarkierung.getMaximumPoint().getX() == rechteckMarkierung.getMinimumPoint().getX()) {
                                     //schmal in x-Richtung:
                                     int x = rechteckMarkierung.getMaximumPoint().getX();
@@ -229,6 +231,10 @@ public class CmdExpand {
                                                 rechteckMarkierung.getMaximumY(),
                                                 zMax));
                                    }
+                                    if (!ostErweiterung && !westErweiterung) {
+                                        markierungNichtMitRegionVerbunden = true;
+                                    }
+                                    System.out.println("schmal in x-Richtung - ostErweiterung: " + ostErweiterung + "; westErweiterung: " + westErweiterung);
                                 }
                                 if (rechteckMarkierung.getMaximumPoint().getZ() == rechteckMarkierung.getMinimumPoint().getZ()) {
                                     //schmal in z-Richtung:
@@ -260,6 +266,7 @@ public class CmdExpand {
                                                 xMax,
                                                 rechteckMarkierung.getMaximumY(),
                                                 z + 1));
+                                        markierungNichtMitRegionVerbunden = false;
                                      }
                                     if (nordErweiterung) {
                                         rechteckMarkierung.setPos1(BlockVector3.at(
@@ -270,9 +277,19 @@ public class CmdExpand {
                                                 rechteckMarkierung.getMaximumPoint().getX(),
                                                 rechteckMarkierung.getMaximumY(),
                                                 xMax));
+                                        markierungNichtMitRegionVerbunden = false;
                                      }
+                                    System.out.println("schmal in z-Richtung - südErweiterung: " + südErweiterung + "; nordErweiterung: " + nordErweiterung);
                                 }
                                 markierungsBlockPolygon = ClaimUtils.polygonAusKuboidRegion(rechteckMarkierung);
+                                if (markierungNichtMitRegionVerbunden) {
+                                    if (regionAngegeben) { //Selbe Nachrichten weiter unten benötigt
+                                        p.spigot().sendMessage(Lang.build("Die Fläche, die du markiert hast, überschneidet oder berührt die angegebene Region nicht."));
+                                    } else {
+                                        p.spigot().sendMessage(Lang.build("Die Fläche, die du markiert hast, überschneidet oder berührt die Region nicht, in der du gerade stehst."));
+                                    }
+                                    return;
+                                }
                             } else {
                                 markierungsBlockPolygon = ((Polygonal2DRegion) markierung).getPoints();
                             }
@@ -287,7 +304,6 @@ public class CmdExpand {
                                     } else {
                                         p.spigot().sendMessage(Lang.build("Die Fläche, die du markiert hast, überschneidet oder berührt die Region nicht, in der du gerade stehst."));
                                     }
-
                                     return;
                                 } else if (result.getResultType() == UnitePolygonsResultType.POLYGON1_INTERSECTS_ITSELF) {
                                     if (regionAngegeben) {
@@ -334,7 +350,14 @@ public class CmdExpand {
                                     }
                                     return;
                                 } else if (result.getResultType() == UnitePolygonsResultType.POLYGON2_HAS_POINT_MULTIPLE) {
-                                    p.spigot().sendMessage(Lang.build("Deine Markierung verwendet Eckpunkte mehrfach."));
+                                    p.spigot().sendMessage(Lang.build("Deine Markierung verwendet Eckpunkte mehrfach.")); //Selbe Nachricht weiter oben benötigt
+                                    return;
+                                } else if (result.getResultType() == UnitePolygonsResultType.POLYGONS_ARE_EQUAL) {
+                                    if (regionAngegeben) {
+                                        p.spigot().sendMessage(Lang.build("Deine Markierung entspricht genau deiner angegebenen Region, also so keine Erweiterung möglich."));
+                                    } else {
+                                        p.spigot().sendMessage(Lang.build("Deine Markierung entspricht genau deiner Region, in der du stehst, also so keine Erweiterung möglich."));
+                                    }
                                     return;
                                 }
                                 p.spigot().sendMessage(Lang.build("Ergebnis-Polygon existiert aus unbekanntem Grund nicht: " + result.getResultType().name()));
@@ -342,25 +365,36 @@ public class CmdExpand {
                             }
                             List<BlockVector2> ergebnisPolygon = result.getPolygon();
                             Polygonal2DRegion newRegion = new Polygonal2DRegion(markierung.getWorld(), ergebnisPolygon, oldRegion.getMinimumPoint().getY(), oldRegion.getMaximumPoint().getY());
-                            ConfirmationListener.inst().addConfirmation(new ExpandSelectionQueue(oldRegion, p.getWorld(), p, ergebnisPolygon, regionAngegeben));
                             for (BlockVector2 vector2 : ergebnisPolygon) {
                                 Bukkit.broadcastMessage(ChatColor.DARK_RED + "Test2 - Eckpunkte: " + vector2);
                             }
                             // inform Player
                             double neueFläche = ClaimUtils.flächeEinesPixelPolygons(ClaimUtils.scharfePolgonFläche(newRegion.getPoints()),newRegion.getPoints());
-                            if (regionAngegeben) {
-                                p.spigot().sendMessage(Lang.build("Möchtest du die angegebene Region (Fläche: " + ClaimUtils.getArea(oldRegion) + "m^2) um deine Markierung erweitern? " +
-                                                "Die neue Region hätte eine Fläche von " + neueFläche + "m^2."),
-                                        Lang.build(Lang.EXPAND_YES, "/yes", null, null),
-                                        Lang.build(Lang.EXPAND_NO, "/no", null, null));
+                            if (thisIsACheck) {
+                                ConfirmationListener.inst().addConfirmation(new ExpandSelectionalQueue(oldRegion, p.getWorld(), p, ergebnisPolygon, regionAngegeben, true));
+                                if (regionAngegeben) {
+                                    p.spigot().sendMessage(Lang.build("Möchtest du überprüfen ob die Erweiterung der angegebenen Region mit deiner Markierung verfügbar ist? "),
+                                            Lang.build(Lang.EXPAND_YES, "/yes", null, null),
+                                            Lang.build(Lang.EXPAND_NO, "/no", null, null));
+                                } else {
+                                    p.spigot().sendMessage(Lang.build("Möchtest du überprüfen ob die Erweiterung der Region, in der du stehst, mit deiner Markierung verfügbar ist? "),
+                                            Lang.build(Lang.EXPAND_YES, "/yes", null, null),
+                                            Lang.build(Lang.EXPAND_NO, "/no", null, null));
+                                }
                             } else {
-                                p.spigot().sendMessage(Lang.build("Möchtest du die Region, auf der du stehst (Fläche: " + ClaimUtils.getArea(oldRegion) + "m^2) um deine Markierung erweitern? " +
-                                                "Die neue Region hätte eine Fläche von " + neueFläche + "m^2."),
-                                        Lang.build(Lang.EXPAND_YES, "/yes", null, null),
-                                        Lang.build(Lang.EXPAND_NO, "/no", null, null));
+                                ConfirmationListener.inst().addConfirmation(new ExpandSelectionalQueue(oldRegion, p.getWorld(), p, ergebnisPolygon, regionAngegeben, false));
+                                if (regionAngegeben) {
+                                    p.spigot().sendMessage(Lang.build("Möchtest du die angegebene Region (Fläche: " + ClaimUtils.getArea(oldRegion) + "m^2) um deine Markierung erweitern? " +
+                                                    "Die neue Region hätte eine Fläche von " + neueFläche + "m^2."),
+                                            Lang.build(Lang.EXPAND_YES, "/yes", null, null),
+                                            Lang.build(Lang.EXPAND_NO, "/no", null, null));
+                                } else {
+                                    p.spigot().sendMessage(Lang.build("Möchtest du die Region, auf der du stehst (Fläche: " + ClaimUtils.getArea(oldRegion) + "m^2) um deine Markierung erweitern? " +
+                                                    "Die neue Region hätte eine Fläche von " + neueFläche + "m^2."),
+                                            Lang.build(Lang.EXPAND_YES, "/yes", null, null),
+                                            Lang.build(Lang.EXPAND_NO, "/no", null, null));
+                                }
                             }
-
-                            //TigerClaim tc = new TigerClaimPolygon(p, p.getWorld(), newRegion);
                         } else {
                             // No Region
                             if (cuboidRegion) {
@@ -433,6 +467,11 @@ public class CmdExpand {
         if (region1ImUhrzeigerSinn) {
             alteRegionsPolygon = ClaimUtils.punktListeInvertiert(alteRegionsPolygon);
         }
+        if (ClaimUtils.sindPolygoneGleich(
+                ClaimUtils.eckpunkteGanzAusEckpunkteExakt(markierungsPolygon), ClaimUtils.eckpunkteGanzAusEckpunkteExakt(alteRegionsPolygon))
+        ) {
+            return new UnitePolygonsResult(null, UnitePolygonsResultType.POLYGONS_ARE_EQUAL);
+        }
         ArrayList<Vector2> bereitsÜberprüfteStartpunkte = new ArrayList<>();
         //Für jeden geeigneten Startpunkt:
         ArrayList<ArrayList<Vector2>> potentielleNeuePolygone = new ArrayList<>();
@@ -479,8 +518,12 @@ public class CmdExpand {
                 return new UnitePolygonsResult(null, UnitePolygonsResultType.POLYGON1_NOT_INTERSECTS_POLYGON2);
             }
         }
-        for (BlockVector2 vector2 : ClaimUtils.eckpunkteGanzAusEckpunkteExakt(neuesPolygon)) {
-            Bukkit.broadcastMessage(ChatColor.RED + "Test1 - Eckpunkte: " + vector2);
+        if (neuesPolygon != null) {
+            for (BlockVector2 vector2 : ClaimUtils.eckpunkteGanzAusEckpunkteExakt(neuesPolygon)) {
+                Bukkit.broadcastMessage(ChatColor.RED + "Test1 - Eckpunkte: " + vector2);
+            }
+        } else {
+            Bukkit.broadcastMessage(ChatColor.RED + "Test1 - Eckpunkte: null");
         }
         List<BlockVector2> neuesBlockPolygon = ClaimUtils.polygonOhneRedundantePunkte(ClaimUtils.eckpunkteGanzAusEckpunkteExakt(neuesPolygon));
         if (ClaimUtils.polygonHatEckpunkteMehrfach(neuesBlockPolygon)) {

@@ -7,19 +7,21 @@ import org.bukkit.entity.Player;
 
 import java.util.List;
 
-public class ExpandSelectionQueue {
+public class ExpandSelectionalQueue {
     private final ProtectedRegion region;
     private final Player player;
     private final World world;
     private final List<BlockVector2> eckpunkteDerNeuenRegion;
     private final boolean regionAngegeben;
+    private final boolean isCheck;
 
-    public ExpandSelectionQueue(ProtectedRegion oldRegion, World world, Player player, List<BlockVector2> eckpunkteDerNeuenRegion, boolean regionAngegeben) {
+    public ExpandSelectionalQueue(ProtectedRegion oldRegion, World world, Player player, List<BlockVector2> eckpunkteDerNeuenRegion, boolean regionAngegeben, boolean isCheck) {
         this.region = oldRegion;
         this.world = world;
         this.player = player;
         this.eckpunkteDerNeuenRegion = eckpunkteDerNeuenRegion;
         this.regionAngegeben = regionAngegeben;
+        this.isCheck = isCheck;
     }
 
     public ProtectedRegion getRegion() {
@@ -40,5 +42,9 @@ public class ExpandSelectionQueue {
 
     public boolean isRegionAngegeben() {
         return regionAngegeben;
+    }
+
+    public boolean isCheck() {
+        return isCheck;
     }
 }

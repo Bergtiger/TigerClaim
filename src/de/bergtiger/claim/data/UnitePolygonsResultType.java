@@ -1,9 +1,5 @@
 package de.bergtiger.claim.data;
 
-import com.sk89q.worldedit.math.BlockVector2;
-
-import java.util.List;
-
 public enum UnitePolygonsResultType {
     POLYGON1_INTERSECTS_ITSELF,
     POLYGON2_INTERSECTS_ITSELF,
@@ -14,4 +10,5 @@ public enum UnitePolygonsResultType {
     RESULT_POLYGON_HAS_POINT_MULTIPLE,
     POLYGON1_HAS_POINT_MULTIPLE,
     POLYGON2_HAS_POINT_MULTIPLE,
+    POLYGONS_ARE_EQUAL,
 }

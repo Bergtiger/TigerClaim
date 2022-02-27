@@ -14,14 +14,16 @@ public class ExpandDirectionalQueue {
     private final int extendLength;
     private final String direction;
     private final boolean regionAngegeben;
+    private final boolean isCheck;
 
-    public ExpandDirectionalQueue(ProtectedRegion oldRegion, World world, Player player, String direction, int extendLength, boolean regionAngegeben) {
+    public ExpandDirectionalQueue(ProtectedRegion oldRegion, World world, Player player, String direction, int extendLength, boolean regionAngegeben, boolean isCheck) {
         this.region = oldRegion;
         this.world = world;
         this.player = player;
         this.direction = direction;
         this.extendLength = extendLength;
         this.regionAngegeben = regionAngegeben;
+        this.isCheck = isCheck;
     }
 
     public ProtectedRegion getRegion() {
@@ -46,5 +48,9 @@ public class ExpandDirectionalQueue {
 
     public boolean isRegionAngegeben() {
         return regionAngegeben;
+    }
+
+    public boolean isCheck() {
+        return isCheck;
     }
 }

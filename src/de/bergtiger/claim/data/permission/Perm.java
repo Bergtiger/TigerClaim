@@ -26,7 +26,8 @@ public enum Perm {
 	CLAIM_WORLDEDIT	("tclaim.worldedit"),
 	CLAIM_DELETE	("tclaim.delete"),
 	CLAIM_CHECK		("tclaim.check"),
-	CLAIM_EXPAND	("tclaim.expand");
+	CLAIM_EXPAND	("tclaim.expand"),
+	CLAIM_EXPANDCHECK	("tclaim.expandcheck");
 
 	private final String value;
 	

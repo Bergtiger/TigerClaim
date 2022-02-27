@@ -768,6 +768,9 @@ public class ClaimUtils {
 	}
 
 	public static List<BlockVector2> polygonOhneRedundantePunkte (List<BlockVector2> eckpunkte) {
+		if (eckpunkte == null) {
+			return null;
+		}
 		BlockVector2 letzterPunkt = eckpunkte.get(eckpunkte.size() - 1);
 		List<BlockVector2> polygonOhneRedundantePunkte = new ArrayList<>();
 		for	(BlockVector2 punkt : eckpunkte) {
@@ -790,5 +793,23 @@ public class ClaimUtils {
 			letzterPunkt = punkt;
 		}
 		return polygonOhneRedundantePunkte;
+	}
+
+	public static boolean sindPolygoneGleich(List<BlockVector2> polygon1, List<BlockVector2> polygon2) {
+		List<BlockVector2> symmetrischeDifferenzDerPolygonPunkteMengen = new ArrayList<>();
+		for (BlockVector2 punkt : polygon1) {
+			if (!polygon2.contains(punkt)) {
+				symmetrischeDifferenzDerPolygonPunkteMengen.add(punkt);
+			}
+		}
+		for (BlockVector2 punkt : polygon2) {
+			if (!polygon1.contains(punkt)) {
+				symmetrischeDifferenzDerPolygonPunkteMengen.add(punkt);
+			}
+		}
+		if (symmetrischeDifferenzDerPolygonPunkteMengen.size() == 0) {
+			return true;
+		}
+		return false;
 	}
 }
