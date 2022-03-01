@@ -6,6 +6,7 @@ import com.sk89q.worldedit.math.BlockVector2;
 import com.sk89q.worldedit.math.Vector2;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.regions.Polygonal2DRegion;
+import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.world.World;
 import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion;
@@ -44,6 +45,33 @@ public class ClaimUtils {
 	public static double getArea(ProtectedRegion region) {
 		if(region != null) {
 			if (region instanceof ProtectedPolygonalRegion polyRegion) {
+				double summe = 0;
+				BlockVector2 letzterPunkt = null;
+				for (int i = 0; i < polyRegion.getPoints().size(); i++) {
+					BlockVector2 punkt = polyRegion.getPoints().get(i);
+					if (i != 0) {
+						summe = summe + letzterPunkt.getBlockX() * punkt.getBlockZ() - letzterPunkt.getBlockZ() * punkt.getBlockX();
+					}
+					letzterPunkt = punkt;
+				}
+				BlockVector2 ersterPunkt = polyRegion.getPoints().get(0);
+				summe = summe + letzterPunkt.getBlockX() * ersterPunkt.getBlockZ() - letzterPunkt.getBlockZ() * ersterPunkt.getBlockX();
+				double scharfeFläche = Math.abs(summe / 2.0);
+				return flächeEinesPixelPolygons(scharfePolgonFläche(polyRegion.getPoints()), polyRegion.getPoints());
+			} else {
+				//Rechtecks-Grundfläche
+				double area = (1 + Math.abs((region.getMinimumPoint().getX() - region.getMaximumPoint().getX()))) *
+						(1 + Math.abs(region.getMinimumPoint().getZ() - region.getMaximumPoint().getZ()));
+				TigerLogger.log(Level.INFO, "ClaimUtils: Area: " + area);
+				return area;
+			}
+		}
+		return 0.0;
+	}
+
+	public static double getArea(Region region) {
+		if(region != null) {
+			if (region instanceof Polygonal2DRegion polyRegion) {
 				double summe = 0;
 				BlockVector2 letzterPunkt = null;
 				for (int i = 0; i < polyRegion.getPoints().size(); i++) {

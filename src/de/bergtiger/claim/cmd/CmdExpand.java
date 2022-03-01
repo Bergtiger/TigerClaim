@@ -21,9 +21,13 @@ import de.bergtiger.claim.data.UnitePolygonsResult;
 import de.bergtiger.claim.data.UnitePolygonsResultType;
 import de.bergtiger.claim.data.language.Lang;
 import de.bergtiger.claim.data.permission.Perm;
+import de.bergtiger.claim.events.PreExpandCheckConfirmationEvent;
+import de.bergtiger.claim.events.PreExpandConfirmationEvent;
 import de.bergtiger.claim.listener.ConfirmationListener;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.World;
+import org.bukkit.block.BlockFace;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -36,54 +40,53 @@ public class CmdExpand {
                 (thisIsACheck && Perm.hasPermission(cs, Perm.CLAIM_EXPANDCHECK)) ||
                 (!thisIsACheck && Perm.hasPermission(cs, Perm.CLAIM_CHECK))
         ) {
-            if (cs instanceof Player p) {
+            if (cs instanceof Player player) {
                 // get RegionManager for world
                 RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
-                RegionManager regions = container.get(BukkitAdapter.adapt(p.getWorld()));
+                RegionManager regions = container.get(BukkitAdapter.adapt(player.getWorld()));
                 ProtectedRegion oldRegion;
                 ArrayList<String> directions = new ArrayList<>();
                 directions.add("north");
                 directions.add("east");
                 directions.add("south");
                 directions.add("west");
-                String direction = null;
+                BlockFace direction = null;
                 boolean regionAngegeben = false;
                 if (args.length >= 2) {
                     String regionName = args[1];
                     oldRegion = regions.getRegion(regionName);
                     if (regions.hasRegion(args[1])) {
                         regionAngegeben = true;
-                        if (!(oldRegion.getOwners().contains(p.getUniqueId()) || Perm.hasPermission(cs, Perm.CLAIM_ADMIN))) {
+                        if (!(oldRegion.getOwners().contains(player.getUniqueId()) || Perm.hasPermission(cs, Perm.CLAIM_ADMIN))) {
                             // not the owner
-                            p.spigot().sendMessage(Lang.build("Es existiert keine Region mit dem Namen " + regionName + " oder du hast keine Berechtigung für diese Region."));
+                            player.spigot().sendMessage(Lang.build("Es existiert keine Region mit dem Namen " + regionName + " oder du hast keine Berechtigung für diese Region."));
                             return;
                         }
                     } else {
                         if (!directions.contains(args[1])) {
                             //Region existiert nicht + es wurde keine Richtung angegeben, die dem Befehl eine andere Bedeutung geben würde
-                            p.spigot().sendMessage(Lang.build("Es existiert keine Region mit dem Namen " + regionName + " oder du hast keine Berechtigung für diese Region."));
+                            player.spigot().sendMessage(Lang.build("Es existiert keine Region mit dem Namen " + regionName + " oder du hast keine Berechtigung für diese Region."));
                             return;
                         }
                     }
+                }
+                // player wants to expand region where he stands
+                ApplicableRegionSet set = regions.getApplicableRegions(BukkitAdapter.asBlockVector(player.getLocation()));
+                if (set.size() == 0) {
+                    // not in a region
+                    player.spigot().sendMessage(Lang.build("Du stehst in keiner Region."));
+                    return;
+                } else if (set.size() > 1) {
+                    // to many regions
+                    player.spigot().sendMessage(Lang.build("Du stehst in mehreren Regionen. Bitte gib eine Region an."));
+                    return;
                 } else {
-                    // player wants to expand region where he stands
-                    ApplicableRegionSet set = regions.getApplicableRegions(BukkitAdapter.asBlockVector(p.getLocation()));
-                    if (set.size() == 0) {
-                        // not in a region
-                        p.spigot().sendMessage(Lang.build("Du stehst in keiner Region."));
+                    // exact one region
+                    oldRegion = set.getRegions().stream().findFirst().get();
+                    if (!(oldRegion.getOwners().contains(player.getUniqueId()) || Perm.hasPermission(cs, Perm.CLAIM_ADMIN))) {
+                        // not the owner
+                        player.spigot().sendMessage(Lang.build(Lang.NOPERMISSION));
                         return;
-                    } else if (set.size() > 1) {
-                        // to many regions
-                        p.spigot().sendMessage(Lang.build("Du stehst in mehreren Regionen. Bitte gib eine Region an."));
-                        return;
-                    } else {
-                        // exact one region
-                        oldRegion = set.getRegions().stream().findFirst().get();
-                        if (!(oldRegion.getOwners().contains(p.getUniqueId()) || Perm.hasPermission(cs, Perm.CLAIM_ADMIN))) {
-                            // not the owner
-                            p.spigot().sendMessage(Lang.build(Lang.NOPERMISSION));
-                            return;
-                        }
                     }
                 }
 
@@ -94,11 +97,11 @@ public class CmdExpand {
                 boolean cuboidRegion = (oldRegion.getType() == RegionType.CUBOID);
                 boolean worldEditPermission = Perm.hasPermission(cs, Perm.CLAIM_ADMIN, Perm.CLAIM_WORLDEDIT);
                 if (!cuboidRegion && !worldEditPermission) {
-                    p.spigot().sendMessage(Lang.build("Du kannst diese Polygon-Region nicht vergrößern, da in diesem Fall World-Edit-Markierungen benötigt werden, " +
+                    player.spigot().sendMessage(Lang.build("Du kannst diese Polygon-Region nicht vergrößern, da in diesem Fall World-Edit-Markierungen benötigt werden, " +
                             "du aber keine Rechte dafür besitzt."));
                     return;
                 }
-                boolean directionalExpand = false;
+                boolean isDirectionalExtension = false;
                 Integer extendLength = null;
                 if (args.length >= 2 + argumentenVerschiebung) {
                     if (directions.contains(args[1 + argumentenVerschiebung].toLowerCase())) {
@@ -109,72 +112,81 @@ public class CmdExpand {
                                 } catch (NumberFormatException throwables) {
                                 }
                                 if (extendLength != null && extendLength > 0) {
-                                    directionalExpand = true;
-                                    direction = args[1 + argumentenVerschiebung].toLowerCase();
+                                    isDirectionalExtension = true;
+                                    switch (args[1 + argumentenVerschiebung]) {
+                                        case "north" : direction = BlockFace.NORTH; break;
+                                        case "east" : direction = BlockFace.EAST; break;
+                                        case "south" : direction = BlockFace.SOUTH; break;
+                                        case "west" : direction = BlockFace.WEST; break;
+                                    }
                                 } else {
-                                    p.spigot().sendMessage(Lang.build(args + " ist keine gültige Zahl. Bitte gib eine positive ganze Zahl an, " +
+                                    player.spigot().sendMessage(Lang.build(args[2 + argumentenVerschiebung] + " ist keine gültige Zahl. Bitte gib eine positive ganze Zahl an, " +
                                             "um wie viele Blöcke du deine Region erweitern möchtest."));
                                     return;
                                 }
                             } else {
-                                p.spigot().sendMessage(Lang.build("Wenn du die Region, in eine Richtung erweitern willst, gib bitte noch an um wieviele Blöcke."));
+                                player.spigot().sendMessage(Lang.build("Wenn du die Region, in eine Richtung erweitern willst, gib bitte noch an um wieviele Blöcke."));
                                 return;
                             }
                         } else {
                             if (regionAngegeben) {
-                                p.spigot().sendMessage(Lang.build("Die angegebene Region ist eine Polygon-Region " +
+                                player.spigot().sendMessage(Lang.build("Die angegebene Region ist eine Polygon-Region " +
                                         "und lässt sich somit nicht in eine bestimmte Richtung erweitern, sondern nur durch eine markierte Region ergänzen."));
                             } else {
-                                p.spigot().sendMessage(Lang.build("Die Region, in der du stehst, ist eine Polygon-Region " +
+                                player.spigot().sendMessage(Lang.build("Die Region, in der du stehst, ist eine Polygon-Region " +
                                         "und lässt sich somit nicht in eine bestimmte Richtung erweitern, sondern nur durch eine markierte Region ergänzen."));
                             }
                             return;
                         }
                     } else {
                         if (!worldEditPermission) {
-                            p.spigot().sendMessage(Lang.build("Du müsstest noch eine Richtung (north/east/south/west) und eine positive ganze Zahl angeben, " +
+                            player.spigot().sendMessage(Lang.build("Du müsstest noch eine Richtung (north/east/south/west) und eine positive ganze Zahl angeben, " +
                                     "damit du deine Region entsprechend vergrößern kannst."));
                         }
                     }
                 }
-                if (directionalExpand) {
+                if (isDirectionalExtension) {
+                    //Erweiterung in bestimmte Richtung (geht nur bei Cuboid-Regionen):
                     double alteFläche = ClaimUtils.getArea(oldRegion);
                     double breite = 0;
-                    if (direction.equals("north") || direction.equals("south")) {
+                    if (direction == BlockFace.NORTH || direction == BlockFace.SOUTH) {
                         breite = 1 + oldRegion.getMaximumPoint().getX() - oldRegion.getMinimumPoint().getX();
-                    } else if (direction.equals("east") || direction.equals("west")) {
+                    } else if (direction == BlockFace.EAST || direction == BlockFace.WEST) {
                         breite = 1 + oldRegion.getMaximumPoint().getZ() - oldRegion.getMinimumPoint().getZ();
                     }
                     double neueFläche = alteFläche + breite * extendLength;
                     if (thisIsACheck) {
-                        ConfirmationListener.inst().addConfirmation(new ExpandDirectionalQueue(oldRegion, p.getWorld(), p, direction, extendLength, regionAngegeben, true));
+                        String message;
                         if (regionAngegeben) {
-                            p.spigot().sendMessage(Lang.build("Möchtest du überprüfen, ob die angegebene Region sich um " + extendLength + " Blöcke in Richtung " + direction + " erweitern lässt? "),
-                                    Lang.build(Lang.EXPAND_YES, "/yes", null, null),
-                                    Lang.build(Lang.EXPAND_NO, "/no", null, null));
+                            message = "Möchtest du überprüfen, ob die angegebene Region sich um " + extendLength + " Blöcke in Richtung " + direction.name() + " erweitern lässt?";
                         } else {
-                            p.spigot().sendMessage(Lang.build("Möchtest du überprüfen, ob die Region, in der du stehst, sich um " + extendLength + " Blöcke in Richtung " + direction + " erweitern lässt? "),
-                                    Lang.build(Lang.EXPAND_YES, "/yes", null, null),
-                                    Lang.build(Lang.EXPAND_NO, "/no", null, null));
+                            message = "Möchtest du überprüfen, ob die Region, in der du stehst, sich um " + extendLength + " Blöcke in Richtung " + direction.name() + " erweitern lässt?";
+                        }
+                        PreExpandCheckConfirmationEvent event = new PreExpandCheckConfirmationEvent(
+                                player, true, regionAngegeben, alteFläche, neueFläche, direction, extendLength, message);
+                        Bukkit.getPluginManager().callEvent(event);
+                        if (!event.isCancelled()) {
+                            ConfirmationListener.inst().addConfirmation(new ExpandDirectionalQueue(oldRegion, player.getWorld(), player, direction, extendLength, regionAngegeben, true));
+                            if (regionAngegeben) {
+                                player.spigot().sendMessage(Lang.build(event.getMessage()),
+                                        Lang.build(Lang.EXPAND_YES, "/yes", null, null),
+                                        Lang.build(Lang.EXPAND_NO, "/no", null, null));
+                            } else {
+                                player.spigot().sendMessage(Lang.build(event.getMessage()),
+                                        Lang.build(Lang.EXPAND_YES, "/yes", null, null),
+                                        Lang.build(Lang.EXPAND_NO, "/no", null, null));
+                            }
                         }
                     } else {
-                        ConfirmationListener.inst().addConfirmation(new ExpandDirectionalQueue(oldRegion, p.getWorld(), p, direction, extendLength, regionAngegeben, false));
-                        if (regionAngegeben) {
-                            p.spigot().sendMessage(Lang.build("Möchtest du die angegebene Region (Fläche: " + ClaimUtils.getArea(oldRegion) + "m^2) um " + extendLength + " Blöcke in Richtung " + direction + " erweitern? " +
-                                            "Die neue Region hätte eine Fläche von " + neueFläche + "m^2."),
-                                    Lang.build(Lang.EXPAND_YES, "/yes", null, null),
-                                    Lang.build(Lang.EXPAND_NO, "/no", null, null));
-                        } else {
-                            p.spigot().sendMessage(Lang.build("Möchtest du die Region, auf der du stehst (Fläche: " + ClaimUtils.getArea(oldRegion) + "m^2), um " + extendLength + " Blöcke in Richtung " + direction + " erweitern? " +
-                                            "Die neue Region hätte eine Fläche von " + neueFläche + "m^2."),
-                                    Lang.build(Lang.EXPAND_YES, "/yes", null, null),
-                                    Lang.build(Lang.EXPAND_NO, "/no", null, null));
-                        }
+                        expandQuestion(player, player.getWorld(), oldRegion, regionAngegeben, alteFläche, neueFläche, isDirectionalExtension,
+                                null, null,
+                                direction, extendLength, null);
                     }
                 } else {
+                    // Erweiterung um Markierung:
                     try {
                         WorldEdit we = WorldEdit.getInstance();
-                        BukkitPlayer bp = BukkitAdapter.adapt(p);
+                        BukkitPlayer bp = BukkitAdapter.adapt(player);
                         Region markierung = we.getSessionManager().get(bp).getSelection(bp.getWorld());
                         if (markierung != null) {
                             // Build new Region from old Region and World Edit Selection
@@ -284,9 +296,9 @@ public class CmdExpand {
                                 markierungsBlockPolygon = ClaimUtils.polygonAusKuboidRegion(rechteckMarkierung);
                                 if (markierungNichtMitRegionVerbunden) {
                                     if (regionAngegeben) { //Selbe Nachrichten weiter unten benötigt
-                                        p.spigot().sendMessage(Lang.build("Die Fläche, die du markiert hast, überschneidet oder berührt die angegebene Region nicht."));
+                                        player.spigot().sendMessage(Lang.build("Die Fläche, die du markiert hast, überschneidet oder berührt die angegebene Region nicht."));
                                     } else {
-                                        p.spigot().sendMessage(Lang.build("Die Fläche, die du markiert hast, überschneidet oder berührt die Region nicht, in der du gerade stehst."));
+                                        player.spigot().sendMessage(Lang.build("Die Fläche, die du markiert hast, überschneidet oder berührt die Region nicht, in der du gerade stehst."));
                                     }
                                     return;
                                 }
@@ -300,67 +312,67 @@ public class CmdExpand {
                             if (result.getPolygon() == null) {
                                 if (result.getResultType() == UnitePolygonsResultType.POLYGON1_NOT_INTERSECTS_POLYGON2) {
                                     if (regionAngegeben) {
-                                        p.spigot().sendMessage(Lang.build("Die Fläche, die du markiert hast, überschneidet oder berührt die angegebene Region nicht."));
+                                        player.spigot().sendMessage(Lang.build("Die Fläche, die du markiert hast, überschneidet oder berührt die angegebene Region nicht."));
                                     } else {
-                                        p.spigot().sendMessage(Lang.build("Die Fläche, die du markiert hast, überschneidet oder berührt die Region nicht, in der du gerade stehst."));
+                                        player.spigot().sendMessage(Lang.build("Die Fläche, die du markiert hast, überschneidet oder berührt die Region nicht, in der du gerade stehst."));
                                     }
                                     return;
                                 } else if (result.getResultType() == UnitePolygonsResultType.POLYGON1_INTERSECTS_ITSELF) {
                                     if (regionAngegeben) {
-                                        p.spigot().sendMessage(Lang.build("Die angegebene Region überschneidet sich selbst, was eigentlich hier nicht vorkommen dürfte."));
+                                        player.spigot().sendMessage(Lang.build("Die angegebene Region überschneidet sich selbst, was eigentlich hier nicht vorkommen dürfte."));
                                     } else {
-                                        p.spigot().sendMessage(Lang.build("Die Region, in der du gerade stehst, überschneidet sich selbst, was eigentlich hier nicht vorkommen dürfte."));
+                                        player.spigot().sendMessage(Lang.build("Die Region, in der du gerade stehst, überschneidet sich selbst, was eigentlich hier nicht vorkommen dürfte."));
                                     }
                                     return;
                                 } else if (result.getResultType() == UnitePolygonsResultType.POLYGON2_INTERSECTS_ITSELF) {
-                                    p.spigot().sendMessage(Lang.build("Die Fläche, die du markiert hast, überschneidet sich selbst."));
+                                    player.spigot().sendMessage(Lang.build("Die Fläche, die du markiert hast, überschneidet sich selbst."));
                                     return;
                                 } else if (result.getResultType() == UnitePolygonsResultType.BOTH_POLYGONS_INTERSECT_THEMSELVES) {
                                     if (regionAngegeben) {
-                                        p.spigot().sendMessage(Lang.build("Die angegebene Region überschneidet sich selbst, was eigentlich hier nicht vorkommen dürfte. " +
+                                        player.spigot().sendMessage(Lang.build("Die angegebene Region überschneidet sich selbst, was eigentlich hier nicht vorkommen dürfte. " +
                                                 "Deine markierte Fläche übrigens auch, damit kannst du keine Region erweitern."));
                                     } else {
-                                        p.spigot().sendMessage(Lang.build("Die Region, in der du gerade stehst, überschneidet sich selbst, was eigentlich hier nicht vorkommen dürfte.. " +
+                                        player.spigot().sendMessage(Lang.build("Die Region, in der du gerade stehst, überschneidet sich selbst, was eigentlich hier nicht vorkommen dürfte.. " +
                                                 "Deine markierte Fläche übrigens auch, damit kannst du keine Region erweitern."));
                                     }
                                     return;
                                 } else if (result.getResultType() == UnitePolygonsResultType.POLYGON2_IS_INSIDE_POLYGON1) {
                                     if (regionAngegeben) {
-                                        p.spigot().sendMessage(Lang.build("Deine Markierung liegt komplett innerhalb der angegebenen Region. " +
+                                        player.spigot().sendMessage(Lang.build("Deine Markierung liegt komplett innerhalb der angegebenen Region. " +
                                                 "So kannst du die Region nicht erweitern."));
                                     } else {
-                                        p.spigot().sendMessage(Lang.build("Deine Markierung liegt komplett innerhalb der Region, in der du gerade stehst. " +
+                                        player.spigot().sendMessage(Lang.build("Deine Markierung liegt komplett innerhalb der Region, in der du gerade stehst. " +
                                                 "So kannst du die Region nicht erweitern."));
                                     }
                                     return;
                                 } else if (result.getResultType() == UnitePolygonsResultType.RESULT_POLYGON_HAS_POINT_MULTIPLE) {
                                     if (regionAngegeben) {
-                                        p.spigot().sendMessage(Lang.build("Die angegebene Region und deine Markierung berühren sich zu wenig, " +
+                                        player.spigot().sendMessage(Lang.build("Die angegebene Region und deine Markierung berühren sich zu wenig, " +
                                                 "um eine zusammenhängende neue Region daraus zu bilden"));
                                     } else {
-                                        p.spigot().sendMessage(Lang.build("Die Region, in der du stehst, und deine Markierung berühren sich zu wenig, " +
+                                        player.spigot().sendMessage(Lang.build("Die Region, in der du stehst, und deine Markierung berühren sich zu wenig, " +
                                                 "um eine zusammenhängende neue Region daraus zu bilden"));
                                     }
                                     return;
                                 } else if (result.getResultType() == UnitePolygonsResultType.POLYGON1_HAS_POINT_MULTIPLE) {
                                     if (regionAngegeben) {
-                                        p.spigot().sendMessage(Lang.build("Die angegebene Region verwendet Eckpunkte mehrfach, was nicht vorkommen sollte."));
+                                        player.spigot().sendMessage(Lang.build("Die angegebene Region verwendet Eckpunkte mehrfach, was nicht vorkommen sollte."));
                                     } else {
-                                        p.spigot().sendMessage(Lang.build("Die Region, in der du stehst, verwendet Eckpunkte mehrfach, was nicht vorkommen sollte."));
+                                        player.spigot().sendMessage(Lang.build("Die Region, in der du stehst, verwendet Eckpunkte mehrfach, was nicht vorkommen sollte."));
                                     }
                                     return;
                                 } else if (result.getResultType() == UnitePolygonsResultType.POLYGON2_HAS_POINT_MULTIPLE) {
-                                    p.spigot().sendMessage(Lang.build("Deine Markierung verwendet Eckpunkte mehrfach.")); //Selbe Nachricht weiter oben benötigt
+                                    player.spigot().sendMessage(Lang.build("Deine Markierung verwendet Eckpunkte mehrfach.")); //Selbe Nachricht weiter oben benötigt
                                     return;
                                 } else if (result.getResultType() == UnitePolygonsResultType.POLYGONS_ARE_EQUAL) {
                                     if (regionAngegeben) {
-                                        p.spigot().sendMessage(Lang.build("Deine Markierung entspricht genau deiner angegebenen Region, also so keine Erweiterung möglich."));
+                                        player.spigot().sendMessage(Lang.build("Deine Markierung entspricht genau deiner angegebenen Region, also so keine Erweiterung möglich."));
                                     } else {
-                                        p.spigot().sendMessage(Lang.build("Deine Markierung entspricht genau deiner Region, in der du stehst, also so keine Erweiterung möglich."));
+                                        player.spigot().sendMessage(Lang.build("Deine Markierung entspricht genau deiner Region, in der du stehst, also so keine Erweiterung möglich."));
                                     }
                                     return;
                                 }
-                                p.spigot().sendMessage(Lang.build("Ergebnis-Polygon existiert aus unbekanntem Grund nicht: " + result.getResultType().name()));
+                                player.spigot().sendMessage(Lang.build("Ergebnis-Polygon existiert aus unbekanntem Grund nicht: " + result.getResultType().name()));
                                 return;
                             }
                             List<BlockVector2> ergebnisPolygon = result.getPolygon();
@@ -369,27 +381,53 @@ public class CmdExpand {
                                 Bukkit.broadcastMessage(ChatColor.DARK_RED + "Test2 - Eckpunkte: " + vector2);
                             }
                             // inform Player
+                            double alteFläche = ClaimUtils.getArea(oldRegion);
                             double neueFläche = ClaimUtils.flächeEinesPixelPolygons(ClaimUtils.scharfePolgonFläche(newRegion.getPoints()),newRegion.getPoints());
                             if (thisIsACheck) {
-                                ConfirmationListener.inst().addConfirmation(new ExpandSelectionalQueue(oldRegion, p.getWorld(), p, ergebnisPolygon, regionAngegeben, true));
+                                String message;
                                 if (regionAngegeben) {
-                                    p.spigot().sendMessage(Lang.build("Möchtest du überprüfen ob die Erweiterung der angegebenen Region mit deiner Markierung verfügbar ist? "),
-                                            Lang.build(Lang.EXPAND_YES, "/yes", null, null),
-                                            Lang.build(Lang.EXPAND_NO, "/no", null, null));
+                                    message = "Möchtest du überprüfen ob die Erweiterung der angegebenen Region mit deiner Markierung verfügbar ist?";
                                 } else {
-                                    p.spigot().sendMessage(Lang.build("Möchtest du überprüfen ob die Erweiterung der Region, in der du stehst, mit deiner Markierung verfügbar ist? "),
-                                            Lang.build(Lang.EXPAND_YES, "/yes", null, null),
-                                            Lang.build(Lang.EXPAND_NO, "/no", null, null));
+                                    message = "Möchtest du überprüfen ob die Erweiterung der Region, in der du stehst, mit deiner Markierung verfügbar ist?";
+                                }
+                                PreExpandCheckConfirmationEvent event = new PreExpandCheckConfirmationEvent(
+                                        player, false, regionAngegeben, ClaimUtils.getArea(oldRegion), ClaimUtils.getArea(newRegion),
+                                        null, null, message);
+                                Bukkit.getPluginManager().callEvent(event);
+                                if (!event.isCancelled()) {
+                                    Polygonal2DRegion selectionWithCorrectHeight = (Polygonal2DRegion) markierung.clone();
+                                    selectionWithCorrectHeight.setMinimumY(oldRegion.getMinimumPoint().getY());
+                                    selectionWithCorrectHeight.setMaximumY(oldRegion.getMaximumPoint().getY());
+                                    ConfirmationListener.inst().addConfirmation(new ExpandSelectionalQueue(
+                                            oldRegion, player.getWorld(), player, ergebnisPolygon, regionAngegeben, true,
+                                            selectionWithCorrectHeight, result.getContainsGapsFromOldRegionAndSelection()));
+                                    if (regionAngegeben) {
+                                        player.spigot().sendMessage(Lang.build(event.getMessage()),
+                                                Lang.build(Lang.EXPAND_YES, "/yes", null, null),
+                                                Lang.build(Lang.EXPAND_NO, "/no", null, null));
+                                    } else {
+                                        player.spigot().sendMessage(Lang.build(event.getMessage()),
+                                                Lang.build(Lang.EXPAND_YES, "/yes", null, null),
+                                                Lang.build(Lang.EXPAND_NO, "/no", null, null));
+                                    }
                                 }
                             } else {
-                                ConfirmationListener.inst().addConfirmation(new ExpandSelectionalQueue(oldRegion, p.getWorld(), p, ergebnisPolygon, regionAngegeben, false));
+                                CmdExpand.expandQuestion(player, player.getWorld(), oldRegion, regionAngegeben, alteFläche, neueFläche, false,
+                                        (Polygonal2DRegion) markierung, result.getContainsGapsFromOldRegionAndSelection(),
+                                        null, null, ergebnisPolygon);
+                                Polygonal2DRegion selectionWithCorrectHeight = (Polygonal2DRegion) markierung.clone();
+                                selectionWithCorrectHeight.setMinimumY(oldRegion.getMinimumPoint().getY());
+                                selectionWithCorrectHeight.setMaximumY(oldRegion.getMaximumPoint().getY());
+                                ConfirmationListener.inst().addConfirmation(new ExpandSelectionalQueue(
+                                        oldRegion, player.getWorld(), player, ergebnisPolygon, regionAngegeben, false,
+                                        selectionWithCorrectHeight, result.getContainsGapsFromOldRegionAndSelection()));
                                 if (regionAngegeben) {
-                                    p.spigot().sendMessage(Lang.build("Möchtest du die angegebene Region (Fläche: " + ClaimUtils.getArea(oldRegion) + "m^2) um deine Markierung erweitern? " +
+                                    player.spigot().sendMessage(Lang.build("Möchtest du die angegebene Region (Fläche: " + alteFläche + "m^2) um deine Markierung erweitern? " +
                                                     "Die neue Region hätte eine Fläche von " + neueFläche + "m^2."),
                                             Lang.build(Lang.EXPAND_YES, "/yes", null, null),
                                             Lang.build(Lang.EXPAND_NO, "/no", null, null));
                                 } else {
-                                    p.spigot().sendMessage(Lang.build("Möchtest du die Region, auf der du stehst (Fläche: " + ClaimUtils.getArea(oldRegion) + "m^2) um deine Markierung erweitern? " +
+                                    player.spigot().sendMessage(Lang.build("Möchtest du die Region, auf der du stehst (Fläche: " + alteFläche + "m^2) um deine Markierung erweitern? " +
                                                     "Die neue Region hätte eine Fläche von " + neueFläche + "m^2."),
                                             Lang.build(Lang.EXPAND_YES, "/yes", null, null),
                                             Lang.build(Lang.EXPAND_NO, "/no", null, null));
@@ -398,20 +436,20 @@ public class CmdExpand {
                         } else {
                             // No Region
                             if (cuboidRegion) {
-                                p.spigot().sendMessage(Lang.build("Du müsstest noch eine Fläche markieren, um die du deine Region erweitern möchtest oder " +
+                                player.spigot().sendMessage(Lang.build("Du müsstest noch eine Fläche markieren, um die du deine Region erweitern möchtest oder " +
                                         "eine Richtung (north/east/south/west) und eine positive ganze Zahl angeben, damit du deine Region entsprechend vergrößern kannst."));
                             } else {
-                                p.spigot().sendMessage(Lang.build("Du müsstest noch eine Fläche markieren, um die du deine Region erweitern möchtest."));
+                                player.spigot().sendMessage(Lang.build("Du müsstest noch eine Fläche markieren, um die du deine Region erweitern möchtest."));
                             }
                             return;
                         }
                     } catch (IncompleteRegionException e) {
                         // No Region
                         if (cuboidRegion) {
-                            p.spigot().sendMessage(Lang.build("Du müsstest noch eine Fläche markieren, um die du deine Region erweitern möchtest oder " +
+                            player.spigot().sendMessage(Lang.build("Du müsstest noch eine Fläche markieren, um die du deine Region erweitern möchtest oder " +
                                     "eine Richtung (north/east/south/west) und eine positive ganze Zahl angeben, damit du deine Region entsprechend vergrößern kannst."));
                         } else {
-                            p.spigot().sendMessage(Lang.build("Du müsstest noch eine Fläche markieren, um die du deine Region erweitern möchtest."));
+                            player.spigot().sendMessage(Lang.build("Du müsstest noch eine Fläche markieren, um die du deine Region erweitern möchtest."));
                         }
                         return;
                     }
@@ -434,12 +472,74 @@ public class CmdExpand {
         }
     }
 
+    public static void expandQuestion(Player player, World world, ProtectedRegion oldRegion, boolean regionStated, double alteFläche, double neueFläche, boolean isDirectionalExtension,
+                                      Polygonal2DRegion markierung, Boolean containsGapsFromOldRegionAndSelection,
+                                      BlockFace direction, Integer extendLength, List<BlockVector2> eckpunkteDerNeuenRegion
+    ) {
+        String message;
+        if (isDirectionalExtension) {
+            if (regionStated) {
+                message = "Möchtest du die angegebene Region (Fläche: " + alteFläche + "m^2) um " + extendLength + " Blöcke in Richtung " +
+                        direction.name() + " erweitern? Die neue Region hätte eine Fläche von " + neueFläche + "m^2.";
+            } else {
+                message = "Möchtest du die Region, auf der du stehst (Fläche: " + alteFläche + "m^2), um " + extendLength + " Blöcke in Richtung " +
+                        direction.name() + " erweitern? Die neue Region hätte eine Fläche von " + neueFläche + "m^2.";
+            }
+        } else {
+            if (regionStated) {
+                //message = "Möchtest du die angegebene Region um deine Markierung erweitern?";
+                message = "Möchtest du die angegebene Region (Fläche: " + alteFläche + "m^2) um deine Markierung erweitern? " +
+                        "Die neue Region hätte eine Fläche von " + neueFläche + "m^2.";
+            } else {
+                //message = "Möchtest du die Region, in der du stehst, um deine Markierung erweitern?";
+                message = "Möchtest du die Region, auf der du stehst (Fläche: " + alteFläche + "m^2) um deine Markierung erweitern? " +
+                        "Die neue Region hätte eine Fläche von " + neueFläche + "m^2.";
+            }
+        }
+        PreExpandConfirmationEvent event = new PreExpandConfirmationEvent(
+                player, isDirectionalExtension, regionStated, alteFläche, neueFläche, direction, extendLength, message);
+        Bukkit.getPluginManager().callEvent(event);
+        if (!event.isCancelled()) {
+            if (isDirectionalExtension) {
+                ConfirmationListener.inst().addConfirmation(new ExpandDirectionalQueue(
+                        oldRegion, world, player, direction, extendLength, regionStated, false));
+            } else {
+                Polygonal2DRegion selectionWithCorrectHeight = markierung.clone();
+                selectionWithCorrectHeight.setMinimumY(oldRegion.getMinimumPoint().getY());
+                selectionWithCorrectHeight.setMaximumY(oldRegion.getMaximumPoint().getY());
+                ConfirmationListener.inst().addConfirmation(new ExpandSelectionalQueue(
+                        oldRegion, world, player, eckpunkteDerNeuenRegion, regionStated, false, selectionWithCorrectHeight, containsGapsFromOldRegionAndSelection));
+            }
+            player.spigot().sendMessage(Lang.build(event.getMessage()),
+                    Lang.build(Lang.EXPAND_YES, "/yes", null, null),
+                    Lang.build(Lang.EXPAND_NO, "/no", null, null));
+        }
+    }
+
+    public static CuboidRegion theDirectionalExpansion (BlockFace direction, ProtectedCuboidRegion oldRegion, int extendLength) {
+        switch (direction) {
+            case NORTH: return new CuboidRegion(
+                    BlockVector3.at(oldRegion.getMinimumPoint().getX(), oldRegion.getMinimumPoint().getY(), oldRegion.getMinimumPoint().getZ() - extendLength),
+                    BlockVector3.at(oldRegion.getMaximumPoint().getX(), oldRegion.getMaximumPoint().getY(), oldRegion.getMinimumPoint().getZ() - 1));
+            case EAST: return new CuboidRegion(
+                    BlockVector3.at(oldRegion.getMaximumPoint().getX() + extendLength, oldRegion.getMinimumPoint().getY(), oldRegion.getMinimumPoint().getZ()),
+                    BlockVector3.at(oldRegion.getMaximumPoint().getX() + 1, oldRegion.getMaximumPoint().getY(), oldRegion.getMaximumPoint().getZ()));
+            case SOUTH: return new CuboidRegion(
+                    BlockVector3.at(oldRegion.getMinimumPoint().getX() - extendLength, oldRegion.getMinimumPoint().getY(), oldRegion.getMaximumPoint().getZ() + extendLength),
+                    BlockVector3.at(oldRegion.getMinimumPoint().getX() - 1, oldRegion.getMaximumPoint().getY(), oldRegion.getMaximumPoint().getZ() + 1));
+            case WEST: return new CuboidRegion(
+                    BlockVector3.at(oldRegion.getMinimumPoint().getX(), oldRegion.getMinimumPoint().getY(), oldRegion.getMinimumPoint().getZ()),
+                    BlockVector3.at(oldRegion.getMaximumPoint().getX(), oldRegion.getMaximumPoint().getY(), oldRegion.getMaximumPoint().getZ()));
+            default: return null;
+        }
+    }
+
     private static UnitePolygonsResult uniteTwoPolygons (List<BlockVector2> alteRegionsBlockPolygon, List<BlockVector2> markierungsBlockPolygon) {
         if (ClaimUtils.polygonHatEckpunkteMehrfach(alteRegionsBlockPolygon)) {
-            return new UnitePolygonsResult(null,UnitePolygonsResultType.POLYGON1_HAS_POINT_MULTIPLE);
+            return new UnitePolygonsResult(null,UnitePolygonsResultType.POLYGON1_HAS_POINT_MULTIPLE, null);
         }
         if (ClaimUtils.polygonHatEckpunkteMehrfach(markierungsBlockPolygon)) {
-            return new UnitePolygonsResult(null,UnitePolygonsResultType.POLYGON2_HAS_POINT_MULTIPLE);
+            return new UnitePolygonsResult(null,UnitePolygonsResultType.POLYGON2_HAS_POINT_MULTIPLE, null);
         }
         ArrayList<Vector2> alteRegionsPolygon = new ArrayList<>();
         for (BlockVector2 blockVector2 : alteRegionsBlockPolygon) {
@@ -453,13 +553,13 @@ public class CmdExpand {
         Boolean region1ImUhrzeigerSinn = ClaimUtils.verläuftPolygonImUhrzeigersinn(alteRegionsPolygon);
         Boolean region2ImUhrzeigerSinn = ClaimUtils.verläuftPolygonImUhrzeigersinn(markierungsPolygon);
         if (region2ImUhrzeigerSinn == null && region1ImUhrzeigerSinn == null) {
-            return new UnitePolygonsResult(null, UnitePolygonsResultType.BOTH_POLYGONS_INTERSECT_THEMSELVES);
+            return new UnitePolygonsResult(null, UnitePolygonsResultType.BOTH_POLYGONS_INTERSECT_THEMSELVES, null);
         }
         if (region1ImUhrzeigerSinn == null) {
-            return new UnitePolygonsResult(null, UnitePolygonsResultType.POLYGON1_INTERSECTS_ITSELF);
+            return new UnitePolygonsResult(null, UnitePolygonsResultType.POLYGON1_INTERSECTS_ITSELF, null);
         }
         if (region2ImUhrzeigerSinn == null) {
-            return new UnitePolygonsResult(null, UnitePolygonsResultType.POLYGON2_INTERSECTS_ITSELF);
+            return new UnitePolygonsResult(null, UnitePolygonsResultType.POLYGON2_INTERSECTS_ITSELF, null);
         }
         if (region2ImUhrzeigerSinn) {
             markierungsPolygon = ClaimUtils.punktListeInvertiert(markierungsPolygon);
@@ -470,7 +570,7 @@ public class CmdExpand {
         if (ClaimUtils.sindPolygoneGleich(
                 ClaimUtils.eckpunkteGanzAusEckpunkteExakt(markierungsPolygon), ClaimUtils.eckpunkteGanzAusEckpunkteExakt(alteRegionsPolygon))
         ) {
-            return new UnitePolygonsResult(null, UnitePolygonsResultType.POLYGONS_ARE_EQUAL);
+            return new UnitePolygonsResult(null, UnitePolygonsResultType.POLYGONS_ARE_EQUAL, null);
         }
         ArrayList<Vector2> bereitsÜberprüfteStartpunkte = new ArrayList<>();
         //Für jeden geeigneten Startpunkt:
@@ -495,13 +595,16 @@ public class CmdExpand {
         //Deswegen ist das neue Polygon nun das mit der größten Fläche:
         ArrayList<Vector2> neuesPolygon = null;
         double größtePolygonfläche = 0.0;
+        double lückenFläche = 0.0;
         for (ArrayList<Vector2> potentiellesNeuesPolygon : potentielleNeuePolygone) {
             double polygonfläche = ClaimUtils.scharfePolgonFläche(potentiellesNeuesPolygon);
+            lückenFläche = lückenFläche + polygonfläche;
             if (polygonfläche > größtePolygonfläche) {
                 größtePolygonfläche = polygonfläche;
                 neuesPolygon = potentiellesNeuesPolygon;
             }
         }
+        lückenFläche = lückenFläche - größtePolygonfläche;
         //Wenn die Flächen vom alten und neuen Polygon gleich sind, überschneiden sich die Polygone nicht:
         if (ClaimUtils.scharfePolgonFläche(alteRegionsPolygon) == größtePolygonfläche) {
             boolean polygon2LiegtInPolygon1 = true;
@@ -512,10 +615,10 @@ public class CmdExpand {
             }
             if (polygon2LiegtInPolygon1) {
                 // Markierung liegt komplett innerhalb Region
-                return new UnitePolygonsResult(null, UnitePolygonsResultType.POLYGON2_IS_INSIDE_POLYGON1);
+                return new UnitePolygonsResult(null, UnitePolygonsResultType.POLYGON2_IS_INSIDE_POLYGON1, null);
             } else {
                 // Markierung und Region überschneiden sich nicht
-                return new UnitePolygonsResult(null, UnitePolygonsResultType.POLYGON1_NOT_INTERSECTS_POLYGON2);
+                return new UnitePolygonsResult(null, UnitePolygonsResultType.POLYGON1_NOT_INTERSECTS_POLYGON2, null);
             }
         }
         if (neuesPolygon != null) {
@@ -527,9 +630,9 @@ public class CmdExpand {
         }
         List<BlockVector2> neuesBlockPolygon = ClaimUtils.polygonOhneRedundantePunkte(ClaimUtils.eckpunkteGanzAusEckpunkteExakt(neuesPolygon));
         if (ClaimUtils.polygonHatEckpunkteMehrfach(neuesBlockPolygon)) {
-            return new UnitePolygonsResult(null, UnitePolygonsResultType.RESULT_POLYGON_HAS_POINT_MULTIPLE);
+            return new UnitePolygonsResult(null, UnitePolygonsResultType.RESULT_POLYGON_HAS_POINT_MULTIPLE, null);
         }
-        return new UnitePolygonsResult(neuesBlockPolygon, UnitePolygonsResultType.BOUNDING_POLYGON_FOUND);
+        return new UnitePolygonsResult(neuesBlockPolygon, UnitePolygonsResultType.BOUNDING_POLYGON_FOUND, lückenFläche > 0.0);
     }
 
     private static ArrayList<Vector2> potentiellNeuesPolygon (

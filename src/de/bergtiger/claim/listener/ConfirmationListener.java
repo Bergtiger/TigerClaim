@@ -12,12 +12,12 @@ import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion;
 import de.bergtiger.claim.bdo.*;
 import de.bergtiger.claim.cmd.CmdClaim;
+import de.bergtiger.claim.cmd.CmdExpand;
 import de.bergtiger.claim.data.ClaimUtils;
-import de.bergtiger.claim.events.RegionCheckEvent;
-import de.bergtiger.claim.events.RegionClaimEvent;
-import de.bergtiger.claim.events.RegionDeleteEvent;
+import de.bergtiger.claim.events.*;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -375,6 +375,7 @@ public class ConfirmationListener implements Listener {
 	 */
 	private static void expandRegionWithSelection(ExpandSelectionalQueue esq) {
 		if (esq != null) {
+			Player player = esq.getPlayer();
 			// get RegionManager for world
 			RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
 			RegionManager regions = container.get(BukkitAdapter.adapt(esq.getWorld()));
@@ -396,23 +397,30 @@ public class ConfirmationListener implements Listener {
 			}
 			// if overlapping is empty -> save region
 			if (overlapping == null || overlapping.isEmpty()) {
-				Map<Flag<?>,Object> flags = oldRegion.getFlags();
-				DefaultDomain members = oldRegion.getMembers();
-				int priority = oldRegion.getPriority();
-				DefaultDomain owners = oldRegion.getOwners();
-				regions.removeRegion(oldRegion.getId());
-				ProtectedPolygonalRegion newProtectedRegion = new ProtectedPolygonalRegion(oldRegion.getId(),esq.getEckpunkteDerNeuenRegion(),oldRegion.getMinimumPoint().getY(), oldRegion.getMaximumPoint().getY());
-				newProtectedRegion.setFlags(flags);
-				newProtectedRegion.setMembers(members);
-				newProtectedRegion.setPriority(priority);
-				newProtectedRegion.setOwners(owners);
-				regions.addRegion(newProtectedRegion);
-				/*
-				oldRegion.getPoints().clear();
-				oldRegion.getPoints().addAll(esq.getEckpunkteDerNeuenRegion());
+				String message = "Region " + oldRegion.getId() + " erfolgreich um Markierung erweitert.";
+				RegionExpandEvent event = new RegionExpandEvent(
+						player, esq.getWorld(), oldRegion, newRegion, esq.getSelection(), false, esq.isRegionAngegeben(), ClaimUtils.getArea(oldRegion), ClaimUtils.getArea(newRegion),
+						null, null, esq.getContainsGapsFromOldRegionAndSelection(), message);
+				Bukkit.getPluginManager().callEvent(event);
+				if (!event.isCancelled()) {
+					Map<Flag<?>,Object> flags = oldRegion.getFlags();
+					DefaultDomain members = oldRegion.getMembers();
+					int priority = oldRegion.getPriority();
+					DefaultDomain owners = oldRegion.getOwners();
+					regions.removeRegion(oldRegion.getId());
+					ProtectedPolygonalRegion newProtectedRegion = new ProtectedPolygonalRegion(oldRegion.getId(),esq.getEckpunkteDerNeuenRegion(),oldRegion.getMinimumPoint().getY(), oldRegion.getMaximumPoint().getY());
+					newProtectedRegion.setFlags(flags);
+					newProtectedRegion.setMembers(members);
+					newProtectedRegion.setPriority(priority);
+					newProtectedRegion.setOwners(owners);
+					regions.addRegion(newProtectedRegion);
+					/*
+					oldRegion.getPoints().clear();
+					oldRegion.getPoints().addAll(esq.getEckpunkteDerNeuenRegion());
 
-				 */
-				esq.getPlayer().spigot().sendMessage(Lang.build("Region erfolgreich um Markierung erweitert."));
+					 */
+					esq.getPlayer().spigot().sendMessage(Lang.build(event.getMessage()));
+				}
 			} else {
 				// is overlapping
 				if (esq.isRegionAngegeben()) {
@@ -426,36 +434,6 @@ public class ConfirmationListener implements Listener {
 		}
 	}
 
-	private static CuboidRegion newDirectionalExpandedRegion (ProtectedCuboidRegion oldRegion, World world, String direction, int extendLength) {
-		// get RegionManager for world
-		RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
-		RegionManager regions = container.get(BukkitAdapter.adapt(world));
-		// add all regions to candidates
-		List<ProtectedRegion> candidates = Lists.newArrayList();
-		regions.getRegions().forEach((k, r) -> {
-			candidates.add(r);
-		});
-		CuboidRegion newRegion = null;
-		if (direction.equals("north")) {
-			newRegion = new CuboidRegion(
-					oldRegion.getMaximumPoint(),
-					oldRegion.getMinimumPoint().add(BlockVector3.at(0,0,-extendLength)));
-		} else if (direction.equals("east")) {
-			newRegion = new CuboidRegion(
-					oldRegion.getMaximumPoint().add(BlockVector3.at(extendLength,0,0)),
-					oldRegion.getMinimumPoint());
-		} else if (direction.equals("south")) {
-			newRegion = new CuboidRegion(
-					oldRegion.getMaximumPoint().add(BlockVector3.at(0,0,extendLength)),
-					oldRegion.getMinimumPoint());
-		} else if (direction.equals("west")) {
-			newRegion = new CuboidRegion(
-					oldRegion.getMaximumPoint(),
-					oldRegion.getMinimumPoint().add(BlockVector3.at(-extendLength,0,0)));
-		}
-		return newRegion;
-	}
-
 	/**
 	 * check claim
 	 *
@@ -463,6 +441,7 @@ public class ConfirmationListener implements Listener {
 	 */
 	private static void expandRegionDirectional(ExpandDirectionalQueue edq) {
 		if (edq != null) {
+			Player player = edq.getPlayer();
 			// get RegionManager for world
 			RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
 			RegionManager regions = container.get(BukkitAdapter.adapt(edq.getWorld()));
@@ -483,19 +462,27 @@ public class ConfirmationListener implements Listener {
 				overlapping.remove(oldRegion);
 			}
 			if (overlapping == null || overlapping.isEmpty()) {
-				// oldRegion wird expandiert (durch newRegion ersetzt)
-				Map<Flag<?>,Object> flags = oldRegion.getFlags();
-				DefaultDomain members = oldRegion.getMembers();
-				int priority = oldRegion.getPriority();
-				DefaultDomain owners = oldRegion.getOwners();
-				regions.removeRegion(oldRegion.getId());
-				ProtectedCuboidRegion newProtectedRegion = new ProtectedCuboidRegion(oldRegion.getId(),newRegion.getMinimumPoint(),newRegion.getMaximumPoint());
-				newProtectedRegion.setFlags(flags);
-				newProtectedRegion.setMembers(members);
-				newProtectedRegion.setPriority(priority);
-				newProtectedRegion.setOwners(owners);
-				regions.addRegion(newProtectedRegion);
-				edq.getPlayer().spigot().sendMessage(Lang.build("Region erfolgreich um " + edq.getExtendLength() + " Blöcke nach " + edq.getDirection() + " erweitert."));
+				String message = "Region " + oldRegion.getId() + " erfolgreich " + edq.getExtendLength() + " Blöcke nach " + edq.getDirection().name() + " erweitert.";
+				CuboidRegion expansion = CmdExpand.theDirectionalExpansion(edq.getDirection(), oldRegion, edq.getExtendLength());
+				RegionExpandEvent event = new RegionExpandEvent(
+						player, edq.getWorld(), oldRegion, newRegion, expansion, true, edq.isRegionAngegeben(), ClaimUtils.getArea(oldRegion), ClaimUtils.getArea(newRegion),
+						edq.getDirection(), edq.getExtendLength(), false, message);
+				Bukkit.getPluginManager().callEvent(event);
+				if (!event.isCancelled()) {
+					// oldRegion wird expandiert (durch newRegion ersetzt)
+					Map<Flag<?>, Object> flags = oldRegion.getFlags();
+					DefaultDomain members = oldRegion.getMembers();
+					int priority = oldRegion.getPriority();
+					DefaultDomain owners = oldRegion.getOwners();
+					regions.removeRegion(oldRegion.getId());
+					ProtectedCuboidRegion newProtectedRegion = new ProtectedCuboidRegion(oldRegion.getId(), newRegion.getMinimumPoint(), newRegion.getMaximumPoint());
+					newProtectedRegion.setFlags(flags);
+					newProtectedRegion.setMembers(members);
+					newProtectedRegion.setPriority(priority);
+					newProtectedRegion.setOwners(owners);
+					regions.addRegion(newProtectedRegion);
+					edq.getPlayer().spigot().sendMessage(Lang.build(event.getMessage()));
+				}
 			} else {
 				if (edq.isRegionAngegeben()) {
 					edq.getPlayer().spigot().sendMessage(Lang.build("Die angegebene Region lässt sich nicht " + edq.getExtendLength() + " Blöcke nach " + edq.getDirection() +
@@ -508,8 +495,14 @@ public class ConfirmationListener implements Listener {
 		}
 	}
 
+	/**
+	 * check claim
+	 *
+	 * @param esq to expand check region with world edit selection
+	 */
 	private static void expandCheckRegionWithSelection(ExpandSelectionalQueue esq) {
 		if (esq != null) {
+			Player player = esq.getPlayer();
 			// get RegionManager for world
 			RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
 			RegionManager regions = container.get(BukkitAdapter.adapt(esq.getWorld()));
@@ -529,26 +522,31 @@ public class ConfirmationListener implements Listener {
 				overlapping = tc.getRegionWithGab().getIntersectingRegions(candidates);
 				overlapping.remove(oldRegion);
 			}
-			// if overlapping is empty -> save region
-			if (overlapping == null || overlapping.isEmpty()) {
-				ConfirmationListener.inst().addConfirmation(new ExpandSelectionalQueue(
-						oldRegion, esq.getWorld(), esq.getPlayer(), esq.getEckpunkteDerNeuenRegion(), esq.isRegionAngegeben(), false));
+			String message;
+			boolean regionIsOverlappingAndShouldNot = overlapping != null && !overlapping.isEmpty();
+			if (regionIsOverlappingAndShouldNot) {
 				if (esq.isRegionAngegeben()) {
-					esq.getPlayer().spigot().sendMessage(Lang.build("Die Fläche deiner Markierung ist verfügbar. " +
-							"Möchtest du die angegebene Region um deine Markierung erweitern?"),
-							Lang.build(Lang.EXPAND_YES, "/yes", null, null),
-							Lang.build(Lang.EXPAND_NO, "/no", null, null));
+					message = "Die Fläche deiner Markierung ist nicht als Erweiterung für dein angegebenes Grundstück verfügbar.";
 				} else {
-					esq.getPlayer().spigot().sendMessage(Lang.build("Die Fläche deiner Markierung ist verfügbar. " +
-							"Möchtest du die Region, in der du stehst, um deine Markierung erweitern?"),
-							Lang.build(Lang.EXPAND_YES, "/yes", null, null),
-							Lang.build(Lang.EXPAND_NO, "/no", null, null));
+					message = "Die Fläche deiner Markierung ist nicht als Erweiterung für dein Grundstück, in dem du stehst, verfügbar.";
 				}
 			} else {
 				if (esq.isRegionAngegeben()) {
-					esq.getPlayer().spigot().sendMessage(Lang.build("Die Fläche deiner Markierung ist nicht als Erweiterung für dein angegebenes Grundstück verfügbar."));
+					message = "Die Fläche deiner Markierung ist verfügbar.";
 				} else {
-					esq.getPlayer().spigot().sendMessage(Lang.build("Die Fläche deiner Markierung ist nicht als Erweiterung für dein Grundstück, in dem du stehst, verfügbar."));
+					message = "Die Fläche deiner Markierung ist verfügbar.";
+				}
+			}
+			ExpandCheckEvent event = new ExpandCheckEvent(
+					player, false, esq.isRegionAngegeben(), regionIsOverlappingAndShouldNot, ClaimUtils.getArea(oldRegion), ClaimUtils.getArea(newRegion),
+					null, null, message);
+			Bukkit.getPluginManager().callEvent(event);
+			if (!event.isCancelled()) {
+				player.spigot().sendMessage(Lang.build(event.getMessage()));
+				if (event.continueExpand()) {
+					CmdExpand.expandQuestion(player, esq.getWorld(), oldRegion, esq.isRegionAngegeben(), ClaimUtils.getArea(oldRegion), ClaimUtils.getArea(newRegion), false,
+							(Polygonal2DRegion) esq.getSelection(), esq.getContainsGapsFromOldRegionAndSelection(),
+							null, null, esq.getEckpunkteDerNeuenRegion());
 				}
 			}
 		}
@@ -561,6 +559,7 @@ public class ConfirmationListener implements Listener {
 	 */
 	private static void expandCheckRegionDirectional (ExpandDirectionalQueue edq) {
 		if (edq != null) {
+			Player player = edq.getPlayer();
 			// get RegionManager for world
 			RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
 			RegionManager regions = container.get(BukkitAdapter.adapt(edq.getWorld()));
@@ -571,7 +570,7 @@ public class ConfirmationListener implements Listener {
 			});
 			ProtectedCuboidRegion oldRegion = (ProtectedCuboidRegion) edq.getRegion();
 			CuboidRegion newRegion = newDirectionalExpandedRegion((ProtectedCuboidRegion) edq.getRegion(), edq.getWorld(), edq.getDirection(), edq.getExtendLength());
-			TigerClaim tc = new TigerClaimCuboid(edq.getPlayer(), edq.getWorld(), newRegion);
+			TigerClaim tc = new TigerClaimCuboid(player, edq.getWorld(), newRegion);
 			// Can claim
 			List<ProtectedRegion> overlapping = null;
 			// isOverlapping false -> not allowed to overlap
@@ -580,29 +579,59 @@ public class ConfirmationListener implements Listener {
 				overlapping = tc.getRegionWithGab().getIntersectingRegions(candidates);
 				overlapping.remove(oldRegion);
 			}
-			if (overlapping == null || overlapping.isEmpty()) {
-				ConfirmationListener.inst().addConfirmation(new ExpandDirectionalQueue(
-						oldRegion, edq.getWorld(), edq.getPlayer(), edq.getDirection(), edq.getExtendLength(), edq.isRegionAngegeben(), false));
+			//call RegionClaimEvent
+			String message;
+			boolean regionIsOverlappingAndShouldNot = overlapping != null && !overlapping.isEmpty();
+			if (regionIsOverlappingAndShouldNot) {
 				if (edq.isRegionAngegeben()) {
-					edq.getPlayer().spigot().sendMessage(Lang.build("Es ist genügend Platz, um die angegebene Region " + edq.getExtendLength() + " Blöcke nach " + edq.getDirection() +
-							" zu erweitern. Möchtest du die Region dahin erweitern?"),
-							Lang.build(Lang.EXPAND_YES, "/yes", null, null),
-							Lang.build(Lang.EXPAND_NO, "/no", null, null));
+					message = "Die angegebene Region lässt sich nicht " + edq.getExtendLength() + " Blöcke nach " + edq.getDirection() +
+							" erweitern, da die Region dann mit anderen Grundstücken überlappen würde/anderen Grundstücken zu nah wäre.";
 				} else {
-					edq.getPlayer().spigot().sendMessage(Lang.build("Es ist genügend Platz, um die Region, in der du stehst " + edq.getExtendLength() + " Blöcke nach " + edq.getDirection() +
-							" zu erweitern. Möchtest du die Region dahin erweitern?"),
-							Lang.build(Lang.EXPAND_YES, "/yes", null, null),
-							Lang.build(Lang.EXPAND_NO, "/no", null, null));
+					message = "Die Region, in der du stehst, lässt sich nicht " + edq.getExtendLength() + " Blöcke nach " + edq.getDirection() +
+							" erweitern, da die Region dann mit anderen Grundstücken überlappen würde/anderen Grundstücken zu nah wäre.";
 				}
 			} else {
-				if (edq.isRegionAngegeben()) {
-					edq.getPlayer().spigot().sendMessage(Lang.build("Die angegebene Region lässt sich nicht " + edq.getExtendLength() + " Blöcke nach " + edq.getDirection() +
-							" erweitern, da die Region dann mit anderen Grundstücken überlappen würde/anderen Grundstücken zu nah wäre."));
-				} else {
-					edq.getPlayer().spigot().sendMessage(Lang.build("Die Region, in der du stehst, lässt sich nicht " + edq.getExtendLength() + " Blöcke nach " + edq.getDirection() +
-							" erweitern, da die Region dann mit anderen Grundstücken überlappen würde/anderen Grundstücken zu nah wäre."));
+				message = "Die Fläche wäre für eine Erweiterung verfügbar.";
+			}
+			ExpandCheckEvent event = new ExpandCheckEvent(
+					player, true, edq.isRegionAngegeben(), regionIsOverlappingAndShouldNot, ClaimUtils.getArea(oldRegion), ClaimUtils.getArea(newRegion),
+					edq.getDirection(), edq.getExtendLength(), message);
+			Bukkit.getPluginManager().callEvent(event);
+			if (!event.isCancelled()) {
+				player.spigot().sendMessage(Lang.build(event.getMessage()));
+				if (!regionIsOverlappingAndShouldNot) {
+					CmdExpand.expandQuestion(player, edq.getWorld(), oldRegion,  edq.isRegionAngegeben(), event.getOldArea(), event.getNewArea(), true,
+							null, null,
+							edq.getDirection(), edq.getExtendLength(), null);
 				}
 			}
 		}
+	}
+
+	private static CuboidRegion newDirectionalExpandedRegion (ProtectedCuboidRegion oldRegion, World world, BlockFace direction, int extendLength) {
+		// get RegionManager for world
+		RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
+		RegionManager regions = container.get(BukkitAdapter.adapt(world));
+		// add all regions to candidates
+		List<ProtectedRegion> candidates = Lists.newArrayList();
+		regions.getRegions().forEach((k, r) -> {
+			candidates.add(r);
+		});
+		CuboidRegion newRegion = null;
+		switch (direction) {
+			case NORTH -> newRegion = new CuboidRegion(
+					oldRegion.getMaximumPoint(),
+					oldRegion.getMinimumPoint().add(BlockVector3.at(0,0,-extendLength)));
+			case EAST -> newRegion = new CuboidRegion(
+					oldRegion.getMaximumPoint().add(BlockVector3.at(extendLength,0,0)),
+					oldRegion.getMinimumPoint());
+			case SOUTH -> newRegion = new CuboidRegion(
+					oldRegion.getMaximumPoint().add(BlockVector3.at(0,0,extendLength)),
+					oldRegion.getMinimumPoint());
+			case WEST -> newRegion = new CuboidRegion(
+					oldRegion.getMaximumPoint(),
+					oldRegion.getMinimumPoint().add(BlockVector3.at(-extendLength,0,0)));
+		}
+		return newRegion;
 	}
 }

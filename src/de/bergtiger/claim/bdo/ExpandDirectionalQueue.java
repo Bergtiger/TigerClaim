@@ -3,6 +3,7 @@ package de.bergtiger.claim.bdo;
 import com.sk89q.worldedit.math.BlockVector2;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import org.bukkit.World;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 
 import java.util.List;
@@ -12,11 +13,11 @@ public class ExpandDirectionalQueue {
     private final Player player;
     private final World world;
     private final int extendLength;
-    private final String direction;
+    private final BlockFace direction;
     private final boolean regionAngegeben;
     private final boolean isCheck;
 
-    public ExpandDirectionalQueue(ProtectedRegion oldRegion, World world, Player player, String direction, int extendLength, boolean regionAngegeben, boolean isCheck) {
+    public ExpandDirectionalQueue(ProtectedRegion oldRegion, World world, Player player, BlockFace direction, int extendLength, boolean regionAngegeben, boolean isCheck) {
         this.region = oldRegion;
         this.world = world;
         this.player = player;
@@ -42,7 +43,7 @@ public class ExpandDirectionalQueue {
         return extendLength;
     }
 
-    public String getDirection() {
+    public BlockFace getDirection() {
         return direction;
     }
 
