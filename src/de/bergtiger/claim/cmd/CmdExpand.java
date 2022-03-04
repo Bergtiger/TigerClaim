@@ -395,12 +395,10 @@ public class CmdExpand {
                                         null, null, message);
                                 Bukkit.getPluginManager().callEvent(event);
                                 if (!event.isCancelled()) {
-                                    Polygonal2DRegion selectionWithCorrectHeight = (Polygonal2DRegion) markierung.clone();
-                                    selectionWithCorrectHeight.setMinimumY(oldRegion.getMinimumPoint().getY());
-                                    selectionWithCorrectHeight.setMaximumY(oldRegion.getMaximumPoint().getY());
+                                    Polygonal2DRegion markierungAlsPolygon = ClaimUtils.markierungAlsPolygon(oldRegion, markierung);
                                     ConfirmationListener.inst().addConfirmation(new ExpandSelectionalQueue(
                                             oldRegion, player.getWorld(), player, ergebnisPolygon, regionAngegeben, true,
-                                            selectionWithCorrectHeight, result.getContainsGapsFromOldRegionAndSelection()));
+                                            markierungAlsPolygon, result.getContainsGapsFromOldRegionAndSelection()));
                                     if (regionAngegeben) {
                                         player.spigot().sendMessage(Lang.build(event.getMessage()),
                                                 Lang.build(Lang.EXPAND_YES, "/yes", null, null),
@@ -412,26 +410,10 @@ public class CmdExpand {
                                     }
                                 }
                             } else {
+                                Polygonal2DRegion markierungAlsPolygon = ClaimUtils.markierungAlsPolygon(oldRegion, markierung);
                                 CmdExpand.expandQuestion(player, player.getWorld(), oldRegion, regionAngegeben, alteFläche, neueFläche, false,
-                                        (Polygonal2DRegion) markierung, result.getContainsGapsFromOldRegionAndSelection(),
+                                        markierungAlsPolygon, result.getContainsGapsFromOldRegionAndSelection(),
                                         null, null, ergebnisPolygon);
-                                Polygonal2DRegion selectionWithCorrectHeight = (Polygonal2DRegion) markierung.clone();
-                                selectionWithCorrectHeight.setMinimumY(oldRegion.getMinimumPoint().getY());
-                                selectionWithCorrectHeight.setMaximumY(oldRegion.getMaximumPoint().getY());
-                                ConfirmationListener.inst().addConfirmation(new ExpandSelectionalQueue(
-                                        oldRegion, player.getWorld(), player, ergebnisPolygon, regionAngegeben, false,
-                                        selectionWithCorrectHeight, result.getContainsGapsFromOldRegionAndSelection()));
-                                if (regionAngegeben) {
-                                    player.spigot().sendMessage(Lang.build("Möchtest du die angegebene Region (Fläche: " + alteFläche + "m^2) um deine Markierung erweitern? " +
-                                                    "Die neue Region hätte eine Fläche von " + neueFläche + "m^2."),
-                                            Lang.build(Lang.EXPAND_YES, "/yes", null, null),
-                                            Lang.build(Lang.EXPAND_NO, "/no", null, null));
-                                } else {
-                                    player.spigot().sendMessage(Lang.build("Möchtest du die Region, auf der du stehst (Fläche: " + alteFläche + "m^2) um deine Markierung erweitern? " +
-                                                    "Die neue Region hätte eine Fläche von " + neueFläche + "m^2."),
-                                            Lang.build(Lang.EXPAND_YES, "/yes", null, null),
-                                            Lang.build(Lang.EXPAND_NO, "/no", null, null));
-                                }
                             }
                         } else {
                             // No Region
@@ -473,7 +455,7 @@ public class CmdExpand {
     }
 
     public static void expandQuestion(Player player, World world, ProtectedRegion oldRegion, boolean regionStated, double alteFläche, double neueFläche, boolean isDirectionalExtension,
-                                      Polygonal2DRegion markierung, Boolean containsGapsFromOldRegionAndSelection,
+                                      Polygonal2DRegion selectionWithCorrectHeight, Boolean containsGapsFromOldRegionAndSelection,
                                       BlockFace direction, Integer extendLength, List<BlockVector2> eckpunkteDerNeuenRegion
     ) {
         String message;
@@ -504,9 +486,6 @@ public class CmdExpand {
                 ConfirmationListener.inst().addConfirmation(new ExpandDirectionalQueue(
                         oldRegion, world, player, direction, extendLength, regionStated, false));
             } else {
-                Polygonal2DRegion selectionWithCorrectHeight = markierung.clone();
-                selectionWithCorrectHeight.setMinimumY(oldRegion.getMinimumPoint().getY());
-                selectionWithCorrectHeight.setMaximumY(oldRegion.getMaximumPoint().getY());
                 ConfirmationListener.inst().addConfirmation(new ExpandSelectionalQueue(
                         oldRegion, world, player, eckpunkteDerNeuenRegion, regionStated, false, selectionWithCorrectHeight, containsGapsFromOldRegionAndSelection));
             }

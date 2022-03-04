@@ -875,4 +875,18 @@ public class ClaimUtils {
 		}
 		return false;
 	}
+
+	public static Polygonal2DRegion markierungAlsPolygon(ProtectedRegion oldRegion, Region markierung) {
+		Polygonal2DRegion markierungAlsPolygon;
+		if (markierung instanceof Polygonal2DRegion) {
+			markierungAlsPolygon = ((Polygonal2DRegion) markierung).clone();
+			markierungAlsPolygon.setMinimumY(oldRegion.getMinimumPoint().getY());
+			markierungAlsPolygon.setMaximumY(oldRegion.getMaximumPoint().getY());
+		} else {
+			markierungAlsPolygon = new Polygonal2DRegion(
+					markierung.getWorld(), ClaimUtils.polygonAusKuboidRegion((CuboidRegion) markierung),
+					oldRegion.getMinimumPoint().getY(), oldRegion.getMaximumPoint().getY());
+		}
+		return markierungAlsPolygon;
+	}
 }
