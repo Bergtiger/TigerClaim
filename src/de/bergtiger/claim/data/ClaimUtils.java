@@ -57,7 +57,7 @@ public class ClaimUtils {
 				BlockVector2 ersterPunkt = polyRegion.getPoints().get(0);
 				summe = summe + letzterPunkt.getBlockX() * ersterPunkt.getBlockZ() - letzterPunkt.getBlockZ() * ersterPunkt.getBlockX();
 				double scharfeFläche = Math.abs(summe / 2.0);
-				return flächeEinesPixelPolygons(scharfePolgonFläche(polyRegion.getPoints()), polyRegion.getPoints());
+				return round(flächeEinesPixelPolygons(scharfePolgonFläche(polyRegion.getPoints()), polyRegion.getPoints()),8);
 			} else {
 				//Rechtecks-Grundfläche
 				double area = (1 + Math.abs((region.getMinimumPoint().getX() - region.getMaximumPoint().getX()))) *
@@ -633,7 +633,7 @@ public class ClaimUtils {
 	public static boolean liegtPunktCAufStreckeAB(Vector2 C, Vector2 A, Vector2 B) {
 		Vector2 AC = C.subtract(A);
 		Vector2 BC = C.subtract(B);
-		if (Math.abs(Math.abs(AC.dot(BC)) - AC.length() * BC.length()) < 0.000001) { //hier muss gerundet werden, da sonst noch feinere Rundungsfehler für ein falsches Ergebnis sorgen können
+		if (round(Math.abs(AC.dot(BC)) - AC.length() * BC.length(),8) == 0) { //hier muss gerundet werden, da sonst noch feinere Rundungsfehler für ein falsches Ergebnis sorgen können
 			//AC und BC sind parallel
 			if (((A.getX() <= C.getX() && C.getX() <= B.getX()) || (A.getX() >= C.getX() && C.getX() >= B.getX())) &&
 					((A.getZ() <= C.getZ() && C.getZ() <= B.getZ()) || (A.getZ() >= C.getZ() && C.getZ() >= B.getZ()))
@@ -888,5 +888,10 @@ public class ClaimUtils {
 					oldRegion.getMinimumPoint().getY(), oldRegion.getMaximumPoint().getY());
 		}
 		return markierungAlsPolygon;
+	}
+
+	public static double round(double value, int decimalPoints) {
+		double d = Math.pow(10, decimalPoints);
+		return Math.round(value * d) / d;
 	}
 }
