@@ -639,38 +639,36 @@ public class CmdExpand {
             //Bleibt unverändert:
             Vector2 startpunkt, ArrayList<Vector2> polygon1punkte, ArrayList<Vector2> polygon2punkte,
             //Wird in Rekursion verändert:
-            Vector2 eckpunkt, boolean eckpunktIstVonP1, ArrayList<Vector2> potentiellNeuesPolygon
+            Vector2 punktAufPolygonKante, boolean eckpunktIstVonP1, ArrayList<Vector2> potentiellNeuesPolygon
     ) {
         if (potentiellNeuesPolygon.contains(startpunkt)) {
             //Sobald man wieder beim Start angekommen ist, ist das neue Polygon komplett und wird zurück gegeben
             return potentiellNeuesPolygon;
         } else {
-            IntersectionResult result = null;
-            Vector2 nächsterEckpunkt = null;
+            IntersectionResult result;
+            Vector2 nächsterEckpunkt;
             if (eckpunktIstVonP1) {
                 //Polygon A = Polygon 1, Polygon B = Polygon 2
-                nächsterEckpunkt = ClaimUtils.nächsterEckpunkt(eckpunkt, polygon1punkte);
-                result = ClaimUtils.ersterSchnittpunktMitPolygonAufStrecke(eckpunkt, nächsterEckpunkt, polygon2punkte);
+                nächsterEckpunkt = ClaimUtils.nächsterEckpunkt(punktAufPolygonKante, polygon1punkte);
+                result = ClaimUtils.ersterSchnittpunktMitPolygonAufStrecke(punktAufPolygonKante, nächsterEckpunkt, polygon2punkte);
             } else {
                 //Polygon A = Polygon 2, Polygon B = Polygon 1
-                nächsterEckpunkt = ClaimUtils.nächsterEckpunkt(eckpunkt, polygon2punkte);
-                result = ClaimUtils.ersterSchnittpunktMitPolygonAufStrecke(eckpunkt, nächsterEckpunkt, polygon1punkte);
+                nächsterEckpunkt = ClaimUtils.nächsterEckpunkt(punktAufPolygonKante, polygon2punkte);
+                result = ClaimUtils.ersterSchnittpunktMitPolygonAufStrecke(punktAufPolygonKante, nächsterEckpunkt, polygon1punkte);
             }
-            if (result != null) {
-                //Polygon A schneidet sich zwischen eckpunkt und nächsterEckpunkt mit Polygon B:
+            if (result != null && !result.getSchnittpunkt().equals(punktAufPolygonKante)) {
+                //Polygon A schneidet sich zwischen punktAufPolygonKante und nächsterEckpunkt mit Polygon B:
                 // der erste Schnittpunkt wird als Eckpunkt des neuen Polygons hinzugefügt, das Polygon wird zu Polygon B gewechselt
                 // und der nächste Punkt auf Polygon B wird zum neuen Polygon hinzugefügt
                 // danach wird rekursiv die nächste Kante in Polygon B betrachtet
                 Vector2 ersterSchnittpunkt = result.getSchnittpunkt();
                 Vector2 nächsteEckeVonSchnittpunktKante = result.getEcke2();
                 Bukkit.broadcastMessage(ChatColor.RED + "potentiellNeuesPolygon: Schnittpunkt: (" + ersterSchnittpunkt.getX() + "," + ersterSchnittpunkt.getZ() + ")");
-                Bukkit.broadcastMessage(ChatColor.RED + "potentiellNeuesPolygon: nächsteEckeVonSchnittpunktKante: (" + nächsteEckeVonSchnittpunktKante.getX() + "," + nächsteEckeVonSchnittpunktKante.getZ() + ")");
                 potentiellNeuesPolygon.add(ersterSchnittpunkt);
-                potentiellNeuesPolygon.add(nächsteEckeVonSchnittpunktKante);
                 return potentiellNeuesPolygon (startpunkt, polygon1punkte, polygon2punkte,
-                        nächsteEckeVonSchnittpunktKante, !eckpunktIstVonP1,  potentiellNeuesPolygon);
+                        ersterSchnittpunkt, !eckpunktIstVonP1,  potentiellNeuesPolygon);
             } else {
-                //Polygon A schneidet sich zwischen eckpunkt und nächsterEckpunkt nicht mit Polygon B:
+                //Polygon A schneidet sich zwischen punktAufPolygonKante und nächsterEckpunkt nicht mit Polygon B:
                 // und der nächste Punkt auf Polygon A wird zum neuen Polygon hinzugefügt
                 // danach wird rekursiv die nächste Kante in Polygon A betrachtet (Polygon wird also nicht gewechselt)
                 potentiellNeuesPolygon.add(nächsterEckpunkt);

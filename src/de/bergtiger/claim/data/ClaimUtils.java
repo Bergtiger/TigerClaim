@@ -614,6 +614,7 @@ public class ClaimUtils {
 			System.out.println("ERROR: ClaimUtils.schnittpunktVonZweiStrecken: Die Steigungen der beiden Strecken sind unendlich, aber die Strecken sind auch nicht parallel.");
 		}
 		System.out.println("m1: " + m1 + "; m2: " + m2 + "; b1: " + b1 + "; b2: " + b2 + "; x: " + x + "; z: " + z);
+		//Liegt der Schnittpunkt der zwei Geraden, die aus den zwei Strecken weitergeführt werden können, auf beiden Strecken?
 		if (((strecke1punkt1.getX() <= x && x <= strecke1punkt2.getX()) || (strecke1punkt1.getX() >= x && x >= strecke1punkt2.getX())) &&
 			((strecke1punkt1.getZ() <= z && z <= strecke1punkt2.getZ()) || (strecke1punkt1.getZ() >= z && z >= strecke1punkt2.getZ())) &&
 			((strecke2punkt1.getX() <= x && x <= strecke2punkt2.getX()) || (strecke2punkt1.getX() >= x && x >= strecke2punkt2.getX())) &&
@@ -627,6 +628,21 @@ public class ClaimUtils {
 			//Strecken haben 0 Schnittpunkte
 			return null;
 		}
+	}
+
+	public static boolean liegtPunktCAufStreckeAB(Vector2 C, Vector2 A, Vector2 B) {
+		Vector2 AC = C.subtract(A);
+		Vector2 BC = C.subtract(B);
+		if (Math.abs(Math.abs(AC.dot(BC)) - AC.length() * BC.length()) < 0.000001) { //hier muss gerundet werden, da sonst noch feinere Rundungsfehler für ein falsches Ergebnis sorgen können
+			//AC und BC sind parallel
+			if (((A.getX() <= C.getX() && C.getX() <= B.getX()) || (A.getX() >= C.getX() && C.getX() >= B.getX())) &&
+					((A.getZ() <= C.getZ() && C.getZ() <= B.getZ()) || (A.getZ() >= C.getZ() && C.getZ() >= B.getZ()))
+			) {
+				// C liegt zwischen A und B
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public static Boolean liegtPunktInPolygon (Vector2 testpunkt, ArrayList<Vector2> polygon) {
@@ -659,15 +675,34 @@ public class ClaimUtils {
 		}
 	}
 
-	public static Vector2 nächsterEckpunkt (Vector2 eckpunkt, ArrayList<Vector2> polygon) {
+	public static Vector2 nächsterEckpunkt (Vector2 punktAufPolygonKante, ArrayList<Vector2> polygon) {
+		System.out.println("public static Vector2 nächsterEckpunkt - punktAufPolygonKante: (" + punktAufPolygonKante.getX() + "," + punktAufPolygonKante.getZ() + ")");
+		//Zuerst überprüfe, ob punktAufPolygonKante ein Eckpunkt ist und gebe wenn ja, den nächsten Eckpunkt zurück
 		for (int i = 0; i < polygon.size(); i++) {
 			Vector2 ecke = polygon.get(i);
-			if (ecke.equals(eckpunkt)) {
+			if (ecke.equals(punktAufPolygonKante)) {
 				if (i == polygon.size() - 1) {
 					return polygon.get(0);
 				} else {
 					return polygon.get(i+1);
 				}
+			}
+		}
+		//punktAufPolygonKante ist kein Eckpunkt:
+		for (int i = 0; i < polygon.size(); i++) {
+			Vector2 möglicheVorherigeEcke = polygon.get(i);
+			Vector2 möglicheNächsteEcke;
+			if (i == polygon.size() - 1) {
+				möglicheNächsteEcke = polygon.get(0);
+			} else {
+				möglicheNächsteEcke = polygon.get(i+1);
+			}
+			System.out.println("public static Vector2 nächsterEckpunkt - möglicheVorherigeEcke: (" +möglicheVorherigeEcke.getX() + "," + möglicheVorherigeEcke.getZ() +
+					"); möglicheNächsteEcke: (" + möglicheNächsteEcke.getX() + "," + möglicheNächsteEcke.getZ() +
+					"); liegtPunktCAufStreckeAB: " + liegtPunktCAufStreckeAB(punktAufPolygonKante, möglicheNächsteEcke, möglicheVorherigeEcke));
+			//Liegt punktAufPolygonKante auf der Strecke von möglicheVorherigeEcke zu möglicheNächsteEcke?:
+			if (liegtPunktCAufStreckeAB(punktAufPolygonKante, möglicheNächsteEcke, möglicheVorherigeEcke)) {
+				return möglicheNächsteEcke;
 			}
 		}
 		return null;
@@ -700,7 +735,7 @@ public class ClaimUtils {
 					eckpunkt1VonSchnittpunktKante = eckpunkt;
 					eckpunkt2VonSchnittpunktKante = nächsterEckpunkt;
 				} else {
-					if (startpunkt.distance(schnittpunkt) <= startpunkt.distance(ersterSchnittpunkt)) {
+					if (startpunkt.distance(schnittpunkt) <= startpunkt.distance(ersterSchnittpunkt) && !schnittpunkt.equals(startpunkt)) {
 						if (startpunkt.distance(schnittpunkt) == startpunkt.distance(ersterSchnittpunkt)) {
 							//Wenn von zwei Kanten vom Polygon der Schnittpunkt mit der Kante der selbe ist,
 							//soll die Kante ausgewählt werden, die weiter rechts führt (Da beim Vereinen von 2 Polygons Richtung gegen den Uhrzeigersinn gewählt wurde)
