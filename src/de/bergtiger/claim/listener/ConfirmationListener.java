@@ -79,6 +79,10 @@ public class ConfirmationListener implements Listener {
 					} else {
 						expandRegionDirectional(edq);
 					}
+				} else if (con instanceof RetractSelectionalQueue rsq) {
+					retractRegionWithSelection(rsq);
+				} else if (con instanceof RetractDirectionalQueue rdq) {
+					retractRegionDirectional(rdq);
 				}
 				if (queue.isEmpty())
 					queue = null;
@@ -133,6 +137,19 @@ public class ConfirmationListener implements Listener {
 	}
 
 	/**
+	 * add expand directional to queue.
+	 *
+	 * @param con to claim
+	 */
+	public void addConfirmation(ExpandDirectionalQueue con) {
+		if (con != null) {
+			if (queue == null)
+				queue = new HashMap<>();
+			queue.put(con.getPlayer(), con);
+		}
+	}
+
+	/**
 	 * add expand selection to queue.
 	 *
 	 * @param con to claim
@@ -146,11 +163,24 @@ public class ConfirmationListener implements Listener {
 	}
 
 	/**
-	 * add expand directional to queue.
+	 * add retract directional to queue.
 	 *
 	 * @param con to claim
 	 */
-	public void addConfirmation(ExpandDirectionalQueue con) {
+	public void addConfirmation(RetractDirectionalQueue con) {
+		if (con != null) {
+			if (queue == null)
+				queue = new HashMap<>();
+			queue.put(con.getPlayer(), con);
+		}
+	}
+
+	/**
+	 * add retract selection to queue.
+	 *
+	 * @param con to claim
+	 */
+	public void addConfirmation(RetractSelectionalQueue con) {
 		if (con != null) {
 			if (queue == null)
 				queue = new HashMap<>();
@@ -633,5 +663,78 @@ public class ConfirmationListener implements Listener {
 					oldRegion.getMinimumPoint().add(BlockVector3.at(-extendLength,0,0)));
 		}
 		return newRegion;
+	}
+
+	/**
+	 * check claim
+	 *
+	 * @param rsq to retract region with world edit selection
+	 */
+	private static void retractRegionWithSelection(RetractSelectionalQueue rsq) {
+		if (rsq != null) {
+			Player player = rsq.getPlayer();
+			// get RegionManager for world
+			RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
+			RegionManager regions = container.get(BukkitAdapter.adapt(rsq.getWorld()));
+			ProtectedRegion oldRegion = rsq.getRegion();
+			Polygonal2DRegion newRegion = new Polygonal2DRegion(BukkitAdapter.adapt(rsq.getWorld()) , rsq.getEckpunkteDerNeuenRegion(), oldRegion.getMinimumPoint().getY(), oldRegion.getMaximumPoint().getY());
+			String message = "Region " + oldRegion.getId() + " erfolgreich um Markierung beschnitten.";
+			RegionRetractEvent event = new RegionRetractEvent(
+					player, rsq.getWorld(), oldRegion, newRegion, rsq.getSelection(), false, rsq.isRegionAngegeben(), ClaimUtils.getArea(oldRegion), ClaimUtils.getArea(newRegion),
+					null, null, message);
+			Bukkit.getPluginManager().callEvent(event);
+			if (!event.isCancelled()) {
+				Map<Flag<?>,Object> flags = oldRegion.getFlags();
+				DefaultDomain members = oldRegion.getMembers();
+				int priority = oldRegion.getPriority();
+				DefaultDomain owners = oldRegion.getOwners();
+				regions.removeRegion(oldRegion.getId());
+				ProtectedPolygonalRegion newProtectedRegion = new ProtectedPolygonalRegion(oldRegion.getId(),rsq.getEckpunkteDerNeuenRegion(),oldRegion.getMinimumPoint().getY(), oldRegion.getMaximumPoint().getY());
+				newProtectedRegion.setFlags(flags);
+				newProtectedRegion.setMembers(members);
+				newProtectedRegion.setPriority(priority);
+				newProtectedRegion.setOwners(owners);
+				regions.addRegion(newProtectedRegion);
+
+				rsq.getPlayer().spigot().sendMessage(Lang.build(event.getMessage()));
+			}
+		}
+	}
+
+	/**
+	 * check claim
+	 *
+	 * @param rdq to retract region directional
+	 */
+	private static void retractRegionDirectional(RetractDirectionalQueue rdq) {
+		if (rdq != null) {
+			Player player = rdq.getPlayer();
+			// get RegionManager for world
+			RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
+			RegionManager regions = container.get(BukkitAdapter.adapt(rdq.getWorld()));
+			ProtectedCuboidRegion oldRegion = (ProtectedCuboidRegion) rdq.getRegion();
+			CuboidRegion newRegion = newDirectionalExpandedRegion((ProtectedCuboidRegion) rdq.getRegion(), rdq.getWorld(), rdq.getDirection(), - rdq.getExtendLength());
+			String message = "Region " + oldRegion.getId() + " erfolgreich " + rdq.getExtendLength() + " Blöcke auf Seite " + rdq.getDirection().name() + " verkürzt.";
+			CuboidRegion retraction = CmdExpand.theDirectionalExpansion(rdq.getDirection(), oldRegion, - rdq.getExtendLength());
+			RegionRetractEvent event = new RegionRetractEvent(
+					player, rdq.getWorld(), oldRegion, newRegion, retraction, true, rdq.isRegionAngegeben(), ClaimUtils.getArea(oldRegion), ClaimUtils.getArea(newRegion),
+					rdq.getDirection(), rdq.getExtendLength(), message);
+			Bukkit.getPluginManager().callEvent(event);
+			if (!event.isCancelled()) {
+				// oldRegion wird verkleinert (durch newRegion ersetzt)
+				Map<Flag<?>, Object> flags = oldRegion.getFlags();
+				DefaultDomain members = oldRegion.getMembers();
+				int priority = oldRegion.getPriority();
+				DefaultDomain owners = oldRegion.getOwners();
+				regions.removeRegion(oldRegion.getId());
+				ProtectedCuboidRegion newProtectedRegion = new ProtectedCuboidRegion(oldRegion.getId(), newRegion.getMinimumPoint(), newRegion.getMaximumPoint());
+				newProtectedRegion.setFlags(flags);
+				newProtectedRegion.setMembers(members);
+				newProtectedRegion.setPriority(priority);
+				newProtectedRegion.setOwners(owners);
+				regions.addRegion(newProtectedRegion);
+				rdq.getPlayer().spigot().sendMessage(Lang.build(event.getMessage()));
+			}
+		}
 	}
 }

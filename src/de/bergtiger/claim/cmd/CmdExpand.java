@@ -131,10 +131,10 @@ public class CmdExpand {
                         } else {
                             if (regionAngegeben) {
                                 player.spigot().sendMessage(Lang.build("Die angegebene Region ist eine Polygon-Region " +
-                                        "und lässt sich somit nicht in eine bestimmte Richtung erweitern, sondern nur durch eine markierte Region ergänzen."));
+                                        "und lässt sich somit nicht in eine bestimmte Richtung erweitern, sondern nur durch eine markierte Fläche ergänzen."));
                             } else {
                                 player.spigot().sendMessage(Lang.build("Die Region, in der du stehst, ist eine Polygon-Region " +
-                                        "und lässt sich somit nicht in eine bestimmte Richtung erweitern, sondern nur durch eine markierte Region ergänzen."));
+                                        "und lässt sich somit nicht in eine bestimmte Richtung erweitern, sondern nur durch eine markierte Fläche ergänzen."));
                             }
                             return;
                         }
@@ -184,6 +184,13 @@ public class CmdExpand {
                     }
                 } else {
                     // Erweiterung um Markierung:
+                    String noRegionMessage;
+                    if (cuboidRegion) {
+                        noRegionMessage = "Du müsstest noch eine Fläche markieren, um die du deine Region erweitern möchtest oder " +
+                                "eine Richtung (north/east/south/west) und eine positive ganze Zahl angeben, damit du deine Region entsprechend vergrößern kannst.";
+                    } else {
+                        noRegionMessage = "Du müsstest noch eine Fläche markieren, um die du deine Region erweitern möchtest.";
+                    }
                     try {
                         WorldEdit we = WorldEdit.getInstance();
                         BukkitPlayer bp = BukkitAdapter.adapt(player);
@@ -310,21 +317,21 @@ public class CmdExpand {
                             }
                             UnitePolygonsResult result = uniteTwoPolygons(alteRegionsBlockPolygon, markierungsBlockPolygon);
                             if (result.getPolygon() == null) {
-                                if (result.getResultType() == UnitePolygonsResultType.POLYGON1_NOT_INTERSECTS_POLYGON2) {
+                                if (result.getResultType() == UnitePolygonsResultType.POLYGONS_DONT_INTERSECT_EACH_OTHER) {
                                     if (regionAngegeben) {
                                         player.spigot().sendMessage(Lang.build("Die Fläche, die du markiert hast, überschneidet oder berührt die angegebene Region nicht."));
                                     } else {
                                         player.spigot().sendMessage(Lang.build("Die Fläche, die du markiert hast, überschneidet oder berührt die Region nicht, in der du gerade stehst."));
                                     }
                                     return;
-                                } else if (result.getResultType() == UnitePolygonsResultType.POLYGON1_INTERSECTS_ITSELF) {
+                                } else if (result.getResultType() == UnitePolygonsResultType.OLD_REGION_INTERSECTS_ITSELF) {
                                     if (regionAngegeben) {
                                         player.spigot().sendMessage(Lang.build("Die angegebene Region überschneidet sich selbst, was eigentlich hier nicht vorkommen dürfte."));
                                     } else {
                                         player.spigot().sendMessage(Lang.build("Die Region, in der du gerade stehst, überschneidet sich selbst, was eigentlich hier nicht vorkommen dürfte."));
                                     }
                                     return;
-                                } else if (result.getResultType() == UnitePolygonsResultType.POLYGON2_INTERSECTS_ITSELF) {
+                                } else if (result.getResultType() == UnitePolygonsResultType.SELECTION_INTERSECTS_ITSELF) {
                                     player.spigot().sendMessage(Lang.build("Die Fläche, die du markiert hast, überschneidet sich selbst."));
                                     return;
                                 } else if (result.getResultType() == UnitePolygonsResultType.BOTH_POLYGONS_INTERSECT_THEMSELVES) {
@@ -336,7 +343,7 @@ public class CmdExpand {
                                                 "Deine markierte Fläche übrigens auch, damit kannst du keine Region erweitern."));
                                     }
                                     return;
-                                } else if (result.getResultType() == UnitePolygonsResultType.POLYGON2_IS_INSIDE_POLYGON1) {
+                                } else if (result.getResultType() == UnitePolygonsResultType.SELECTION_IS_INSIDE_OLD_REGION) {
                                     if (regionAngegeben) {
                                         player.spigot().sendMessage(Lang.build("Deine Markierung liegt komplett innerhalb der angegebenen Region. " +
                                                 "So kannst du die Region nicht erweitern."));
@@ -354,14 +361,14 @@ public class CmdExpand {
                                                 "um eine zusammenhängende neue Region daraus zu bilden"));
                                     }
                                     return;
-                                } else if (result.getResultType() == UnitePolygonsResultType.POLYGON1_HAS_POINT_MULTIPLE) {
+                                } else if (result.getResultType() == UnitePolygonsResultType.OLD_REGION_HAS_POINT_MULTIPLE) {
                                     if (regionAngegeben) {
                                         player.spigot().sendMessage(Lang.build("Die angegebene Region verwendet Eckpunkte mehrfach, was nicht vorkommen sollte."));
                                     } else {
                                         player.spigot().sendMessage(Lang.build("Die Region, in der du stehst, verwendet Eckpunkte mehrfach, was nicht vorkommen sollte."));
                                     }
                                     return;
-                                } else if (result.getResultType() == UnitePolygonsResultType.POLYGON2_HAS_POINT_MULTIPLE) {
+                                } else if (result.getResultType() == UnitePolygonsResultType.SELECTION_HAS_POINT_MULTIPLE) {
                                     player.spigot().sendMessage(Lang.build("Deine Markierung verwendet Eckpunkte mehrfach.")); //Selbe Nachricht weiter oben benötigt
                                     return;
                                 } else if (result.getResultType() == UnitePolygonsResultType.POLYGONS_ARE_EQUAL) {
@@ -417,30 +424,13 @@ public class CmdExpand {
                             }
                         } else {
                             // No Region
-                            if (cuboidRegion) {
-                                player.spigot().sendMessage(Lang.build("Du müsstest noch eine Fläche markieren, um die du deine Region erweitern möchtest oder " +
-                                        "eine Richtung (north/east/south/west) und eine positive ganze Zahl angeben, damit du deine Region entsprechend vergrößern kannst."));
-                            } else {
-                                player.spigot().sendMessage(Lang.build("Du müsstest noch eine Fläche markieren, um die du deine Region erweitern möchtest."));
-                            }
+                            player.spigot().sendMessage(Lang.build(noRegionMessage));
                             return;
                         }
                     } catch (IncompleteRegionException e) {
                         // No Region
-                        if (cuboidRegion) {
-                            player.spigot().sendMessage(Lang.build("Du müsstest noch eine Fläche markieren, um die du deine Region erweitern möchtest oder " +
-                                    "eine Richtung (north/east/south/west) und eine positive ganze Zahl angeben, damit du deine Region entsprechend vergrößern kannst."));
-                        } else {
-                            player.spigot().sendMessage(Lang.build("Du müsstest noch eine Fläche markieren, um die du deine Region erweitern möchtest."));
-                        }
+                        player.spigot().sendMessage(Lang.build(noRegionMessage));
                         return;
-                    }
-
-
-                    if (cuboidRegion) {
-
-                    } else {
-
                     }
                 }
             } else {
@@ -515,10 +505,10 @@ public class CmdExpand {
 
     private static UnitePolygonsResult uniteTwoPolygons (List<BlockVector2> alteRegionsBlockPolygon, List<BlockVector2> markierungsBlockPolygon) {
         if (ClaimUtils.polygonHatEckpunkteMehrfach(alteRegionsBlockPolygon)) {
-            return new UnitePolygonsResult(null,UnitePolygonsResultType.POLYGON1_HAS_POINT_MULTIPLE, null);
+            return new UnitePolygonsResult(null,UnitePolygonsResultType.OLD_REGION_HAS_POINT_MULTIPLE, null);
         }
         if (ClaimUtils.polygonHatEckpunkteMehrfach(markierungsBlockPolygon)) {
-            return new UnitePolygonsResult(null,UnitePolygonsResultType.POLYGON2_HAS_POINT_MULTIPLE, null);
+            return new UnitePolygonsResult(null,UnitePolygonsResultType.SELECTION_HAS_POINT_MULTIPLE, null);
         }
         ArrayList<Vector2> alteRegionsPolygon = new ArrayList<>();
         for (BlockVector2 blockVector2 : alteRegionsBlockPolygon) {
@@ -535,10 +525,10 @@ public class CmdExpand {
             return new UnitePolygonsResult(null, UnitePolygonsResultType.BOTH_POLYGONS_INTERSECT_THEMSELVES, null);
         }
         if (region1ImUhrzeigerSinn == null) {
-            return new UnitePolygonsResult(null, UnitePolygonsResultType.POLYGON1_INTERSECTS_ITSELF, null);
+            return new UnitePolygonsResult(null, UnitePolygonsResultType.OLD_REGION_INTERSECTS_ITSELF, null);
         }
         if (region2ImUhrzeigerSinn == null) {
-            return new UnitePolygonsResult(null, UnitePolygonsResultType.POLYGON2_INTERSECTS_ITSELF, null);
+            return new UnitePolygonsResult(null, UnitePolygonsResultType.SELECTION_INTERSECTS_ITSELF, null);
         }
         if (region2ImUhrzeigerSinn) {
             markierungsPolygon = ClaimUtils.punktListeInvertiert(markierungsPolygon);
@@ -562,7 +552,7 @@ public class CmdExpand {
                 if (!bereitsÜberprüfteStartpunkte.contains(startpunkt)) {
                     //... wird ein potentielles neues Polygon gefunden
                     Bukkit.broadcastMessage("Potentielles Polygon " + i + "; startpunkt: (" + startpunkt.getX() + "," + startpunkt.getZ() + ")"); i++;
-                    ArrayList<Vector2> potentiellNeuesPolygon = potentiellNeuesPolygon(
+                    ArrayList<Vector2> potentiellNeuesPolygon = potentiellNeuesPolygonBildung(
                             startpunkt, markierungsPolygon, alteRegionsPolygon, //Bleibt unverändert
                             startpunkt, true, new ArrayList<>()); //Wird in Rekursion verändert
                     potentielleNeuePolygone.add(potentiellNeuesPolygon);
@@ -594,10 +584,10 @@ public class CmdExpand {
             }
             if (polygon2LiegtInPolygon1) {
                 // Markierung liegt komplett innerhalb Region
-                return new UnitePolygonsResult(null, UnitePolygonsResultType.POLYGON2_IS_INSIDE_POLYGON1, null);
+                return new UnitePolygonsResult(null, UnitePolygonsResultType.SELECTION_IS_INSIDE_OLD_REGION, null);
             } else {
                 // Markierung und Region überschneiden sich nicht
-                return new UnitePolygonsResult(null, UnitePolygonsResultType.POLYGON1_NOT_INTERSECTS_POLYGON2, null);
+                return new UnitePolygonsResult(null, UnitePolygonsResultType.POLYGONS_DONT_INTERSECT_EACH_OTHER, null);
             }
         }
         if (neuesPolygon != null) {
@@ -614,7 +604,7 @@ public class CmdExpand {
         return new UnitePolygonsResult(neuesBlockPolygon, UnitePolygonsResultType.BOUNDING_POLYGON_FOUND, lückenFläche > 0.0);
     }
 
-    private static ArrayList<Vector2> potentiellNeuesPolygon (
+    private static ArrayList<Vector2> potentiellNeuesPolygonBildung(
             //Bleibt unverändert:
             Vector2 startpunkt, ArrayList<Vector2> polygon1punkte, ArrayList<Vector2> polygon2punkte,
             //Wird in Rekursion verändert:
@@ -629,11 +619,11 @@ public class CmdExpand {
             if (eckpunktIstVonP1) {
                 //Polygon A = Polygon 1, Polygon B = Polygon 2
                 nächsterEckpunkt = ClaimUtils.nächsterEckpunkt(punktAufPolygonKante, polygon1punkte);
-                result = ClaimUtils.ersterSchnittpunktMitPolygonAufStrecke(punktAufPolygonKante, nächsterEckpunkt, polygon2punkte);
+                result = ClaimUtils.ersterSchnittpunktMitPolygonAufStrecke(punktAufPolygonKante, nächsterEckpunkt, polygon2punkte, false);
             } else {
                 //Polygon A = Polygon 2, Polygon B = Polygon 1
                 nächsterEckpunkt = ClaimUtils.nächsterEckpunkt(punktAufPolygonKante, polygon2punkte);
-                result = ClaimUtils.ersterSchnittpunktMitPolygonAufStrecke(punktAufPolygonKante, nächsterEckpunkt, polygon1punkte);
+                result = ClaimUtils.ersterSchnittpunktMitPolygonAufStrecke(punktAufPolygonKante, nächsterEckpunkt, polygon1punkte, false);
             }
             if (result != null && !result.getSchnittpunkt().equals(punktAufPolygonKante)) {
                 //Polygon A schneidet sich zwischen punktAufPolygonKante und nächsterEckpunkt mit Polygon B:
@@ -644,7 +634,7 @@ public class CmdExpand {
                 Vector2 nächsteEckeVonSchnittpunktKante = result.getEcke2();
                 Bukkit.broadcastMessage(ChatColor.RED + "potentiellNeuesPolygon: Schnittpunkt: (" + ersterSchnittpunkt.getX() + "," + ersterSchnittpunkt.getZ() + ")");
                 potentiellNeuesPolygon.add(ersterSchnittpunkt);
-                return potentiellNeuesPolygon (startpunkt, polygon1punkte, polygon2punkte,
+                return potentiellNeuesPolygonBildung(startpunkt, polygon1punkte, polygon2punkte,
                         ersterSchnittpunkt, !eckpunktIstVonP1,  potentiellNeuesPolygon);
             } else {
                 //Polygon A schneidet sich zwischen punktAufPolygonKante und nächsterEckpunkt nicht mit Polygon B:
@@ -652,7 +642,7 @@ public class CmdExpand {
                 // danach wird rekursiv die nächste Kante in Polygon A betrachtet (Polygon wird also nicht gewechselt)
                 potentiellNeuesPolygon.add(nächsterEckpunkt);
                 Bukkit.broadcastMessage(ChatColor.RED + "potentiellNeuesPolygon: nächsterEckpunkt: (" + nächsterEckpunkt.getX() + "," + nächsterEckpunkt.getZ() + ")");
-                return potentiellNeuesPolygon (startpunkt, polygon1punkte, polygon2punkte,
+                return potentiellNeuesPolygonBildung(startpunkt, polygon1punkte, polygon2punkte,
                         nächsterEckpunkt, eckpunktIstVonP1,  potentiellNeuesPolygon);
             }
         }

@@ -1,0 +1,51 @@
+package de.bergtiger.claim.bdo;
+
+import com.sk89q.worldedit.math.BlockVector2;
+import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import org.bukkit.World;
+import org.bukkit.block.BlockFace;
+import org.bukkit.entity.Player;
+
+import java.util.List;
+
+public class RetractDirectionalQueue {
+    private final ProtectedRegion region;
+    private final Player player;
+    private final World world;
+    private final int extendLength;
+    private final BlockFace direction;
+    private final boolean regionAngegeben;
+
+    public RetractDirectionalQueue(ProtectedRegion oldRegion, World world, Player player, BlockFace direction, int extendLength, boolean regionAngegeben) {
+        this.region = oldRegion;
+        this.world = world;
+        this.player = player;
+        this.direction = direction;
+        this.extendLength = extendLength;
+        this.regionAngegeben = regionAngegeben;
+    }
+
+    public ProtectedRegion getRegion() {
+        return region;
+    }
+
+    public Player getPlayer() {
+        return player;
+    }
+
+    public World getWorld() {
+        return world;
+    }
+
+    public int getExtendLength() {
+        return extendLength;
+    }
+
+    public BlockFace getDirection() {
+        return direction;
+    }
+
+    public boolean isRegionAngegeben() {
+        return regionAngegeben;
+    }
+}

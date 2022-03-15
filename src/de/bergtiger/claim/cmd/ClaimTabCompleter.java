@@ -40,6 +40,9 @@ public class ClaimTabCompleter implements TabCompleter {
 			// ExpandCheck
 			if (Perm.hasPermission(cs, Perm.CLAIM_ADMIN, Perm.CLAIM_EXPANDCHECK))
 				list.add(Claim.EXPANDCHECK);
+			// Retract
+			if (Perm.hasPermission(cs, Perm.CLAIM_ADMIN, Perm.CLAIM_RETRACT))
+				list.add(Claim.RETRACT);
 			// Set
 			if (Perm.hasPermission(cs, Perm.CLAIM_ADMIN, Perm.CLAIM_SET))
 				list.add(Claim.SET);

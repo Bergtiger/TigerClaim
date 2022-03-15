@@ -15,6 +15,7 @@ public class Claim implements CommandExecutor {
 			CLAIM = "claim", CREATE = "create", NEW = "new",
 			DELETE = "delete",
 			EXPANDCHECK = "expandcheck",
+			RETRACT = "retract",
 			EXPAND = "expand",
 			PLUGIN = "plugin",
 			RELOAD = "reload";
@@ -39,6 +40,7 @@ public class Claim implements CommandExecutor {
 				case DELETE -> CmdDelete.delete(cs, args);
 				case EXPANDCHECK -> CmdExpand.expand(cs, args, true, false);
 				case EXPAND -> CmdExpand.expand(cs, args, false, false);
+				case RETRACT -> CmdRetract.retract(cs, args);
 				case PLUGIN -> CmdPlugin.showPluginInfo(cs);
 				case RELOAD -> CmdReload.reload(cs);
 				default -> CmdHelp.help(cs);

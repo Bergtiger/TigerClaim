@@ -658,7 +658,7 @@ public class ClaimUtils {
 				deltaZMax = Math.abs(testpunkt.getZ() - eckpunkt.getZ());
 			}
 		}
-		parallelZuKeinerWorldEditKante.multiply(Vector2.at(deltaXMax,deltaZMax));
+		parallelZuKeinerWorldEditKante = parallelZuKeinerWorldEditKante.multiply(Vector2.at(deltaXMax,deltaZMax));
 		Vector2 fernerPunkt = testpunkt.add(parallelZuKeinerWorldEditKante);
 		Vector2 letzterEckpunkt = polygon.get(polygon.size() - 1);
 		int anzahlSchnitte = 0;
@@ -676,7 +676,6 @@ public class ClaimUtils {
 	}
 
 	public static Vector2 nächsterEckpunkt (Vector2 punktAufPolygonKante, ArrayList<Vector2> polygon) {
-		System.out.println("public static Vector2 nächsterEckpunkt - punktAufPolygonKante: (" + punktAufPolygonKante.getX() + "," + punktAufPolygonKante.getZ() + ")");
 		//Zuerst überprüfe, ob punktAufPolygonKante ein Eckpunkt ist und gebe wenn ja, den nächsten Eckpunkt zurück
 		for (int i = 0; i < polygon.size(); i++) {
 			Vector2 ecke = polygon.get(i);
@@ -697,12 +696,38 @@ public class ClaimUtils {
 			} else {
 				möglicheNächsteEcke = polygon.get(i+1);
 			}
-			System.out.println("public static Vector2 nächsterEckpunkt - möglicheVorherigeEcke: (" +möglicheVorherigeEcke.getX() + "," + möglicheVorherigeEcke.getZ() +
-					"); möglicheNächsteEcke: (" + möglicheNächsteEcke.getX() + "," + möglicheNächsteEcke.getZ() +
-					"); liegtPunktCAufStreckeAB: " + liegtPunktCAufStreckeAB(punktAufPolygonKante, möglicheNächsteEcke, möglicheVorherigeEcke));
 			//Liegt punktAufPolygonKante auf der Strecke von möglicheVorherigeEcke zu möglicheNächsteEcke?:
 			if (liegtPunktCAufStreckeAB(punktAufPolygonKante, möglicheNächsteEcke, möglicheVorherigeEcke)) {
 				return möglicheNächsteEcke;
+			}
+		}
+		return null;
+	}
+
+	public static Vector2 vorherigerEckpunkt (Vector2 punktAufPolygonKante, ArrayList<Vector2> polygon) {
+		//Zuerst überprüfe, ob punktAufPolygonKante ein Eckpunkt ist und gebe wenn ja, den vorherigen Eckpunkt zurück
+		for (int i = 0; i < polygon.size(); i++) {
+			Vector2 ecke = polygon.get(i);
+			if (ecke.equals(punktAufPolygonKante)) {
+				if (i == 0) {
+					return polygon.get(polygon.size() - 1);
+				} else {
+					return polygon.get(i-1);
+				}
+			}
+		}
+		//punktAufPolygonKante ist kein Eckpunkt:
+		for (int i = 0; i < polygon.size(); i++) {
+			Vector2 möglicheVorherigeEcke = polygon.get(i);
+			Vector2 möglicheNächsteEcke;
+			if (i == polygon.size() - 1) {
+				möglicheNächsteEcke = polygon.get(0);
+			} else {
+				möglicheNächsteEcke = polygon.get(i+1);
+			}
+			//Liegt punktAufPolygonKante auf der Strecke von möglicheVorherigeEcke zu möglicheNächsteEcke?:
+			if (liegtPunktCAufStreckeAB(punktAufPolygonKante, möglicheNächsteEcke, möglicheVorherigeEcke)) {
+				return möglicheVorherigeEcke;
 			}
 		}
 		return null;
@@ -722,7 +747,7 @@ public class ClaimUtils {
 		return null;
 	}
 
-	public static IntersectionResult ersterSchnittpunktMitPolygonAufStrecke (Vector2 startpunkt, Vector2 zielpunkt, ArrayList<Vector2> polygon) {
+	public static IntersectionResult ersterSchnittpunktMitPolygonAufStrecke (Vector2 startpunkt, Vector2 zielpunkt, ArrayList<Vector2> polygon, boolean schnittPunktDarfNichtStartpunktSein) {
 		Vector2 ersterSchnittpunkt = null;
 		Vector2 eckpunkt1VonSchnittpunktKante = null;
 		Vector2 eckpunkt2VonSchnittpunktKante = null;
@@ -730,34 +755,35 @@ public class ClaimUtils {
 			Vector2 nächsterEckpunkt = nächsterEckpunkt(eckpunkt, polygon);
 			Vector2 schnittpunkt = schnittpunktVonZweiStrecken(startpunkt, zielpunkt, eckpunkt, nächsterEckpunkt);
 			if (schnittpunkt != null) {
-				if (ersterSchnittpunkt == null) {
-					ersterSchnittpunkt = schnittpunkt;
-					eckpunkt1VonSchnittpunktKante = eckpunkt;
-					eckpunkt2VonSchnittpunktKante = nächsterEckpunkt;
-				} else {
-					if (startpunkt.distance(schnittpunkt) <= startpunkt.distance(ersterSchnittpunkt) && !schnittpunkt.equals(startpunkt)) {
-						if (startpunkt.distance(schnittpunkt) == startpunkt.distance(ersterSchnittpunkt)) {
-							//Wenn von zwei Kanten vom Polygon der Schnittpunkt mit der Kante der selbe ist,
-							//soll die Kante ausgewählt werden, die weiter rechts führt (Da beim Vereinen von 2 Polygons Richtung gegen den Uhrzeigersinn gewählt wurde)
-							if (eckpunkt2VonSchnittpunktKante.equals(schnittpunkt)) {
-								//Wenn der Eckpunkt von kante1 der Schnittpunkt ist, ist die Richtung somit schon vorgegeben und der Schnittpunkt soll sich auf kante2 beziehen
+				if (!schnittPunktDarfNichtStartpunktSein || !schnittpunkt.equals(startpunkt)) {
+					if (ersterSchnittpunkt == null) {
+						ersterSchnittpunkt = schnittpunkt;
+						eckpunkt1VonSchnittpunktKante = eckpunkt;
+						eckpunkt2VonSchnittpunktKante = nächsterEckpunkt;
+					} else {
+						if (startpunkt.distance(schnittpunkt) <= startpunkt.distance(ersterSchnittpunkt) && !schnittpunkt.equals(startpunkt)) {
+							if (startpunkt.distance(schnittpunkt) == startpunkt.distance(ersterSchnittpunkt)) {
+								//Wenn bei zwei Kanten vom Polygon der Schnittpunkt mit der Kante der selbe ist,
+								//soll die Kante ausgewählt werden, die weiter rechts führt (Da beim Vereinen von 2 Polygons Richtung gegen den Uhrzeigersinn gewählt wurde)
+								if (eckpunkt2VonSchnittpunktKante.equals(schnittpunkt)) {
+									//Wenn der Eckpunkt von kante1 der Schnittpunkt ist, ist die Richtung somit schon vorgegeben und der Schnittpunkt soll sich auf kante2 beziehen
+									ersterSchnittpunkt = schnittpunkt;
+									eckpunkt1VonSchnittpunktKante = eckpunkt;
+									eckpunkt2VonSchnittpunktKante = nächsterEckpunkt;
+								} else if (nächsterEckpunkt.equals(schnittpunkt)) {
+									//Wenn der Eckpunkt von kante2 der Schnittpunkt ist, ist die Richtung somit schon vorgegeben und der Schnittpunkt soll sich auf kante1 beziehen
+									//nichts tun, da Kante1 schon ausgewählt
+								} else {
+									System.out.println("ersterSchnittpunktMitPolygonAufStrecke: Dieser Fall sollte eigentlich nicht eintreten. " +
+											"Bitte vervollständigen, jetzt wo er scheinbar doch eintritt.");
+									Vector2 kante1 = eckpunkt2VonSchnittpunktKante.subtract(schnittpunkt);
+									Vector2 kante2 = nächsterEckpunkt.subtract(schnittpunkt);
+								}
+							} else {
 								ersterSchnittpunkt = schnittpunkt;
 								eckpunkt1VonSchnittpunktKante = eckpunkt;
 								eckpunkt2VonSchnittpunktKante = nächsterEckpunkt;
-							} else if (nächsterEckpunkt.equals(schnittpunkt)) {
-								//Wenn der Eckpunkt von kante2 der Schnittpunkt ist, ist die Richtung somit schon vorgegeben und der Schnittpunkt soll sich auf kante1 beziehen
-								//nichts tun, da Kante1 schon ausgewählt
-							} else {
-								System.out.println("ersterSchnittpunktMitPolygonAufStrecke: Dieser Fall sollte eigentlich nicht eintreten. " +
-										"Bitte vervollständigen, jetzt wo er scheinbar doch eintritt.");
-								Vector2 kante1 = eckpunkt2VonSchnittpunktKante.subtract(schnittpunkt);
-								Vector2 kante2 = nächsterEckpunkt.subtract(schnittpunkt);
-								boolean rechtsKnick = kante1.getX() * kante2.getZ() - kante1.getZ() * kante2.getX() > 0;
 							}
-						} else {
-							ersterSchnittpunkt = schnittpunkt;
-							eckpunkt1VonSchnittpunktKante = eckpunkt;
-							eckpunkt2VonSchnittpunktKante = nächsterEckpunkt;
 						}
 					}
 				}
