@@ -18,6 +18,7 @@ public class Claim implements CommandExecutor {
 			EXPANDCHECK = "expandcheck",
 			RETRACT = "retract",
 			EXPAND = "expand",
+			HEIGHT = "height",
 			PLUGIN = "plugin",
 			RELOAD = "reload";
 
@@ -54,6 +55,7 @@ public class Claim implements CommandExecutor {
 					}
 				}
 				case RETRACT -> CmdRetract.retract(cs, args);
+				case HEIGHT -> CmdHeight.adjustHeights(cs, args);
 				case PLUGIN -> CmdPlugin.showPluginInfo(cs);
 				case RELOAD -> CmdReload.reload(cs);
 				default -> CmdHelp.help(cs);

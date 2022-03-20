@@ -8,6 +8,7 @@ import java.util.NoSuchElementException;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.regions.Polygonal2DRegion;
+import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion;
 import de.bergtiger.claim.bdo.*;
@@ -83,6 +84,8 @@ public class ConfirmationListener implements Listener {
 					retractRegionWithSelection(rsq);
 				} else if (con instanceof RetractDirectionalQueue rdq) {
 					retractRegionDirectional(rdq);
+				} else if (con instanceof AdjustHeightsQueue ahq) {
+					adjustHeights(ahq);
 				}
 				if (queue.isEmpty())
 					queue = null;
@@ -181,6 +184,19 @@ public class ConfirmationListener implements Listener {
 	 * @param con to claim
 	 */
 	public void addConfirmation(RetractSelectionalQueue con) {
+		if (con != null) {
+			if (queue == null)
+				queue = new HashMap<>();
+			queue.put(con.getPlayer(), con);
+		}
+	}
+
+	/**
+	 * add heights adjusting to queue.
+	 *
+	 * @param con to claim
+	 */
+	public void addConfirmation(AdjustHeightsQueue con) {
 		if (con != null) {
 			if (queue == null)
 				queue = new HashMap<>();
@@ -315,6 +331,11 @@ public class ConfirmationListener implements Listener {
 		}
 	}
 
+	/**
+	 * delete claim
+	 *
+	 * @param dq to delete region
+	 */
 	private void deleteRegion(DeleteQueue dq) {
 		RegionDeleteEvent event = new RegionDeleteEvent(dq.getRegion(), dq.getWorld(), dq.getPlayer(), ClaimUtils.getArea(dq.getRegion()), Lang.DELETE_SUCCESS.get());
 		Bukkit.getPluginManager().callEvent(event);
@@ -399,7 +420,7 @@ public class ConfirmationListener implements Listener {
 	}
 
 	/**
-	 * check claim
+	 * expand claim with selection
 	 *
 	 * @param esq to expand region with world edit selection
 	 */
@@ -465,7 +486,7 @@ public class ConfirmationListener implements Listener {
 	}
 
 	/**
-	 * check claim
+	 * expand claim directional
 	 *
 	 * @param edq to expand region directional
 	 */
@@ -526,7 +547,7 @@ public class ConfirmationListener implements Listener {
 	}
 
 	/**
-	 * check claim
+	 * expand check claim with selection
 	 *
 	 * @param esq to expand check region with world edit selection
 	 */
@@ -583,7 +604,7 @@ public class ConfirmationListener implements Listener {
 	}
 
 	/**
-	 * check claim
+	 * expand check claim directional
 	 *
 	 * @param edq to expand check region directional
 	 */
@@ -666,7 +687,7 @@ public class ConfirmationListener implements Listener {
 	}
 
 	/**
-	 * check claim
+	 * retract claim with selection
 	 *
 	 * @param rsq to retract region with world edit selection
 	 */
@@ -702,7 +723,7 @@ public class ConfirmationListener implements Listener {
 	}
 
 	/**
-	 * check claim
+	 * retract claim directional
 	 *
 	 * @param rdq to retract region directional
 	 */
@@ -736,5 +757,39 @@ public class ConfirmationListener implements Listener {
 				rdq.getPlayer().spigot().sendMessage(Lang.build(event.getMessage()));
 			}
 		}
+	}
+
+	/**
+	 * change claim heights
+	 *
+	 * @param ahq to change region heights
+	 */
+	private static void adjustHeights(AdjustHeightsQueue ahq) {
+		// get RegionManager for world
+		RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
+		RegionManager regions = container.get(BukkitAdapter.adapt(ahq.getWorld()));
+		ProtectedRegion oldRegion = ahq.getRegion();
+		String message = "Die Höhen der Region " + oldRegion.getId() + " wurden erfolgreich angepasst.";
+		ProtectedRegion newRegion;
+		if (oldRegion instanceof ProtectedPolygonalRegion) {
+			newRegion = new ProtectedPolygonalRegion(oldRegion.getId(), oldRegion.getPoints(), ahq.getNewMinHeight(), ahq.getNewMaxHeight());
+		} else {
+			newRegion = new ProtectedCuboidRegion(oldRegion.getId(),
+					BlockVector3.at(oldRegion.getMinimumPoint().getX(), ahq.getNewMinHeight(), oldRegion.getMinimumPoint().getZ()),
+					BlockVector3.at(oldRegion.getMaximumPoint().getX(), ahq.getNewMaxHeight(), oldRegion.getMaximumPoint().getZ()));
+		}
+		// hier könnte ein Event kommen
+		// oldRegion wird höhenverändert (durch newRegion ersetzt)
+		Map<Flag<?>, Object> flags = oldRegion.getFlags();
+		DefaultDomain members = oldRegion.getMembers();
+		int priority = oldRegion.getPriority();
+		DefaultDomain owners = oldRegion.getOwners();
+		regions.removeRegion(oldRegion.getId());
+		newRegion.setFlags(flags);
+		newRegion.setMembers(members);
+		newRegion.setPriority(priority);
+		newRegion.setOwners(owners);
+		regions.addRegion(newRegion);
+		ahq.getPlayer().spigot().sendMessage(Lang.build(message));
 	}
 }

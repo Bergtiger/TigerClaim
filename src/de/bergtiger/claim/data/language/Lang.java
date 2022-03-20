@@ -123,6 +123,10 @@ public enum Lang implements Cons {
 	EXPAND_YES			(" &aYes"),
 	EXPAND_NO			(" &cNo"),
 
+	// Height
+	HEIGHT_YES			(" &aYes"),
+	HEIGHT_NO			(" &cNo"),
+
 	// Reload
 	RELOAD_FINISHED		("&aReload finished."),
 	// PluginInfo

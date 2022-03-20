@@ -83,7 +83,7 @@ public class CmdDelete {
 										Lang.build(Lang.DELETE_NO, "/no", Lang.build(Lang.DELETE_HOVER_NO), null));
 							}
 						} else {
-							// no permission
+							// no owner
 							p.spigot().sendMessage(Lang.build(Lang.NOPERMISSION));
 						}
 					}
