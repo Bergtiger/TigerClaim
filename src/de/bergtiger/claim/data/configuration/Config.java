@@ -56,7 +56,8 @@ public class Config {
 		REGION_CHECK		= CONFIG + ".Region.Check",
 		REGION_RADIUS		= CONFIG + ".Region.Radius", 
 		REGION_FLAGS		= CONFIG + ".Region.Flags",
-		REGION_GAP			= CONFIG + ".Region.Gap",
+		REGION_GAP_XZ		= CONFIG + ".Region.GapXZ",
+		REGION_GAP_Y		= CONFIG + ".Region.GapY",
 		// height
 		REGION_MIN_HEIGHT	= CONFIG + ".Region.Height.Min",
 		REGION_MAX_HEIGHT	= CONFIG + ".Region.Height.Max";
@@ -208,9 +209,12 @@ public class Config {
 		// default radius
 		if (!cfg.contains(REGION_RADIUS))
 			cfg.addDefault(REGION_RADIUS, 39);
-		// gap size
-		if (!cfg.contains(REGION_GAP))
-			cfg.addDefault(REGION_GAP, 10);
+		// gap xz size
+		if (!cfg.contains(REGION_GAP_XZ))
+			cfg.addDefault(REGION_GAP_XZ, 10);
+		// gap y size
+		if (!cfg.contains(REGION_GAP_Y))
+			cfg.addDefault(REGION_GAP_Y, 384);
 		// expand vert
 		if (!cfg.contains(REGION_EXPAND_VERT))
 			cfg.addDefault(REGION_EXPAND_VERT, true);

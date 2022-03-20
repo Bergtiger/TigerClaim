@@ -27,7 +27,8 @@ public abstract class TigerClaim {
 	private final Boolean overlapping;
 	private final String pattern;
 	private String timePattern;
-	private final Integer gap;
+	private final Integer gapXZ;
+	private final Integer gapY;
 	
 	private Integer playerRegionCount = 0;
 	private Integer regionCounter = 1;
@@ -49,31 +50,44 @@ public abstract class TigerClaim {
 			timePattern = "dd-MM-yyyy";
 		// IdPattern
 		pattern = Config.getString(Config.REGION_PATTERN);
-		// Gap
-		if(Config.hasValue(Config.REGION_GAP)) {
+		// GapXZ
+		if(Config.hasValue(Config.REGION_GAP_XZ)) {
 			Integer i = null;
 			try {
-				i = Config.getInt(Config.REGION_GAP);
+				i = Config.getInt(Config.REGION_GAP_XZ);
 			} catch (NumberFormatException e) {
-				TigerLogger.log(Level.SEVERE, String.format("&6'&e%s&6' &chas to be a Number.", Config.REGION_GAP), e);
+				TigerLogger.log(Level.SEVERE, String.format("&6'&e%s&6' &chas to be a Number.", Config.REGION_GAP_XZ), e);
 			}
-			gap = i;
+			gapXZ = i;
 		}
 		else
-			gap = null;
+			gapXZ = null;
+		// GapY
+		if(Config.hasValue(Config.REGION_GAP_Y)) {
+			Integer i = null;
+			try {
+				i = Config.getInt(Config.REGION_GAP_Y);
+			} catch (NumberFormatException e) {
+				TigerLogger.log(Level.SEVERE, String.format("&6'&e%s&6' &chas to be a Number.", Config.REGION_GAP_Y), e);
+			}
+			gapY = i;
+		}
+		else
+			gapY = null;
 		// Expand Vertical
 		expandVert = Config.getBoolean(Config.REGION_EXPAND_VERT);
 		// Overlapping
 		overlapping = Config.getBoolean(Config.REGION_OVERLAPPING);
 	}
 	
-	public TigerClaim(Player player, World world, HashMap<Flag<?>, Object> flags, String time, String pattern, Integer gab, Boolean expandVert, Boolean overlapping) {
+	public TigerClaim(Player player, World world, HashMap<Flag<?>, Object> flags, String time, String pattern, Integer gapXZ, Integer gapY, Boolean expandVert, Boolean overlapping) {
 		this.player = player;
 		this.world = world;
 		this.flags = flags;
 		this.timePattern = time;
 		this.pattern = pattern;
-		this.gap = gab;
+		this.gapXZ = gapXZ;
+		this.gapY = gapY;
 		this.expandVert = expandVert;
 		this.overlapping = overlapping;
 	}
@@ -155,11 +169,19 @@ public abstract class TigerClaim {
 	}
 	
 	/**
-	 * Gap between regions and claim.
+	 * GapXZ between regions and claim.
 	 * @return Integer
 	 */
-	public Integer getGap() {
-		return gap;
+	public Integer getGapXZ() {
+		return gapXZ;
+	}
+
+	/**
+	 * GapY between regions and claim.
+	 * @return Integer
+	 */
+	public Integer getGapY() {
+		return gapY;
 	}
 	
 	/**

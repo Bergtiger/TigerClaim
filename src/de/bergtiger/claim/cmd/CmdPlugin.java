@@ -46,12 +46,19 @@ public class CmdPlugin {
 					build(PLUGIN_HOVER_RADIUS),
 					String.format(cmd, CmdSet.CMD_RADIUS)));
 			components.add(newLine());
-			// Gap
+			// GapXZ
 			components.add(build(
-					PLUGIN_GAP.replace(VALUE, Integer.toString(getInt(REGION_GAP))),
+					PLUGIN_GAP_XZ.replace(VALUE, Integer.toString(getInt(REGION_GAP_XZ))),
 					null,
-					build(PLUGIN_HOVER_GAP),
-					String.format(cmd, CmdSet.CMD_GAP)));
+					build(PLUGIN_HOVER_GAP_XZ),
+					String.format(cmd, CmdSet.CMD_GAP_XZ)));
+			components.add(newLine());
+			// GapY
+			components.add(build(
+					PLUGIN_GAP_Y.replace(VALUE, Integer.toString(getInt(REGION_GAP_Y))),
+					null,
+					build(PLUGIN_HOVER_GAP_Y),
+					String.format(cmd, CmdSet.CMD_GAP_Y)));
 			components.add(newLine());
 			// Expand Vert
 			components.add(build(

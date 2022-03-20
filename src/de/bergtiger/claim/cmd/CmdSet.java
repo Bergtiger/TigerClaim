@@ -24,7 +24,8 @@ import static de.bergtiger.claim.data.configuration.Config.*;
 public class CmdSet {
 
 	public static final String
-			CMD_GAP			= "gap",
+			CMD_GAP_XZ = "gap_xz",
+			CMD_GAP_Y = "gap_y",
 			CMD_RADIUS		= "radius",
 			CMD_FLAG		= "flag",
 			CMD_TIME		= "time",
@@ -68,11 +69,20 @@ public class CmdSet {
 							cs.spigot().sendMessage(Lang.build(Lang.NONUMBERVALUE.get().replace(Lang.VALUE, args[2])));
 						}
 					}
-					case CMD_GAP -> {
+					case CMD_GAP_XZ -> {
 						try {
-							setValue(Config.REGION_GAP, Integer.valueOf(args[2]));
-							cs.spigot().sendMessage(Lang.build(Lang.SET_SAVED.replace(Lang.TYPE, CMD_GAP).replace(Lang.VALUE,
-									getValue(Config.REGION_GAP).toString())));
+							setValue(Config.REGION_GAP_XZ, Integer.valueOf(args[2]));
+							cs.spigot().sendMessage(Lang.build(Lang.SET_SAVED.replace(Lang.TYPE, CMD_GAP_XZ).replace(Lang.VALUE,
+									getValue(Config.REGION_GAP_XZ).toString())));
+						} catch (NumberFormatException e) {
+							cs.spigot().sendMessage(Lang.build(Lang.NONUMBERVALUE.get().replace(Lang.VALUE, args[2])));
+						}
+					}
+					case CMD_GAP_Y -> {
+						try {
+							setValue(Config.REGION_GAP_Y, Integer.valueOf(args[2]));
+							cs.spigot().sendMessage(Lang.build(Lang.SET_SAVED.replace(Lang.TYPE, CMD_GAP_Y).replace(Lang.VALUE,
+									getValue(Config.REGION_GAP_Y).toString())));
 						} catch (NumberFormatException e) {
 							cs.spigot().sendMessage(Lang.build(Lang.NONUMBERVALUE.get().replace(Lang.VALUE, args[2])));
 						}

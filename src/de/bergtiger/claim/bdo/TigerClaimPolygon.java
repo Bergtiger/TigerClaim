@@ -42,7 +42,7 @@ public class TigerClaimPolygon extends TigerClaim {
 
 	@Override
 	public ProtectedRegion getRegionWithGab() {
-		if((getGap() != null) && (getGap() > 0)) {
+		if((getGapXZ() != null) && (getGapXZ() > 0)) {
 			List<BlockVector2> intersections = new ArrayList<>();
 			// calculate intersection
 			for(int i = 0; i < points.size(); i++) {
@@ -59,11 +59,23 @@ public class TigerClaimPolygon extends TigerClaim {
 					// System.out.println("s: " + s);
 				}
 			}
-			return new ProtectedPolygonalRegion(
-				getId(), 
-				intersections, 
-				isExpandVert() ? minHeight : minY,
-				isExpandVert() ? maxHeight : maxY);
+			Integer gapY = getGapY();
+			if (gapY == null) {
+				gapY = 0;
+			}
+			if(gapY > 0) {
+				return new ProtectedPolygonalRegion(
+						getId(),
+						intersections,
+						isExpandVert() ? minHeight : Math.max(minY - gapY, minHeight),
+						isExpandVert() ? maxHeight : Math.min(maxY + gapY, maxHeight));
+			} else {
+				return new ProtectedPolygonalRegion(
+						getId(),
+						intersections,
+						isExpandVert() ? minHeight : minY,
+						isExpandVert() ? maxHeight : maxY);
+			}
 		}
 		return getRegion();
 	}
@@ -81,12 +93,12 @@ public class TigerClaimPolygon extends TigerClaim {
 	
 	private Vector2 intersection(Vector2 a, Vector2 b, Vector2 c) {
 		Vector2 ab = a.subtract(b);
-		Vector2 o = orthogonal(ab, getGap());
+		Vector2 o = orthogonal(ab, getGapXZ());
 		Vector2 a1 = a.add(o);
 		Vector2 b1 = b.add(o);
 		
 		Vector2 bc = b.subtract(c);
-		Vector2 o2 = orthogonal(bc, getGap());
+		Vector2 o2 = orthogonal(bc, getGapXZ());
 		Vector2 b2 = b.add(o2);
 		Vector2 c2 = c.add(o2);
 		

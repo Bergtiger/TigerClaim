@@ -31,11 +31,19 @@ public class TigerClaimCuboid extends TigerClaim {
 
 	@Override
 	public ProtectedRegion getRegionWithGab() {
-		if((getGap() != null) && (getGap() > 0))
+		Integer gapXZ = getGapXZ();
+		Integer gapY = getGapY();
+		if (gapXZ == null) {
+			gapXZ = 0;
+		}
+		if (gapY == null) {
+			gapY = 0;
+		}
+		if(gapXZ > 0 || gapY > 0)
 			return new ProtectedCuboidRegion(
 					getId(),
-					BlockVector3.at(min.getBlockX() - getGap(), isExpandVert() ? minHeight : Math.max(min.getBlockY() - getGap(), minHeight), min.getBlockZ() - getGap()),
-					BlockVector3.at(max.getBlockX() + getGap(), isExpandVert() ? maxHeight : Math.min(max.getBlockY() + getGap(), maxHeight), max.getBlockZ() + getGap()));
+					BlockVector3.at(min.getBlockX() - gapXZ, isExpandVert() ? minHeight : Math.max(min.getBlockY() - gapY, minHeight), min.getBlockZ() - gapXZ),
+					BlockVector3.at(max.getBlockX() + gapXZ, isExpandVert() ? maxHeight : Math.min(max.getBlockY() + gapY, maxHeight), max.getBlockZ() + gapXZ));
 		return getRegion();
 	}
 

@@ -46,17 +46,25 @@ public class TigerClaimRadius extends TigerClaim {
 
 	@Override
 	public ProtectedRegion getRegionWithGab() {
-		if(getGap() != null && getGap() > 0)
+		Integer gapXZ = getGapXZ();
+		Integer gapY = getGapY();
+		if (gapXZ == null) {
+			gapXZ = 0;
+		}
+		if (gapY == null) {
+			gapY = 0;
+		}
+		if(gapXZ > 0 || gapY > 0)
 			return new ProtectedCuboidRegion(
 					getId(), 
 					BlockVector3.at(
-							(loc.getBlockX() - radius - getGap()),
-							(isExpandVert() ? minHeight : Math.max((loc.getBlockY() - radius - getGap()), minHeight)),
-							(loc.getBlockZ() - radius - getGap())), 
+							(loc.getBlockX() - radius - gapXZ),
+							(isExpandVert() ? minHeight : Math.max((loc.getBlockY() - radius - gapY), minHeight)),
+							(loc.getBlockZ() - radius - gapXZ)),
 					BlockVector3.at(
-							(loc.getBlockX() + radius + getGap()),
-							(isExpandVert() ? maxHeight : Math.min((loc.getBlockY() + radius + getGap()), maxHeight)),
-							(loc.getBlockZ() + radius + getGap())));
+							(loc.getBlockX() + radius + gapXZ),
+							(isExpandVert() ? maxHeight : Math.min((loc.getBlockY() + radius + gapY), maxHeight)),
+							(loc.getBlockZ() + radius + gapXZ)));
 		return getRegion();
 	}
 	
