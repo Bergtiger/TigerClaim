@@ -31,6 +31,7 @@ public class CmdSet {
 			CMD_PATTERN		= "pattern",
 			CMD_EXPAND_VERT	= "expandvert",
 			CMD_OVERLAPPING	= "overlapping",
+			CMD_CHECK		= "check",
 			CMD_PAGE_LENGTH	= "pagelength",
 			CMD_HEIGHT_MIN	= "min",
 			CMD_HEIGHT_MAX	= "max";
@@ -101,6 +102,11 @@ public class CmdSet {
 						setValue(REGION_OVERLAPPING, Boolean.valueOf(args[2]));
 						cs.spigot().sendMessage(Lang.build(Lang.SET_SAVED.replace(Lang.TYPE, CMD_OVERLAPPING).replace(Lang.VALUE,
 								getValue(REGION_OVERLAPPING).toString())));
+					}
+					case CMD_CHECK -> {
+						setValue(REGION_CHECK, Boolean.valueOf(args[2]));
+						cs.spigot().sendMessage(Lang.build(Lang.SET_SAVED.replace(Lang.TYPE, CMD_CHECK).replace(Lang.VALUE,
+								getValue(REGION_CHECK).toString())));
 					}
 					case CMD_HEIGHT_MIN -> {
 						setValue(REGION_MIN_HEIGHT, Integer.parseInt(args[2]));

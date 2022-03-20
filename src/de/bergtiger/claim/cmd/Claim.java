@@ -1,5 +1,6 @@
 package de.bergtiger.claim.cmd;
 
+import de.bergtiger.claim.data.configuration.Config;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -36,10 +37,22 @@ public class Claim implements CommandExecutor {
 				case INFO -> CmdInfo.info(cs);
 				case LIST -> CmdList.list(cs, args);
 				case CHECK -> CmdCheck.check(cs);
-				case CLAIM, CREATE, NEW -> CmdClaim.claim(cs, false);
+				case CLAIM, CREATE, NEW -> {
+					if (Config.getBoolean(Config.REGION_CHECK)) {
+						CmdCheck.check(cs);
+					} else {
+						CmdClaim.claim(cs, false);
+					}
+				}
 				case DELETE -> CmdDelete.delete(cs, args);
 				case EXPANDCHECK -> CmdExpand.expand(cs, args, true, false);
-				case EXPAND -> CmdExpand.expand(cs, args, false, false);
+				case EXPAND -> {
+					if (Config.getBoolean(Config.REGION_CHECK)) {
+						CmdExpand.expand(cs, args, true, false);
+					} else {
+						CmdExpand.expand(cs, args, false, false);
+					}
+				}
 				case RETRACT -> CmdRetract.retract(cs, args);
 				case PLUGIN -> CmdPlugin.showPluginInfo(cs);
 				case RELOAD -> CmdReload.reload(cs);
