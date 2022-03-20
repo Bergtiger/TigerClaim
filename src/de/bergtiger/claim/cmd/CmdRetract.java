@@ -289,6 +289,14 @@ public class CmdRetract {
                                         player.spigot().sendMessage(Lang.build("Deine Markierung zerteilt die Region, in der du stehst, was nicht vorkommen sollte."));
                                     }
                                     return;
+                                } else if (result.getResultType() == PolygonSubtractionResultType.SUBTRACTION_NOT_BIG_ENOUGH_TO_REMOVE_WHOLE_BLOCKS) {
+                                    if (regionAngegeben) {
+                                        player.spigot().sendMessage(Lang.build("Deine Markierung würde so wenig Fläche von der angegebenen Region entfernen, " +
+                                                "dass keine ganzen Blöcke entfernt werden würden."));
+                                    } else {
+                                        player.spigot().sendMessage(Lang.build("Deine Markierung würde so wenig Fläche von der Region, in der du stehst, entfernen, " +
+                                                "dass keine ganzen Blöcke entfernt werden würden."));}
+                                    return;
                                 }
                                 player.spigot().sendMessage(Lang.build("Ergebnis-Polygon existiert aus unbekanntem Grund nicht: " + result.getResultType().name()));
                                 return;
@@ -455,6 +463,9 @@ public class CmdRetract {
         List<BlockVector2> differenzBlockPolygon = ClaimUtils.polygonOhneRedundantePunkte(ClaimUtils.eckpunkteGanzAusEckpunkteExakt(differenzPolygon));
         if (ClaimUtils.polygonHatEckpunkteMehrfach(differenzBlockPolygon)) {
             return new PolygonSubtractionResult(null, PolygonSubtractionResultType.RESULT_POLYGON_HAS_POINT_MULTIPLE);
+        }
+        if (ClaimUtils.flächeEinesPixelPolygons(differenzBlockPolygon) == ClaimUtils.flächeEinesPixelPolygons(alteRegionsBlockPolygon)) {
+            return new PolygonSubtractionResult(null, PolygonSubtractionResultType.SUBTRACTION_NOT_BIG_ENOUGH_TO_REMOVE_WHOLE_BLOCKS);
         }
         return new PolygonSubtractionResult(differenzBlockPolygon, PolygonSubtractionResultType.BOUNDING_POLYGON_FOUND);
     }

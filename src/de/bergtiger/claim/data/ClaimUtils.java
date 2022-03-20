@@ -128,6 +128,10 @@ public class ClaimUtils {
 		return scharfeFläche;
 	}
 
+	public static double flächeEinesPixelPolygons(List<BlockVector2> eckpunkteGanz) {
+		return flächeEinesPixelPolygons(scharfePolgonFläche(eckpunkteGanz),eckpunkteGanz);
+	}
+
 	public static double flächeEinesPixelPolygons(double scharfeFläche, List<BlockVector2> eckpunkteGanz) {
 		boolean ausgaben = false;
 		ArrayList<Vector2> eckpunkte = new ArrayList<>();
