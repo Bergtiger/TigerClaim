@@ -597,8 +597,8 @@ public class ClaimUtils {
 				return null;
 			}
 		}
-		double m1 = ClaimUtils.round(strecke1vector.getZ() / strecke1vector.getX(),10);
-		double m2 = ClaimUtils.round(strecke2vector.getZ() / strecke2vector.getX(),10);
+		double m1 = strecke1vector.getZ() / strecke1vector.getX();
+		double m2 = strecke2vector.getZ() / strecke2vector.getX();
 		//b=z-m*x
 		double b1 = strecke1punkt1.getZ() - m1 * strecke1punkt1.getX();
 		double b2 = strecke2punkt1.getZ() - m2 * strecke2punkt1.getX();
@@ -607,13 +607,13 @@ public class ClaimUtils {
 		if (m1 != Double.POSITIVE_INFINITY && m1 != Double.NEGATIVE_INFINITY && m2 != Double.POSITIVE_INFINITY && m2 != Double.NEGATIVE_INFINITY) {
 			//m1*x+b1=m2*x+b2 ==> x=(b2-b1)/(m1-m2)
 			x = ClaimUtils.round((b2 - b1) / (m1 - m2),10);
-			z = m1 * x + b1;
+			z = ClaimUtils.round(m1 * x + b1,10);
 		} else if ((m1 == Double.POSITIVE_INFINITY || m1 == Double.NEGATIVE_INFINITY) && m2 != Double.POSITIVE_INFINITY && m2 != Double.NEGATIVE_INFINITY) {
 			x = strecke1punkt1.getX();
-			z = m2 * x + b2;
+			z = ClaimUtils.round(m2 * x + b2,10);
 		} else if (m1 != Double.POSITIVE_INFINITY && m1 != Double.NEGATIVE_INFINITY && (m2 == Double.POSITIVE_INFINITY || m2 == Double.NEGATIVE_INFINITY)) {
 			x = strecke2punkt1.getX();
-			z = m1 * x + b1;
+			z = ClaimUtils.round(m1 * x + b1,10);
 		} else {
 			System.out.println("ERROR: ClaimUtils.schnittpunktVonZweiStrecken: Die Steigungen der beiden Strecken sind unendlich, aber die Strecken sind auch nicht parallel.");
 		}

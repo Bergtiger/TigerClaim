@@ -299,11 +299,11 @@ public class CmdRetract {
                                     return;
                                 } else if (result.getResultType() == PolygonSubtractionResultType.RESULT_POLYGON_HAS_POINT_MULTIPLE) {
                                     if (regionAngegeben) {
-                                        player.spigot().sendMessage(Lang.build("Deine Markierung berührt die angegebene Region nur, " +
-                                                "um die Region zu beschneiden, müsste sie aber einen Teil der Region abdecken."));
+                                        player.spigot().sendMessage(Lang.build("Deine Markierung berührt die angegebene Region nur. " +
+                                                "Um die Region zu beschneiden, müsste sie aber einen Teil der Region abdecken."));
                                     } else {
-                                        player.spigot().sendMessage(Lang.build("Deine Markierung berührt die Region, in der du stehst, nur, " +
-                                                "um die Region zu beschneiden, müsste sie aber einen Teil der Region abdecken."));
+                                        player.spigot().sendMessage(Lang.build("Deine Markierung berührt die Region, in der du stehst, nur. " +
+                                                "Um die Region zu beschneiden, müsste sie aber einen Teil der Region abdecken."));
                                     }
                                     return;
                                 }
