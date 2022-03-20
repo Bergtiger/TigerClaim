@@ -647,6 +647,7 @@ public class ClaimUtils {
 
 	public static Boolean liegtPunktInPolygon (Vector2 testpunkt, ArrayList<Vector2> polygon) {
 		//Punkt-in-Polygon-Test nach Jordan
+		if (polygon.contains(testpunkt)) {return true; }
 		Vector2 parallelZuKeinerWorldEditKante = Vector2.at(2,Math.PI);
 		double deltaXMax = 0;
 		double deltaZMax = 0;

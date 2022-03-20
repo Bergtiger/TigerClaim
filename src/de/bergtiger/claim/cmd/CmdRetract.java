@@ -443,10 +443,14 @@ public class CmdRetract {
         }
         //Wenn aus dem Polygon der ursprünglichen Region Eckpunkte gibt, die weder im Ergebnis-Polygon noch in der Markierung liegen,
         // dann wurde die alte Region durch die Markierung in mehrere Teile zerteilt (soll der Spieler nicht so machen)
+        boolean regionWirdDurchMarkierungZerteilt = false;
         for (Vector2 alteRegionsEckpunkt : alteRegionsPolygon) {
             if (!ClaimUtils.liegtPunktInPolygon(alteRegionsEckpunkt, markierungsPolygon) && !ClaimUtils.liegtPunktInPolygon(alteRegionsEckpunkt, differenzPolygon)) {
-                return new PolygonSubtractionResult(null, PolygonSubtractionResultType.SELECTION_DIVIDES_OLD_REGION_INTO_PARTS);
+                regionWirdDurchMarkierungZerteilt = true;
             }
+        }
+        if (regionWirdDurchMarkierungZerteilt) {
+            return new PolygonSubtractionResult(null, PolygonSubtractionResultType.SELECTION_DIVIDES_OLD_REGION_INTO_PARTS);
         }
         List<BlockVector2> differenzBlockPolygon = ClaimUtils.polygonOhneRedundantePunkte(ClaimUtils.eckpunkteGanzAusEckpunkteExakt(differenzPolygon));
         if (ClaimUtils.polygonHatEckpunkteMehrfach(differenzBlockPolygon)) {
