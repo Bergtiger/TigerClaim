@@ -44,7 +44,7 @@ public class CmdExpand {
                 // get RegionManager for world
                 RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
                 RegionManager regions = container.get(BukkitAdapter.adapt(player.getWorld()));
-                ProtectedRegion oldRegion;
+                ProtectedRegion oldRegion = null;
                 ArrayList<String> directions = new ArrayList<>();
                 directions.add("north");
                 directions.add("east");
@@ -54,8 +54,8 @@ public class CmdExpand {
                 boolean regionAngegeben = false;
                 if (args.length >= 2) {
                     String regionName = args[1];
-                    oldRegion = regions.getRegion(regionName);
                     if (regions.hasRegion(args[1])) {
+                        oldRegion = regions.getRegion(regionName);
                         regionAngegeben = true;
                         if (!(oldRegion.getOwners().contains(player.getUniqueId()) || Perm.hasPermission(cs, Perm.CLAIM_ADMIN))) {
                             // not the owner
@@ -70,23 +70,25 @@ public class CmdExpand {
                         }
                     }
                 }
-                // player wants to expand region where he stands
-                ApplicableRegionSet set = regions.getApplicableRegions(BukkitAdapter.asBlockVector(player.getLocation()));
-                if (set.size() == 0) {
-                    // not in a region
-                    player.spigot().sendMessage(Lang.build("Du stehst in keiner Region."));
-                    return;
-                } else if (set.size() > 1) {
-                    // to many regions
-                    player.spigot().sendMessage(Lang.build("Du stehst in mehreren Regionen. Bitte gib eine Region an."));
-                    return;
-                } else {
-                    // exact one region
-                    oldRegion = set.getRegions().stream().findFirst().get();
-                    if (!(oldRegion.getOwners().contains(player.getUniqueId()) || Perm.hasPermission(cs, Perm.CLAIM_ADMIN))) {
-                        // not the owner
-                        player.spigot().sendMessage(Lang.build(Lang.NOPERMISSION));
+                if (oldRegion == null) {
+                    // player wants to expand region where he stands
+                    ApplicableRegionSet set = regions.getApplicableRegions(BukkitAdapter.asBlockVector(player.getLocation()));
+                    if (set.size() == 0) {
+                        // not in a region
+                        player.spigot().sendMessage(Lang.build("Du stehst in keiner Region."));
                         return;
+                    } else if (set.size() > 1) {
+                        // to many regions
+                        player.spigot().sendMessage(Lang.build("Du stehst in mehreren Regionen. Bitte gib eine Region an."));
+                        return;
+                    } else {
+                        // exact one region
+                        oldRegion = set.getRegions().stream().findFirst().get();
+                        if (!(oldRegion.getOwners().contains(player.getUniqueId()) || Perm.hasPermission(cs, Perm.CLAIM_ADMIN))) {
+                            // not the owner
+                            player.spigot().sendMessage(Lang.build(Lang.NOPERMISSION));
+                            return;
+                        }
                     }
                 }
 
