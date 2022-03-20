@@ -355,10 +355,10 @@ public class CmdExpand {
                                 } else if (result.getResultType() == UnitePolygonsResultType.RESULT_POLYGON_HAS_POINT_MULTIPLE) {
                                     if (regionAngegeben) {
                                         player.spigot().sendMessage(Lang.build("Die angegebene Region und deine Markierung berühren sich zu wenig, " +
-                                                "um eine zusammenhängende neue Region daraus zu bilden"));
+                                                "um eine zusammenhängende neue Region daraus zu bilden."));
                                     } else {
                                         player.spigot().sendMessage(Lang.build("Die Region, in der du stehst, und deine Markierung berühren sich zu wenig, " +
-                                                "um eine zusammenhängende neue Region daraus zu bilden"));
+                                                "um eine zusammenhängende neue Region daraus zu bilden."));
                                     }
                                     return;
                                 } else if (result.getResultType() == UnitePolygonsResultType.OLD_REGION_HAS_POINT_MULTIPLE) {

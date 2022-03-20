@@ -297,6 +297,15 @@ public class CmdRetract {
                                         player.spigot().sendMessage(Lang.build("Deine Markierung würde so wenig Fläche von der Region, in der du stehst, entfernen, " +
                                                 "dass keine ganzen Blöcke entfernt werden würden."));}
                                     return;
+                                } else if (result.getResultType() == PolygonSubtractionResultType.RESULT_POLYGON_HAS_POINT_MULTIPLE) {
+                                    if (regionAngegeben) {
+                                        player.spigot().sendMessage(Lang.build("Deine Markierung berührt die angegebene Region nur, " +
+                                                "um die Region zu beschneiden, müsste sie aber einen Teil der Region abdecken."));
+                                    } else {
+                                        player.spigot().sendMessage(Lang.build("Deine Markierung berührt die Region, in der du stehst, nur, " +
+                                                "um die Region zu beschneiden, müsste sie aber einen Teil der Region abdecken."));
+                                    }
+                                    return;
                                 }
                                 player.spigot().sendMessage(Lang.build("Ergebnis-Polygon existiert aus unbekanntem Grund nicht: " + result.getResultType().name()));
                                 return;
