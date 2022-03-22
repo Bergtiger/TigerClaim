@@ -16,7 +16,7 @@ public class RegionRetractEvent extends Event implements Cancellable {
     private final World world;
     private final ProtectedRegion oldRegion;
     private final Region newRegion;
-    private final Region expansionOrSelection;
+    private final Region retractionOrSelection;
     private final boolean isDirectionalExtension;
     private final boolean regionStated;
     private final double oldArea;
@@ -50,7 +50,7 @@ public class RegionRetractEvent extends Event implements Cancellable {
         this.world = world;
         this.oldRegion = oldRegion;
         this.newRegion = newRegion;
-        this.expansionOrSelection = expansionOrSelection;
+        this.retractionOrSelection = expansionOrSelection;
         this.isDirectionalExtension = isDirectionalExtension;
         this.regionStated = regionStated;
         this.oldArea = oldArea;
@@ -76,8 +76,8 @@ public class RegionRetractEvent extends Event implements Cancellable {
         return newRegion;
     }
 
-    public Region getExpansionOrSelection() {
-        return expansionOrSelection;
+    public Region getRetractionOrSelection() {
+        return retractionOrSelection;
     }
 
     public boolean isDirectionalExtension() {
