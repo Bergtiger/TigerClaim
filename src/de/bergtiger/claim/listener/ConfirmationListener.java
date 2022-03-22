@@ -8,7 +8,6 @@ import java.util.NoSuchElementException;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.regions.Polygonal2DRegion;
-import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion;
 import de.bergtiger.claim.bdo.*;
@@ -778,17 +777,20 @@ public class ConfirmationListener implements Listener {
 					BlockVector3.at(oldRegion.getMinimumPoint().getX(), ahq.getNewMinHeight(), oldRegion.getMinimumPoint().getZ()),
 					BlockVector3.at(oldRegion.getMaximumPoint().getX(), ahq.getNewMaxHeight(), oldRegion.getMaximumPoint().getZ()));
 		}
-		// hier könnte ein Event kommen
 		// oldRegion wird höhenverändert (durch newRegion ersetzt)
 		Map<Flag<?>, Object> flags = oldRegion.getFlags();
 		DefaultDomain members = oldRegion.getMembers();
 		int priority = oldRegion.getPriority();
 		DefaultDomain owners = oldRegion.getOwners();
-		regions.removeRegion(oldRegion.getId());
 		newRegion.setFlags(flags);
 		newRegion.setMembers(members);
 		newRegion.setPriority(priority);
 		newRegion.setOwners(owners);
+
+		RegionHeightsAdjustmentEvent event = new RegionHeightsAdjustmentEvent(oldRegion, newRegion,
+				oldRegion.getMinimumPoint().getY(), oldRegion.getMaximumPoint().getY(), ahq.getNewMinHeight(), ahq.getNewMaxHeight());
+		Bukkit.getPluginManager().callEvent(event);
+		regions.removeRegion(oldRegion.getId());
 		regions.addRegion(newRegion);
 		ahq.getPlayer().spigot().sendMessage(Lang.build(message));
 	}
