@@ -787,7 +787,7 @@ public class ConfirmationListener implements Listener {
 		newRegion.setPriority(priority);
 		newRegion.setOwners(owners);
 
-		RegionHeightsAdjustmentEvent event = new RegionHeightsAdjustmentEvent(oldRegion, newRegion,
+		RegionHeightsAdjustmentEvent event = new RegionHeightsAdjustmentEvent(oldRegion, newRegion, ahq.getWorld(),
 				oldRegion.getMinimumPoint().getY(), oldRegion.getMaximumPoint().getY(), ahq.getNewMinHeight(), ahq.getNewMaxHeight());
 		Bukkit.getPluginManager().callEvent(event);
 		regions.removeRegion(oldRegion.getId());
