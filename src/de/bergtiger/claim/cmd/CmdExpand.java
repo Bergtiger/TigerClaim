@@ -488,20 +488,48 @@ public class CmdExpand {
     }
 
     public static CuboidRegion theDirectionalExpansion (BlockFace direction, ProtectedCuboidRegion oldRegion, int extendLength) {
-        switch (direction) {
-            case NORTH: return new CuboidRegion(
-                    BlockVector3.at(oldRegion.getMinimumPoint().getX(), oldRegion.getMinimumPoint().getY(), oldRegion.getMinimumPoint().getZ() - extendLength),
-                    BlockVector3.at(oldRegion.getMaximumPoint().getX(), oldRegion.getMaximumPoint().getY(), oldRegion.getMinimumPoint().getZ() - 1));
-            case EAST: return new CuboidRegion(
-                    BlockVector3.at(oldRegion.getMaximumPoint().getX() + extendLength, oldRegion.getMinimumPoint().getY(), oldRegion.getMinimumPoint().getZ()),
-                    BlockVector3.at(oldRegion.getMaximumPoint().getX() + 1, oldRegion.getMaximumPoint().getY(), oldRegion.getMaximumPoint().getZ()));
-            case SOUTH: return new CuboidRegion(
-                    BlockVector3.at(oldRegion.getMinimumPoint().getX() - extendLength, oldRegion.getMinimumPoint().getY(), oldRegion.getMaximumPoint().getZ() + extendLength),
-                    BlockVector3.at(oldRegion.getMinimumPoint().getX() - 1, oldRegion.getMaximumPoint().getY(), oldRegion.getMaximumPoint().getZ() + 1));
-            case WEST: return new CuboidRegion(
-                    BlockVector3.at(oldRegion.getMinimumPoint().getX(), oldRegion.getMinimumPoint().getY(), oldRegion.getMinimumPoint().getZ()),
-                    BlockVector3.at(oldRegion.getMaximumPoint().getX(), oldRegion.getMaximumPoint().getY(), oldRegion.getMaximumPoint().getZ()));
-            default: return null;
+        if (extendLength > 0) {
+            switch (direction) {
+                case NORTH:
+                    return new CuboidRegion(
+                            BlockVector3.at(oldRegion.getMinimumPoint().getX(), oldRegion.getMinimumPoint().getY(), oldRegion.getMinimumPoint().getZ() - extendLength),
+                            BlockVector3.at(oldRegion.getMaximumPoint().getX(), oldRegion.getMaximumPoint().getY(), oldRegion.getMinimumPoint().getZ() - 1));
+                case EAST:
+                    return new CuboidRegion(
+                            BlockVector3.at(oldRegion.getMaximumPoint().getX() + 1, oldRegion.getMinimumPoint().getY(), oldRegion.getMinimumPoint().getZ()),
+                            BlockVector3.at(oldRegion.getMaximumPoint().getX() + extendLength, oldRegion.getMaximumPoint().getY(), oldRegion.getMaximumPoint().getZ()));
+                case SOUTH:
+                    return new CuboidRegion(
+                            BlockVector3.at(oldRegion.getMinimumPoint().getX(), oldRegion.getMinimumPoint().getY(), oldRegion.getMaximumPoint().getZ() + 1),
+                            BlockVector3.at(oldRegion.getMaximumPoint().getX(), oldRegion.getMaximumPoint().getY(), oldRegion.getMaximumPoint().getZ() + extendLength));
+                case WEST:
+                    return new CuboidRegion(
+                            BlockVector3.at(oldRegion.getMinimumPoint().getX() - extendLength, oldRegion.getMinimumPoint().getY(), oldRegion.getMinimumPoint().getZ()),
+                            BlockVector3.at(oldRegion.getMinimumPoint().getX() - 1, oldRegion.getMaximumPoint().getY(), oldRegion.getMaximumPoint().getZ()));
+                default:
+                    return null;
+            }
+        } else {
+            switch (direction) {
+                case NORTH:
+                    return new CuboidRegion(
+                            BlockVector3.at(oldRegion.getMinimumPoint().getX(), oldRegion.getMinimumPoint().getY(), oldRegion.getMinimumPoint().getZ() - (extendLength + 1)),
+                            BlockVector3.at(oldRegion.getMaximumPoint().getX(), oldRegion.getMaximumPoint().getY(), oldRegion.getMinimumPoint().getZ()));
+                case EAST:
+                    return new CuboidRegion(
+                            BlockVector3.at(oldRegion.getMaximumPoint().getX(), oldRegion.getMinimumPoint().getY(), oldRegion.getMinimumPoint().getZ()),
+                            BlockVector3.at(oldRegion.getMaximumPoint().getX() + (extendLength + 1), oldRegion.getMaximumPoint().getY(), oldRegion.getMaximumPoint().getZ()));
+                case SOUTH:
+                    return new CuboidRegion(
+                            BlockVector3.at(oldRegion.getMinimumPoint().getX(), oldRegion.getMinimumPoint().getY(), oldRegion.getMaximumPoint().getZ()),
+                            BlockVector3.at(oldRegion.getMaximumPoint().getX(), oldRegion.getMaximumPoint().getY(), oldRegion.getMaximumPoint().getZ() + (extendLength + 1)));
+                case WEST:
+                    return new CuboidRegion(
+                            BlockVector3.at(oldRegion.getMinimumPoint().getX() - (extendLength + 1), oldRegion.getMinimumPoint().getY(), oldRegion.getMinimumPoint().getZ()),
+                            BlockVector3.at(oldRegion.getMinimumPoint().getX(), oldRegion.getMaximumPoint().getY(), oldRegion.getMaximumPoint().getZ()));
+                default:
+                    return null;
+            }
         }
     }
 
