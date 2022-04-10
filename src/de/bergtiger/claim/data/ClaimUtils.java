@@ -649,7 +649,7 @@ public class ClaimUtils {
 		return false;
 	}
 
-	public static Boolean liegtPunktInPolygon (Vector2 testpunkt, ArrayList<Vector2> polygon) {
+	public static Boolean liegtPunktInPolygon (Vector2 testpunkt, ArrayList<Vector2> polygon, boolean mitKante) {
 		//Punkt-in-Polygon-Test nach Jordan
 		if (polygon.contains(testpunkt)) {return true; }
 		Vector2 parallelZuKeinerWorldEditKante = Vector2.at(2,Math.PI);
@@ -668,9 +668,9 @@ public class ClaimUtils {
 		Vector2 letzterEckpunkt = polygon.get(polygon.size() - 1);
 		int anzahlSchnitte = 0;
 		for (Vector2 eckpunkt : polygon) {
-			//Wenn Punkt auf Strecke liegt, gehört er unabhängig von der Anzahl der Schnitte in diesem Test zum Polygon:
+			//Wenn Punkt auf Strecke liegt, gehört er unabhängig von der Anzahl der Schnitte in diesem Test zum Polygon/nicht zum Polygon:
 			if (liegtPunktCAufStreckeAB(testpunkt, letzterEckpunkt, eckpunkt)) {
-				return true;
+				return mitKante;
 			}
 			if (schnittpunktVonZweiStrecken(letzterEckpunkt, eckpunkt, testpunkt, fernerPunkt) != null) {
 				anzahlSchnitte ++;
@@ -970,10 +970,36 @@ public class ClaimUtils {
 
 	public static boolean polygon1LiegtInPolygon2(ArrayList<Vector2> polygon1, ArrayList<Vector2> polygon2) {
 		for (Vector2 polygon1punkt : polygon1) {
-			if (!ClaimUtils.liegtPunktInPolygon(polygon1punkt, polygon2)) {
+			if (!ClaimUtils.liegtPunktInPolygon(polygon1punkt, polygon2, true)) {
 				return false;
 			}
 		}
 		return true;
+	}
+
+	public static boolean polygoneÜberlappen (ArrayList<Vector2> polygon1, ArrayList<Vector2> polygon2) {
+		//Polygone überlappen, wenn mind. ein Eckpunkt eines Polygons ganz im anderen Polygon liegt oder alle Eckpunkte eines Polygons auch Eckpunkte des anderen sind
+		for (Vector2 polygon1punkt : polygon1) {
+			if (liegtPunktInPolygon(polygon1punkt, polygon2, false)) {
+				return true;
+			}
+		}
+		for (Vector2 polygon2punkt : polygon2) {
+			if (liegtPunktInPolygon(polygon2punkt, polygon1, false)) {
+				return true;
+			}
+		}
+		ArrayList<Vector2> schnittDerEckpunkteMengen = new ArrayList<>();
+		for (Vector2 polygon1Punkt : polygon1) {
+			if (polygon2.contains(polygon1Punkt)) {
+				schnittDerEckpunkteMengen.add(polygon1Punkt);
+			}
+		}
+		if (schnittDerEckpunkteMengen.size() == polygon1.size() ||
+				schnittDerEckpunkteMengen.size() == polygon2.size()
+		) {
+			return true;
+		}
+		return false;
 	}
 }

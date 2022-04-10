@@ -415,10 +415,15 @@ public class CmdRetract {
         if (ClaimUtils.sindPolygoneGleich(markierungsBlockPolygon, alteRegionsBlockPolygon)) {
             return new PolygonSubtractionResult(null, PolygonSubtractionResultType.POLYGONS_ARE_EQUAL);
         }
+        //Wenn Polygone sich kein bisschen überlappen:
+        if (!ClaimUtils.polygoneÜberlappen(alteRegionsPolygon, markierungsPolygon)) {
+            // Markierung und Region überschneiden sich nicht
+            return new PolygonSubtractionResult(null, PolygonSubtractionResultType.POLYGONS_DONT_INTERSECT_EACH_OTHER);
+        }
         ArrayList<Vector2> differenzPolygon = null;
         for (Vector2 startpunkt : alteRegionsPolygon) {
             //... der nicht in der Markierung liegt...
-            if (!ClaimUtils.liegtPunktInPolygon(startpunkt, markierungsPolygon)) {
+            if (!ClaimUtils.liegtPunktInPolygon(startpunkt, markierungsPolygon, true)) {
                 if (differenzPolygon == null) {
                     System.out.println("STARTPUNKT: (" + startpunkt.getX() + "," + startpunkt.getZ() + ")");
                     differenzPolygon = differenzPolygonBildung(startpunkt, alteRegionsPolygon, markierungsPolygon,
@@ -436,7 +441,7 @@ public class CmdRetract {
         if (ClaimUtils.scharfePolgonFläche(alteRegionsPolygon) == ClaimUtils.scharfePolgonFläche(differenzPolygon)) {
             boolean markierungLiegtInAlterRegion = true;
             for (Vector2 polygon2punkt : markierungsPolygon) {
-                if (!ClaimUtils.liegtPunktInPolygon(polygon2punkt,alteRegionsPolygon)) {
+                if (!ClaimUtils.liegtPunktInPolygon(polygon2punkt,alteRegionsPolygon, true)) {
                     markierungLiegtInAlterRegion = false;
                 }
             }
@@ -447,7 +452,7 @@ public class CmdRetract {
                 boolean alteRegionLiegtInMarkierung = true;
                 System.out.println("boolean alteRegionLiegtInMarkierung = true;");
                 for (Vector2 polygon2punkt : alteRegionsPolygon) {
-                    if (!ClaimUtils.liegtPunktInPolygon(polygon2punkt, markierungsPolygon)) {
+                    if (!ClaimUtils.liegtPunktInPolygon(polygon2punkt, markierungsPolygon, true)) {
                         alteRegionLiegtInMarkierung = false;
                     }
                 }
@@ -464,7 +469,7 @@ public class CmdRetract {
         // dann wurde die alte Region durch die Markierung in mehrere Teile zerteilt (soll der Spieler nicht so machen)
         boolean regionWirdDurchMarkierungZerteilt = false;
         for (Vector2 alteRegionsEckpunkt : alteRegionsPolygon) {
-            if (!ClaimUtils.liegtPunktInPolygon(alteRegionsEckpunkt, markierungsPolygon) && !ClaimUtils.liegtPunktInPolygon(alteRegionsEckpunkt, differenzPolygon)) {
+            if (!ClaimUtils.liegtPunktInPolygon(alteRegionsEckpunkt, markierungsPolygon, true) && !ClaimUtils.liegtPunktInPolygon(alteRegionsEckpunkt, differenzPolygon, true)) {
                 regionWirdDurchMarkierungZerteilt = true;
             }
         }

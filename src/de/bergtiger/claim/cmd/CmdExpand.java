@@ -233,7 +233,7 @@ public class CmdExpand {
                                     boolean ostErweiterung = false;
                                     for (int z = rechteckMarkierung.getMinimumPoint().getBlockZ(); z <= rechteckMarkierung.getMaximumPoint().getBlockZ(); z++) {
                                         if (ClaimUtils.liegtPunktInPolygon(
-                                                Vector2.at(x + 0.5 + 1.0, z + 0.5), alteRegionsPolygon
+                                                Vector2.at(x + 0.5 + 1.0, z + 0.5), alteRegionsPolygon, true
                                         )) {
                                             ostErweiterung = true;
                                         }
@@ -241,7 +241,7 @@ public class CmdExpand {
                                     boolean westErweiterung = false;
                                     for (int z = rechteckMarkierung.getMinimumPoint().getBlockZ(); z <= rechteckMarkierung.getMaximumPoint().getBlockZ(); z++) {
                                         if (ClaimUtils.liegtPunktInPolygon(
-                                                Vector2.at(x + 0.5 - 1.0, z + 0.5), alteRegionsPolygon
+                                                Vector2.at(x + 0.5 - 1.0, z + 0.5), alteRegionsPolygon, true
                                         )) {
                                             westErweiterung = true;
                                         }
@@ -279,7 +279,7 @@ public class CmdExpand {
                                     boolean südErweiterung = false;
                                     for (int x = rechteckMarkierung.getMinimumPoint().getBlockX(); x <= rechteckMarkierung.getMaximumPoint().getBlockX(); x++) {
                                         if (ClaimUtils.liegtPunktInPolygon(
-                                                Vector2.at(x + 0.5, z + 0.5 + 1.0), alteRegionsPolygon
+                                                Vector2.at(x + 0.5, z + 0.5 + 1.0), alteRegionsPolygon, true
                                         )) {
                                             südErweiterung = true;
                                         }
@@ -287,7 +287,7 @@ public class CmdExpand {
                                     boolean nordErweiterung = false;
                                     for (int x = rechteckMarkierung.getMinimumPoint().getBlockX(); x <= rechteckMarkierung.getMaximumPoint().getBlockX(); x++) {
                                         if (ClaimUtils.liegtPunktInPolygon(
-                                                Vector2.at(x + 0.5, z + 0.5 - 1.0), alteRegionsPolygon
+                                                Vector2.at(x + 0.5, z + 0.5 - 1.0), alteRegionsPolygon, true
                                         )) {
                                             nordErweiterung = true;
                                         }
@@ -353,7 +353,7 @@ public class CmdExpand {
                                     boolean ostErweiterung = false;
                                     for (int z = alteRechtecksRegion.getMinimumPoint().getBlockZ(); z <= alteRechtecksRegion.getMaximumPoint().getBlockZ(); z++) {
                                         if (ClaimUtils.liegtPunktInPolygon(
-                                                Vector2.at(x + 0.5 + 1.0, z + 0.5), ClaimUtils.eckpunkteExaktAusEckpunkteGanz(markierungsBlockPolygon)
+                                                Vector2.at(x + 0.5 + 1.0, z + 0.5), ClaimUtils.eckpunkteExaktAusEckpunkteGanz(markierungsBlockPolygon), true
                                         )) {
                                             ostErweiterung = true;
                                         }
@@ -361,7 +361,7 @@ public class CmdExpand {
                                     boolean westErweiterung = false;
                                     for (int z = alteRechtecksRegion.getMinimumPoint().getBlockZ(); z <= alteRechtecksRegion.getMaximumPoint().getBlockZ(); z++) {
                                         if (ClaimUtils.liegtPunktInPolygon(
-                                                Vector2.at(x + 0.5 - 1.0, z + 0.5), ClaimUtils.eckpunkteExaktAusEckpunkteGanz(markierungsBlockPolygon)
+                                                Vector2.at(x + 0.5 - 1.0, z + 0.5), ClaimUtils.eckpunkteExaktAusEckpunkteGanz(markierungsBlockPolygon), true
                                         )) {
                                             westErweiterung = true;
                                         }
@@ -399,7 +399,7 @@ public class CmdExpand {
                                     boolean südErweiterung = false;
                                     for (int x = alteRechtecksRegion.getMinimumPoint().getBlockX(); x <= alteRechtecksRegion.getMaximumPoint().getBlockX(); x++) {
                                         if (ClaimUtils.liegtPunktInPolygon(
-                                                Vector2.at(x + 0.5, z + 0.5 + 1.0), ClaimUtils.eckpunkteExaktAusEckpunkteGanz(markierungsBlockPolygon)
+                                                Vector2.at(x + 0.5, z + 0.5 + 1.0), ClaimUtils.eckpunkteExaktAusEckpunkteGanz(markierungsBlockPolygon), true
                                         )) {
                                             südErweiterung = true;
                                         }
@@ -407,7 +407,7 @@ public class CmdExpand {
                                     boolean nordErweiterung = false;
                                     for (int x = alteRechtecksRegion.getMinimumPoint().getBlockX(); x <= alteRechtecksRegion.getMaximumPoint().getBlockX(); x++) {
                                         if (ClaimUtils.liegtPunktInPolygon(
-                                                Vector2.at(x + 0.5, z + 0.5 - 1.0), ClaimUtils.eckpunkteExaktAusEckpunkteGanz(markierungsBlockPolygon)
+                                                Vector2.at(x + 0.5, z + 0.5 - 1.0), ClaimUtils.eckpunkteExaktAusEckpunkteGanz(markierungsBlockPolygon), true
                                         )) {
                                             nordErweiterung = true;
                                         }
@@ -716,7 +716,7 @@ public class CmdExpand {
         int i = 1;
         for (Vector2 startpunkt : markierungsPolygon) {
             //... der nicht im zweiten Polygon liegt...
-            if (!ClaimUtils.liegtPunktInPolygon(startpunkt, alteRegionsPolygon)) {
+            if (!ClaimUtils.liegtPunktInPolygon(startpunkt, alteRegionsPolygon, true)) {
                 //... und nicht bereits überprüft wurde (zu einem potentiellen neuem Polygon gehört)...
                 if (!bereitsÜberprüfteStartpunkte.contains(startpunkt)) {
                     //... wird ein potentielles neues Polygon gefunden
