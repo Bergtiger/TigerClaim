@@ -7,13 +7,13 @@ import com.sk89q.worldedit.math.Vector2;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.regions.Polygonal2DRegion;
 import com.sk89q.worldedit.regions.Region;
-import com.sk89q.worldedit.world.World;
 import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import de.bergtiger.claim.data.language.Lang;
 import de.bergtiger.claim.data.logger.TigerLogger;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -668,6 +668,10 @@ public class ClaimUtils {
 		Vector2 letzterEckpunkt = polygon.get(polygon.size() - 1);
 		int anzahlSchnitte = 0;
 		for (Vector2 eckpunkt : polygon) {
+			//Wenn Punkt auf Strecke liegt, gehört er unabhängig von der Anzahl der Schnitte in diesem Test zum Polygon:
+			if (liegtPunktCAufStreckeAB(testpunkt, letzterEckpunkt, eckpunkt)) {
+				return true;
+			}
 			if (schnittpunktVonZweiStrecken(letzterEckpunkt, eckpunkt, testpunkt, fernerPunkt) != null) {
 				anzahlSchnitte ++;
 			}
@@ -834,6 +838,44 @@ public class ClaimUtils {
 		return eckpunkte;
 	}
 
+	public static ArrayList<Vector2> exakteEckpunkteEinerKuboidRegion (CuboidRegion cuboidRegion) {
+		ArrayList<Vector2> eckpunkte = new ArrayList<>(4);
+		eckpunkte.add(Vector2.at(cuboidRegion.getMinimumPoint().getX(),cuboidRegion.getMinimumPoint().getZ()));
+		eckpunkte.add(Vector2.at(cuboidRegion.getMinimumPoint().getX(),cuboidRegion.getMaximumPoint().getZ() + 1));
+		eckpunkte.add(Vector2.at(cuboidRegion.getMaximumPoint().getX() + 1,cuboidRegion.getMaximumPoint().getZ() + 1));
+		eckpunkte.add(Vector2.at(cuboidRegion.getMaximumPoint().getX() + 1,cuboidRegion.getMinimumPoint().getZ()));
+		return eckpunkte;
+	}
+
+	public static ArrayList<Vector2> exakteEckpunkteEinerKuboidRegion (ProtectedCuboidRegion cuboidRegion) {
+		ArrayList<Vector2> eckpunkte = new ArrayList<>(4);
+		eckpunkte.add(Vector2.at(cuboidRegion.getMinimumPoint().getX(),cuboidRegion.getMinimumPoint().getZ()));
+		eckpunkte.add(Vector2.at(cuboidRegion.getMinimumPoint().getX(),cuboidRegion.getMaximumPoint().getZ() + 1));
+		eckpunkte.add(Vector2.at(cuboidRegion.getMaximumPoint().getX() + 1,cuboidRegion.getMaximumPoint().getZ() + 1));
+		eckpunkte.add(Vector2.at(cuboidRegion.getMaximumPoint().getX() + 1,cuboidRegion.getMinimumPoint().getZ()));
+		return eckpunkte;
+	}
+
+	public static boolean region1LiegtInRegion2 (Region region1, ProtectedRegion region2) {
+		ArrayList<Vector2> region1Eckpunkte;
+		ArrayList<Vector2> region2Eckpunkte;
+		if (region2 instanceof ProtectedCuboidRegion) {
+			region2Eckpunkte = ClaimUtils.exakteEckpunkteEinerKuboidRegion((ProtectedCuboidRegion) region2);
+		} else {
+			region2Eckpunkte = eckpunkteExaktAusEckpunkteGanz(region2.getPoints());
+		}
+		if (region1 instanceof CuboidRegion) {
+			region1Eckpunkte = ClaimUtils.exakteEckpunkteEinerKuboidRegion((CuboidRegion) region1);
+		} else {
+			region1Eckpunkte = eckpunkteExaktAusEckpunkteGanz(((Polygonal2DRegion) region1).getPoints());
+		}
+		boolean region1LiegtInRegion2 = ClaimUtils.polygon1LiegtInPolygon2(region1Eckpunkte,region2Eckpunkte);
+		if (region1LiegtInRegion2) {
+		} else {
+		}
+		return ClaimUtils.polygon1LiegtInPolygon2(region1Eckpunkte,region2Eckpunkte);
+	}
+
 	public static List<BlockVector2> polygonAusKuboidRegion (ProtectedCuboidRegion cuboidRegion) {
 		List<BlockVector2> eckpunkte = new ArrayList<>(4);
 		eckpunkte.add(BlockVector2.at(cuboidRegion.getMinimumPoint().getX(),cuboidRegion.getMinimumPoint().getZ()));
@@ -924,5 +966,14 @@ public class ClaimUtils {
 	public static double round(double value, int decimalPoints) {
 		double d = Math.pow(10, decimalPoints);
 		return Math.round(value * d) / d;
+	}
+
+	public static boolean polygon1LiegtInPolygon2(ArrayList<Vector2> polygon1, ArrayList<Vector2> polygon2) {
+		for (Vector2 polygon1punkt : polygon1) {
+			if (!ClaimUtils.liegtPunktInPolygon(polygon1punkt, polygon2)) {
+				return false;
+			}
+		}
+		return true;
 	}
 }

@@ -184,7 +184,8 @@ public class CmdExpand {
                                 null, null,
                                 direction, extendLength, null);
                     }
-                } else {
+                }
+                else {
                     // Erweiterung um Markierung:
                     String noRegionMessage;
                     if (cuboidRegion) {
@@ -205,19 +206,34 @@ public class CmdExpand {
                             } else {
                                 alteRegionsBlockPolygon = oldRegion.getPoints();
                             }
+
+                            //Liegt Markierung in Region?:
+                            if(ClaimUtils.region1LiegtInRegion2(markierung,oldRegion)) {
+                                //Selbe Nachrichten weiter unten benötigt
+                                if (regionAngegeben) {
+                                    player.spigot().sendMessage(Lang.build("Deine Markierung liegt komplett innerhalb der angegebenen Region. " +
+                                            "So kannst du die Region nicht erweitern."));
+                                } else {
+                                    player.spigot().sendMessage(Lang.build("Deine Markierung liegt komplett innerhalb der Region, in der du gerade stehst. " +
+                                            "So kannst du die Region nicht erweitern."));
+                                }
+                                return;
+                            }
                             List<BlockVector2> markierungsBlockPolygon;
+
                             if (markierung instanceof CuboidRegion) {
-                                // Wenn Rechtecks-Markierung nur ein Block breit ist, dann wird sie in jede Richtung um einen Block breiter gemacht, wo sie auf das Polygon trifft:
+                                // Wenn Rechtecks-Markierung nur ein Block breit ist, dann wird sie in jede Richtung um einen Block breiter gemacht, wo sie auf das alteRegionsBlockPolygon trifft:
                                 CuboidRegion rechteckMarkierung = (CuboidRegion) markierung.clone();
+                                ArrayList<Vector2> alteRegionsPolygon = ClaimUtils.eckpunkteExaktAusEckpunkteGanz(alteRegionsBlockPolygon);
                                 boolean markierungNichtMitRegionVerbunden = false;
-                                System.out.println("markierung instanceof CuboidRegion");
+                                Bukkit.broadcastMessage("markierung instanceof CuboidRegion");
                                 if (rechteckMarkierung.getMaximumPoint().getX() == rechteckMarkierung.getMinimumPoint().getX()) {
                                     //schmal in x-Richtung:
                                     int x = rechteckMarkierung.getMaximumPoint().getX();
                                     boolean ostErweiterung = false;
                                     for (int z = rechteckMarkierung.getMinimumPoint().getBlockZ(); z <= rechteckMarkierung.getMaximumPoint().getBlockZ(); z++) {
                                         if (ClaimUtils.liegtPunktInPolygon(
-                                                Vector2.at(x + 0.5 + 1.0, z + 0.5), ClaimUtils.eckpunkteExaktAusEckpunkteGanz(alteRegionsBlockPolygon)
+                                                Vector2.at(x + 0.5 + 1.0, z + 0.5), alteRegionsPolygon
                                         )) {
                                             ostErweiterung = true;
                                         }
@@ -225,7 +241,7 @@ public class CmdExpand {
                                     boolean westErweiterung = false;
                                     for (int z = rechteckMarkierung.getMinimumPoint().getBlockZ(); z <= rechteckMarkierung.getMaximumPoint().getBlockZ(); z++) {
                                         if (ClaimUtils.liegtPunktInPolygon(
-                                                Vector2.at(x + 0.5 - 1.0, z + 0.5), ClaimUtils.eckpunkteExaktAusEckpunkteGanz(alteRegionsBlockPolygon)
+                                                Vector2.at(x + 0.5 - 1.0, z + 0.5), alteRegionsPolygon
                                         )) {
                                             westErweiterung = true;
                                         }
@@ -251,11 +267,11 @@ public class CmdExpand {
                                                 rechteckMarkierung.getMaximumPoint().getX(),
                                                 rechteckMarkierung.getMaximumY(),
                                                 zMax));
-                                   }
+                                    }
                                     if (!ostErweiterung && !westErweiterung) {
                                         markierungNichtMitRegionVerbunden = true;
                                     }
-                                    System.out.println("schmal in x-Richtung - ostErweiterung: " + ostErweiterung + "; westErweiterung: " + westErweiterung);
+                                    Bukkit.broadcastMessage("schmal in x-Richtung - ostErweiterung: " + ostErweiterung + "; westErweiterung: " + westErweiterung);
                                 }
                                 if (rechteckMarkierung.getMaximumPoint().getZ() == rechteckMarkierung.getMinimumPoint().getZ()) {
                                     //schmal in z-Richtung:
@@ -263,7 +279,7 @@ public class CmdExpand {
                                     boolean südErweiterung = false;
                                     for (int x = rechteckMarkierung.getMinimumPoint().getBlockX(); x <= rechteckMarkierung.getMaximumPoint().getBlockX(); x++) {
                                         if (ClaimUtils.liegtPunktInPolygon(
-                                                Vector2.at(x + 0.5, z + 0.5 + 1.0), ClaimUtils.eckpunkteExaktAusEckpunkteGanz(alteRegionsBlockPolygon)
+                                                Vector2.at(x + 0.5, z + 0.5 + 1.0), alteRegionsPolygon
                                         )) {
                                             südErweiterung = true;
                                         }
@@ -271,7 +287,7 @@ public class CmdExpand {
                                     boolean nordErweiterung = false;
                                     for (int x = rechteckMarkierung.getMinimumPoint().getBlockX(); x <= rechteckMarkierung.getMaximumPoint().getBlockX(); x++) {
                                         if (ClaimUtils.liegtPunktInPolygon(
-                                                Vector2.at(x + 0.5, z + 0.5 - 1.0), ClaimUtils.eckpunkteExaktAusEckpunkteGanz(alteRegionsBlockPolygon)
+                                                Vector2.at(x + 0.5, z + 0.5 - 1.0), alteRegionsPolygon
                                         )) {
                                             nordErweiterung = true;
                                         }
@@ -288,7 +304,7 @@ public class CmdExpand {
                                                 rechteckMarkierung.getMaximumY(),
                                                 z + 1));
                                         markierungNichtMitRegionVerbunden = false;
-                                     }
+                                    }
                                     if (nordErweiterung) {
                                         rechteckMarkierung.setPos1(BlockVector3.at(
                                                 xMin,
@@ -299,8 +315,8 @@ public class CmdExpand {
                                                 rechteckMarkierung.getMaximumY(),
                                                 xMax));
                                         markierungNichtMitRegionVerbunden = false;
-                                     }
-                                    System.out.println("schmal in z-Richtung - südErweiterung: " + südErweiterung + "; nordErweiterung: " + nordErweiterung);
+                                    }
+                                    Bukkit.broadcastMessage("schmal in z-Richtung - südErweiterung: " + südErweiterung + "; nordErweiterung: " + nordErweiterung);
                                 }
                                 markierungsBlockPolygon = ClaimUtils.polygonAusKuboidRegion(rechteckMarkierung);
                                 if (markierungNichtMitRegionVerbunden) {
@@ -311,80 +327,203 @@ public class CmdExpand {
                                     }
                                     return;
                                 }
-                            } else {
+                            }
+                            else {
                                 markierungsBlockPolygon = ((Polygonal2DRegion) markierung).getPoints();
                             }
-                            for (BlockVector2 polygon1punkt : alteRegionsBlockPolygon) {
-                                Bukkit.broadcastMessage("CmdExpand, Test1, polygon1punkt: (" + polygon1punkt.getX() + "," + polygon1punkt.getZ() + ")");
-                            }
-                            UnitePolygonsResult result = uniteTwoPolygons(alteRegionsBlockPolygon, markierungsBlockPolygon);
-                            if (result.getPolygon() == null) {
-                                if (result.getResultType() == UnitePolygonsResultType.POLYGONS_DONT_INTERSECT_EACH_OTHER) {
-                                    if (regionAngegeben) {
+
+                            List<BlockVector2> ergebnisPolygon = null;
+                            if (oldRegion instanceof ProtectedCuboidRegion) {
+                                // Wenn oldRegion nur ein Block breit ist, dann wird sie in jede Richtung um einen Block breiter gemacht, wo sie auf das Polygon markierungsBlockPolygon trifft:
+                                CuboidRegion alteRechtecksRegion = new CuboidRegion(oldRegion.getMinimumPoint(), oldRegion.getMaximumPoint());
+                                ArrayList<Vector2> alteRechtecksRegionEckpunkte = ClaimUtils.exakteEckpunkteEinerKuboidRegion(alteRechtecksRegion);
+                                //Fehlermeldung:
+                                if (ClaimUtils.polygon1LiegtInPolygon2(
+                                        alteRechtecksRegionEckpunkte,
+                                        ClaimUtils.eckpunkteExaktAusEckpunkteGanz(markierungsBlockPolygon)
+                                        )) {
+                                    //Neue Region soll komplett der Markierung entsprechen
+                                    ergebnisPolygon = markierungsBlockPolygon;
+                                }
+                                boolean markierungNichtMitRegionVerbunden = false;
+                                Bukkit.broadcastMessage("oldRegion instanceof ProtectedCuboidRegion");
+                                if (alteRechtecksRegion.getMaximumPoint().getX() == alteRechtecksRegion.getMinimumPoint().getX()) {
+                                    //schmal in x-Richtung:
+                                    int x = alteRechtecksRegion.getMaximumPoint().getX();
+                                    boolean ostErweiterung = false;
+                                    for (int z = alteRechtecksRegion.getMinimumPoint().getBlockZ(); z <= alteRechtecksRegion.getMaximumPoint().getBlockZ(); z++) {
+                                        if (ClaimUtils.liegtPunktInPolygon(
+                                                Vector2.at(x + 0.5 + 1.0, z + 0.5), ClaimUtils.eckpunkteExaktAusEckpunkteGanz(markierungsBlockPolygon)
+                                        )) {
+                                            ostErweiterung = true;
+                                        }
+                                    }
+                                    boolean westErweiterung = false;
+                                    for (int z = alteRechtecksRegion.getMinimumPoint().getBlockZ(); z <= alteRechtecksRegion.getMaximumPoint().getBlockZ(); z++) {
+                                        if (ClaimUtils.liegtPunktInPolygon(
+                                                Vector2.at(x + 0.5 - 1.0, z + 0.5), ClaimUtils.eckpunkteExaktAusEckpunkteGanz(markierungsBlockPolygon)
+                                        )) {
+                                            westErweiterung = true;
+                                        }
+                                    }
+                                    int zMin = alteRechtecksRegion.getMinimumPoint().getZ();
+                                    int zMax = alteRechtecksRegion.getMaximumPoint().getZ();
+                                    if (ostErweiterung) {
+                                        alteRechtecksRegion.setPos1(BlockVector3.at(
+                                                alteRechtecksRegion.getMinimumPoint().getX(),
+                                                alteRechtecksRegion.getMinimumY(),
+                                                zMin));
+                                        alteRechtecksRegion.setPos2(BlockVector3.at(
+                                                x + 1,
+                                                alteRechtecksRegion.getMaximumY(),
+                                                zMax));
+                                    }
+                                    if (westErweiterung) {
+                                        alteRechtecksRegion.setPos1(BlockVector3.at(
+                                                x - 1,
+                                                alteRechtecksRegion.getMinimumY(),
+                                                zMin));
+                                        alteRechtecksRegion.setPos2(BlockVector3.at(
+                                                alteRechtecksRegion.getMaximumPoint().getX(),
+                                                alteRechtecksRegion.getMaximumY(),
+                                                zMax));
+                                    }
+                                    if (!ostErweiterung && !westErweiterung) {
+                                        markierungNichtMitRegionVerbunden = true;
+                                    }
+                                    Bukkit.broadcastMessage("schmal in x-Richtung - ostErweiterung: " + ostErweiterung + "; westErweiterung: " + westErweiterung);
+                                }
+                                if (alteRechtecksRegion.getMaximumPoint().getZ() == alteRechtecksRegion.getMinimumPoint().getZ()) {
+                                    //schmal in z-Richtung:
+                                    int z = markierung.getMaximumPoint().getZ();
+                                    boolean südErweiterung = false;
+                                    for (int x = alteRechtecksRegion.getMinimumPoint().getBlockX(); x <= alteRechtecksRegion.getMaximumPoint().getBlockX(); x++) {
+                                        if (ClaimUtils.liegtPunktInPolygon(
+                                                Vector2.at(x + 0.5, z + 0.5 + 1.0), ClaimUtils.eckpunkteExaktAusEckpunkteGanz(markierungsBlockPolygon)
+                                        )) {
+                                            südErweiterung = true;
+                                        }
+                                    }
+                                    boolean nordErweiterung = false;
+                                    for (int x = alteRechtecksRegion.getMinimumPoint().getBlockX(); x <= alteRechtecksRegion.getMaximumPoint().getBlockX(); x++) {
+                                        if (ClaimUtils.liegtPunktInPolygon(
+                                                Vector2.at(x + 0.5, z + 0.5 - 1.0), ClaimUtils.eckpunkteExaktAusEckpunkteGanz(markierungsBlockPolygon)
+                                        )) {
+                                            nordErweiterung = true;
+                                        }
+                                    }
+                                    int xMin = alteRechtecksRegion.getMinimumPoint().getX();
+                                    int xMax = alteRechtecksRegion.getMaximumPoint().getX();
+                                    if (südErweiterung) {
+                                        alteRechtecksRegion.setPos1(BlockVector3.at(
+                                                xMin,
+                                                alteRechtecksRegion.getMinimumY(),
+                                                alteRechtecksRegion.getMinimumPoint().getZ()));
+                                        alteRechtecksRegion.setPos2(BlockVector3.at(
+                                                xMax,
+                                                alteRechtecksRegion.getMaximumY(),
+                                                z + 1));
+                                        markierungNichtMitRegionVerbunden = false;
+                                    }
+                                    if (nordErweiterung) {
+                                        alteRechtecksRegion.setPos1(BlockVector3.at(
+                                                xMin,
+                                                alteRechtecksRegion.getMinimumY(),
+                                                z - 1));
+                                        alteRechtecksRegion.setPos2(BlockVector3.at(
+                                                alteRechtecksRegion.getMaximumPoint().getX(),
+                                                alteRechtecksRegion.getMaximumY(),
+                                                xMax));
+                                        markierungNichtMitRegionVerbunden = false;
+                                    }
+                                    Bukkit.broadcastMessage("schmal in z-Richtung - südErweiterung: " + südErweiterung + "; nordErweiterung: " + nordErweiterung);
+                                }
+                                alteRegionsBlockPolygon = ClaimUtils.polygonAusKuboidRegion(alteRechtecksRegion);
+                                if (markierungNichtMitRegionVerbunden) {
+                                    if (regionAngegeben) { //Selbe Nachrichten weiter unten benötigt
                                         player.spigot().sendMessage(Lang.build("Die Fläche, die du markiert hast, überschneidet oder berührt die angegebene Region nicht."));
                                     } else {
                                         player.spigot().sendMessage(Lang.build("Die Fläche, die du markiert hast, überschneidet oder berührt die Region nicht, in der du gerade stehst."));
                                     }
                                     return;
-                                } else if (result.getResultType() == UnitePolygonsResultType.OLD_REGION_INTERSECTS_ITSELF) {
-                                    if (regionAngegeben) {
-                                        player.spigot().sendMessage(Lang.build("Die angegebene Region überschneidet sich selbst, was eigentlich hier nicht vorkommen dürfte."));
-                                    } else {
-                                        player.spigot().sendMessage(Lang.build("Die Region, in der du gerade stehst, überschneidet sich selbst, was eigentlich hier nicht vorkommen dürfte."));
+                                }
+                            }
+
+                            for (BlockVector2 alteRegionsEckpunkt : alteRegionsBlockPolygon) {
+                                Bukkit.broadcastMessage("CmdExpand, Test1, alteRegionsEckpunkt: (" + alteRegionsEckpunkt.getX() + "," + alteRegionsEckpunkt.getZ() + ")");
+                            }
+                            Boolean containsGapsFromOldRegionAndSelection = false;
+                            if (ergebnisPolygon == null) { //ergebnisPolygon ist != null, wenn die Region kubisch ist und komplett in Markierung liegt
+                                UnitePolygonsResult result = uniteTwoPolygons(alteRegionsBlockPolygon, markierungsBlockPolygon);
+                                containsGapsFromOldRegionAndSelection = result.getContainsGapsFromOldRegionAndSelection();
+                                if (result.getPolygon() == null) {
+                                    if (result.getResultType() == UnitePolygonsResultType.POLYGONS_DONT_INTERSECT_EACH_OTHER) {
+                                        if (regionAngegeben) {
+                                            player.spigot().sendMessage(Lang.build("Die Fläche, die du markiert hast, überschneidet oder berührt die angegebene Region nicht."));
+                                        } else {
+                                            player.spigot().sendMessage(Lang.build("Die Fläche, die du markiert hast, überschneidet oder berührt die Region nicht, in der du gerade stehst."));
+                                        }
+                                        return;
+                                    } else if (result.getResultType() == UnitePolygonsResultType.OLD_REGION_INTERSECTS_ITSELF) {
+                                        if (regionAngegeben) {
+                                            player.spigot().sendMessage(Lang.build("Die angegebene Region überschneidet sich selbst, was eigentlich hier nicht vorkommen dürfte."));
+                                        } else {
+                                            player.spigot().sendMessage(Lang.build("Die Region, in der du gerade stehst, überschneidet sich selbst, was eigentlich hier nicht vorkommen dürfte."));
+                                        }
+                                        return;
+                                    } else if (result.getResultType() == UnitePolygonsResultType.SELECTION_INTERSECTS_ITSELF) {
+                                        player.spigot().sendMessage(Lang.build("Die Fläche, die du markiert hast, überschneidet sich selbst."));
+                                        return;
+                                    } else if (result.getResultType() == UnitePolygonsResultType.BOTH_POLYGONS_INTERSECT_THEMSELVES) {
+                                        if (regionAngegeben) {
+                                            player.spigot().sendMessage(Lang.build("Die angegebene Region überschneidet sich selbst, was eigentlich hier nicht vorkommen dürfte. " +
+                                                    "Deine markierte Fläche übrigens auch, damit kannst du keine Region erweitern."));
+                                        } else {
+                                            player.spigot().sendMessage(Lang.build("Die Region, in der du gerade stehst, überschneidet sich selbst, was eigentlich hier nicht vorkommen dürfte.. " +
+                                                    "Deine markierte Fläche übrigens auch, damit kannst du keine Region erweitern."));
+                                        }
+                                        return;
+                                    } else if (result.getResultType() == UnitePolygonsResultType.SELECTION_IS_INSIDE_OLD_REGION) {
+                                        if (regionAngegeben) {
+                                            player.spigot().sendMessage(Lang.build("Deine Markierung liegt komplett innerhalb der angegebenen Region. " +
+                                                    "So kannst du die Region nicht erweitern."));
+                                        } else {
+                                            player.spigot().sendMessage(Lang.build("Deine Markierung liegt komplett innerhalb der Region, in der du gerade stehst. " +
+                                                    "So kannst du die Region nicht erweitern."));
+                                        }
+                                        return;
+                                    } else if (result.getResultType() == UnitePolygonsResultType.RESULT_POLYGON_HAS_POINT_MULTIPLE) {
+                                        if (regionAngegeben) {
+                                            player.spigot().sendMessage(Lang.build("Die angegebene Region und deine Markierung berühren sich zu wenig, " +
+                                                    "um eine zusammenhängende neue Region daraus zu bilden."));
+                                        } else {
+                                            player.spigot().sendMessage(Lang.build("Die Region, in der du stehst, und deine Markierung berühren sich zu wenig, " +
+                                                    "um eine zusammenhängende neue Region daraus zu bilden."));
+                                        }
+                                        return;
+                                    } else if (result.getResultType() == UnitePolygonsResultType.OLD_REGION_HAS_POINT_MULTIPLE) {
+                                        if (regionAngegeben) {
+                                            player.spigot().sendMessage(Lang.build("Die angegebene Region verwendet Eckpunkte mehrfach, was nicht vorkommen sollte."));
+                                        } else {
+                                            player.spigot().sendMessage(Lang.build("Die Region, in der du stehst, verwendet Eckpunkte mehrfach, was nicht vorkommen sollte."));
+                                        }
+                                        return;
+                                    } else if (result.getResultType() == UnitePolygonsResultType.SELECTION_HAS_POINT_MULTIPLE) {
+                                        player.spigot().sendMessage(Lang.build("Deine Markierung verwendet Eckpunkte mehrfach.")); //Selbe Nachricht weiter oben benötigt
+                                        return;
+                                    } else if (result.getResultType() == UnitePolygonsResultType.POLYGONS_ARE_EQUAL) {
+                                        if (regionAngegeben) {
+                                            player.spigot().sendMessage(Lang.build("Deine Markierung entspricht genau deiner angegebenen Region, also so keine Erweiterung möglich."));
+                                        } else {
+                                            player.spigot().sendMessage(Lang.build("Deine Markierung entspricht genau deiner Region, in der du stehst, also so keine Erweiterung möglich."));
+                                        }
+                                        return;
                                     }
-                                    return;
-                                } else if (result.getResultType() == UnitePolygonsResultType.SELECTION_INTERSECTS_ITSELF) {
-                                    player.spigot().sendMessage(Lang.build("Die Fläche, die du markiert hast, überschneidet sich selbst."));
-                                    return;
-                                } else if (result.getResultType() == UnitePolygonsResultType.BOTH_POLYGONS_INTERSECT_THEMSELVES) {
-                                    if (regionAngegeben) {
-                                        player.spigot().sendMessage(Lang.build("Die angegebene Region überschneidet sich selbst, was eigentlich hier nicht vorkommen dürfte. " +
-                                                "Deine markierte Fläche übrigens auch, damit kannst du keine Region erweitern."));
-                                    } else {
-                                        player.spigot().sendMessage(Lang.build("Die Region, in der du gerade stehst, überschneidet sich selbst, was eigentlich hier nicht vorkommen dürfte.. " +
-                                                "Deine markierte Fläche übrigens auch, damit kannst du keine Region erweitern."));
-                                    }
-                                    return;
-                                } else if (result.getResultType() == UnitePolygonsResultType.SELECTION_IS_INSIDE_OLD_REGION) {
-                                    if (regionAngegeben) {
-                                        player.spigot().sendMessage(Lang.build("Deine Markierung liegt komplett innerhalb der angegebenen Region. " +
-                                                "So kannst du die Region nicht erweitern."));
-                                    } else {
-                                        player.spigot().sendMessage(Lang.build("Deine Markierung liegt komplett innerhalb der Region, in der du gerade stehst. " +
-                                                "So kannst du die Region nicht erweitern."));
-                                    }
-                                    return;
-                                } else if (result.getResultType() == UnitePolygonsResultType.RESULT_POLYGON_HAS_POINT_MULTIPLE) {
-                                    if (regionAngegeben) {
-                                        player.spigot().sendMessage(Lang.build("Die angegebene Region und deine Markierung berühren sich zu wenig, " +
-                                                "um eine zusammenhängende neue Region daraus zu bilden."));
-                                    } else {
-                                        player.spigot().sendMessage(Lang.build("Die Region, in der du stehst, und deine Markierung berühren sich zu wenig, " +
-                                                "um eine zusammenhängende neue Region daraus zu bilden."));
-                                    }
-                                    return;
-                                } else if (result.getResultType() == UnitePolygonsResultType.OLD_REGION_HAS_POINT_MULTIPLE) {
-                                    if (regionAngegeben) {
-                                        player.spigot().sendMessage(Lang.build("Die angegebene Region verwendet Eckpunkte mehrfach, was nicht vorkommen sollte."));
-                                    } else {
-                                        player.spigot().sendMessage(Lang.build("Die Region, in der du stehst, verwendet Eckpunkte mehrfach, was nicht vorkommen sollte."));
-                                    }
-                                    return;
-                                } else if (result.getResultType() == UnitePolygonsResultType.SELECTION_HAS_POINT_MULTIPLE) {
-                                    player.spigot().sendMessage(Lang.build("Deine Markierung verwendet Eckpunkte mehrfach.")); //Selbe Nachricht weiter oben benötigt
-                                    return;
-                                } else if (result.getResultType() == UnitePolygonsResultType.POLYGONS_ARE_EQUAL) {
-                                    if (regionAngegeben) {
-                                        player.spigot().sendMessage(Lang.build("Deine Markierung entspricht genau deiner angegebenen Region, also so keine Erweiterung möglich."));
-                                    } else {
-                                        player.spigot().sendMessage(Lang.build("Deine Markierung entspricht genau deiner Region, in der du stehst, also so keine Erweiterung möglich."));
-                                    }
+                                    player.spigot().sendMessage(Lang.build("Ergebnis-Polygon existiert aus unbekanntem Grund nicht: " + result.getResultType().name()));
                                     return;
                                 }
-                                player.spigot().sendMessage(Lang.build("Ergebnis-Polygon existiert aus unbekanntem Grund nicht: " + result.getResultType().name()));
-                                return;
+                                ergebnisPolygon = result.getPolygon();
                             }
-                            List<BlockVector2> ergebnisPolygon = result.getPolygon();
                             Polygonal2DRegion newRegion = new Polygonal2DRegion(markierung.getWorld(), ergebnisPolygon, oldRegion.getMinimumPoint().getY(), oldRegion.getMaximumPoint().getY());
                             for (BlockVector2 vector2 : ergebnisPolygon) {
                                 Bukkit.broadcastMessage(ChatColor.DARK_RED + "Test2 - Eckpunkte: " + vector2);
@@ -407,7 +546,7 @@ public class CmdExpand {
                                     Polygonal2DRegion markierungAlsPolygon = ClaimUtils.markierungAlsPolygon(oldRegion, markierung);
                                     ConfirmationListener.inst().addConfirmation(new ExpandSelectionalQueue(
                                             oldRegion, player.getWorld(), player, ergebnisPolygon, regionAngegeben, true,
-                                            markierungAlsPolygon, result.getContainsGapsFromOldRegionAndSelection()));
+                                            markierungAlsPolygon, containsGapsFromOldRegionAndSelection));
                                     if (regionAngegeben) {
                                         player.spigot().sendMessage(Lang.build(event.getMessage()),
                                                 Lang.build(Lang.EXPAND_YES, "/yes", null, null),
@@ -421,7 +560,7 @@ public class CmdExpand {
                             } else {
                                 Polygonal2DRegion markierungAlsPolygon = ClaimUtils.markierungAlsPolygon(oldRegion, markierung);
                                 CmdExpand.expandQuestion(player, player.getWorld(), oldRegion, regionAngegeben, alteFläche, neueFläche, false,
-                                        markierungAlsPolygon, result.getContainsGapsFromOldRegionAndSelection(),
+                                        markierungAlsPolygon, containsGapsFromOldRegionAndSelection,
                                         null, null, ergebnisPolygon);
                             }
                         } else {
@@ -606,13 +745,7 @@ public class CmdExpand {
         lückenFläche = lückenFläche - größtePolygonfläche;
         //Wenn die Flächen vom alten und neuen Polygon gleich sind, überschneiden sich die Polygone nicht:
         if (ClaimUtils.scharfePolgonFläche(alteRegionsPolygon) == größtePolygonfläche) {
-            boolean polygon2LiegtInPolygon1 = true;
-            for (Vector2 polygon2punkt : markierungsPolygon) {
-                if (!ClaimUtils.liegtPunktInPolygon(polygon2punkt,alteRegionsPolygon)) {
-                    polygon2LiegtInPolygon1 = false;
-                }
-            }
-            if (polygon2LiegtInPolygon1) {
+            if (ClaimUtils.polygon1LiegtInPolygon2(markierungsPolygon,alteRegionsPolygon)) {
                 // Markierung liegt komplett innerhalb Region
                 return new UnitePolygonsResult(null, UnitePolygonsResultType.SELECTION_IS_INSIDE_OLD_REGION, null);
             } else {
