@@ -226,7 +226,7 @@ public class CmdExpand {
                                 CuboidRegion rechteckMarkierung = (CuboidRegion) markierung.clone();
                                 ArrayList<Vector2> alteRegionsPolygon = ClaimUtils.eckpunkteExaktAusEckpunkteGanz(alteRegionsBlockPolygon);
                                 boolean markierungNichtMitRegionVerbunden = false;
-                                Bukkit.broadcastMessage("markierung instanceof CuboidRegion");
+                                System.out.println("markierung instanceof CuboidRegion");
                                 if (rechteckMarkierung.getMaximumPoint().getX() == rechteckMarkierung.getMinimumPoint().getX()) {
                                     //schmal in x-Richtung:
                                     int x = rechteckMarkierung.getMaximumPoint().getX();
@@ -271,7 +271,7 @@ public class CmdExpand {
                                     if (!ostErweiterung && !westErweiterung) {
                                         markierungNichtMitRegionVerbunden = true;
                                     }
-                                    Bukkit.broadcastMessage("schmal in x-Richtung - ostErweiterung: " + ostErweiterung + "; westErweiterung: " + westErweiterung);
+                                    System.out.println("schmal in x-Richtung - ostErweiterung: " + ostErweiterung + "; westErweiterung: " + westErweiterung);
                                 }
                                 if (rechteckMarkierung.getMaximumPoint().getZ() == rechteckMarkierung.getMinimumPoint().getZ()) {
                                     //schmal in z-Richtung:
@@ -316,7 +316,7 @@ public class CmdExpand {
                                                 xMax));
                                         markierungNichtMitRegionVerbunden = false;
                                     }
-                                    Bukkit.broadcastMessage("schmal in z-Richtung - südErweiterung: " + südErweiterung + "; nordErweiterung: " + nordErweiterung);
+                                    System.out.println("schmal in z-Richtung - südErweiterung: " + südErweiterung + "; nordErweiterung: " + nordErweiterung);
                                 }
                                 markierungsBlockPolygon = ClaimUtils.polygonAusKuboidRegion(rechteckMarkierung);
                                 if (markierungNichtMitRegionVerbunden) {
@@ -346,7 +346,7 @@ public class CmdExpand {
                                     ergebnisPolygon = markierungsBlockPolygon;
                                 }
                                 boolean markierungNichtMitRegionVerbunden = false;
-                                Bukkit.broadcastMessage("oldRegion instanceof ProtectedCuboidRegion");
+                                System.out.println("oldRegion instanceof ProtectedCuboidRegion");
                                 if (alteRechtecksRegion.getMaximumPoint().getX() == alteRechtecksRegion.getMinimumPoint().getX()) {
                                     //schmal in x-Richtung:
                                     int x = alteRechtecksRegion.getMaximumPoint().getX();
@@ -391,7 +391,7 @@ public class CmdExpand {
                                     if (!ostErweiterung && !westErweiterung) {
                                         markierungNichtMitRegionVerbunden = true;
                                     }
-                                    Bukkit.broadcastMessage("schmal in x-Richtung - ostErweiterung: " + ostErweiterung + "; westErweiterung: " + westErweiterung);
+                                    System.out.println("schmal in x-Richtung - ostErweiterung: " + ostErweiterung + "; westErweiterung: " + westErweiterung);
                                 }
                                 if (alteRechtecksRegion.getMaximumPoint().getZ() == alteRechtecksRegion.getMinimumPoint().getZ()) {
                                     //schmal in z-Richtung:
@@ -436,7 +436,7 @@ public class CmdExpand {
                                                 xMax));
                                         markierungNichtMitRegionVerbunden = false;
                                     }
-                                    Bukkit.broadcastMessage("schmal in z-Richtung - südErweiterung: " + südErweiterung + "; nordErweiterung: " + nordErweiterung);
+                                    System.out.println("schmal in z-Richtung - südErweiterung: " + südErweiterung + "; nordErweiterung: " + nordErweiterung);
                                 }
                                 alteRegionsBlockPolygon = ClaimUtils.polygonAusKuboidRegion(alteRechtecksRegion);
                                 if (markierungNichtMitRegionVerbunden) {
@@ -450,7 +450,7 @@ public class CmdExpand {
                             }
 
                             for (BlockVector2 alteRegionsEckpunkt : alteRegionsBlockPolygon) {
-                                Bukkit.broadcastMessage("CmdExpand, Test1, alteRegionsEckpunkt: (" + alteRegionsEckpunkt.getX() + "," + alteRegionsEckpunkt.getZ() + ")");
+                                System.out.println("CmdExpand, Test1, alteRegionsEckpunkt: (" + alteRegionsEckpunkt.getX() + "," + alteRegionsEckpunkt.getZ() + ")");
                             }
                             Boolean containsGapsFromOldRegionAndSelection = false;
                             if (ergebnisPolygon == null) { //ergebnisPolygon ist != null, wenn die Region kubisch ist und komplett in Markierung liegt
@@ -526,7 +526,7 @@ public class CmdExpand {
                             }
                             Polygonal2DRegion newRegion = new Polygonal2DRegion(markierung.getWorld(), ergebnisPolygon, oldRegion.getMinimumPoint().getY(), oldRegion.getMaximumPoint().getY());
                             for (BlockVector2 vector2 : ergebnisPolygon) {
-                                Bukkit.broadcastMessage(ChatColor.DARK_RED + "Test2 - Eckpunkte: " + vector2);
+                                System.out.println(ChatColor.DARK_RED + "Test2 - Eckpunkte: " + vector2);
                             }
                             // inform Player
                             double alteFläche = ClaimUtils.getArea(oldRegion);
@@ -720,7 +720,7 @@ public class CmdExpand {
                 //... und nicht bereits überprüft wurde (zu einem potentiellen neuem Polygon gehört)...
                 if (!bereitsÜberprüfteStartpunkte.contains(startpunkt)) {
                     //... wird ein potentielles neues Polygon gefunden
-                    Bukkit.broadcastMessage("Potentielles Polygon " + i + "; startpunkt: (" + startpunkt.getX() + "," + startpunkt.getZ() + ")"); i++;
+                    System.out.println("Potentielles Polygon " + i + "; startpunkt: (" + startpunkt.getX() + "," + startpunkt.getZ() + ")"); i++;
                     ArrayList<Vector2> potentiellNeuesPolygon = potentiellNeuesPolygonBildung(
                             startpunkt, markierungsPolygon, alteRegionsPolygon, //Bleibt unverändert
                             startpunkt, true, new ArrayList<>()); //Wird in Rekursion verändert
@@ -755,10 +755,10 @@ public class CmdExpand {
         }
         if (neuesPolygon != null) {
             for (BlockVector2 vector2 : ClaimUtils.eckpunkteGanzAusEckpunkteExakt(neuesPolygon)) {
-                Bukkit.broadcastMessage(ChatColor.RED + "Test1 - Eckpunkte: " + vector2);
+                System.out.println(ChatColor.RED + "Test1 - Eckpunkte: " + vector2);
             }
         } else {
-            Bukkit.broadcastMessage(ChatColor.RED + "Test1 - Eckpunkte: null");
+            System.out.println(ChatColor.RED + "Test1 - Eckpunkte: null");
         }
         List<BlockVector2> neuesBlockPolygon = ClaimUtils.polygonOhneRedundantePunkte(ClaimUtils.eckpunkteGanzAusEckpunkteExakt(neuesPolygon));
         if (ClaimUtils.polygonHatEckpunkteMehrfach(neuesBlockPolygon)) {
@@ -795,7 +795,7 @@ public class CmdExpand {
                 // danach wird rekursiv die nächste Kante in Polygon B betrachtet
                 Vector2 ersterSchnittpunkt = result.getSchnittpunkt();
                 Vector2 nächsteEckeVonSchnittpunktKante = result.getEcke2();
-                Bukkit.broadcastMessage(ChatColor.RED + "potentiellNeuesPolygon: Schnittpunkt: (" + ersterSchnittpunkt.getX() + "," + ersterSchnittpunkt.getZ() + ")");
+                System.out.println(ChatColor.RED + "potentiellNeuesPolygon: Schnittpunkt: (" + ersterSchnittpunkt.getX() + "," + ersterSchnittpunkt.getZ() + ")");
                 potentiellNeuesPolygon.add(ersterSchnittpunkt);
                 return potentiellNeuesPolygonBildung(startpunkt, polygon1punkte, polygon2punkte,
                         ersterSchnittpunkt, !eckpunktIstVonP1,  potentiellNeuesPolygon);
@@ -804,7 +804,7 @@ public class CmdExpand {
                 // und der nächste Punkt auf Polygon A wird zum neuen Polygon hinzugefügt
                 // danach wird rekursiv die nächste Kante in Polygon A betrachtet (Polygon wird also nicht gewechselt)
                 potentiellNeuesPolygon.add(nächsterEckpunkt);
-                Bukkit.broadcastMessage(ChatColor.RED + "potentiellNeuesPolygon: nächsterEckpunkt: (" + nächsterEckpunkt.getX() + "," + nächsterEckpunkt.getZ() + ")");
+                System.out.println(ChatColor.RED + "potentiellNeuesPolygon: nächsterEckpunkt: (" + nächsterEckpunkt.getX() + "," + nächsterEckpunkt.getZ() + ")");
                 return potentiellNeuesPolygonBildung(startpunkt, polygon1punkte, polygon2punkte,
                         nächsterEckpunkt, eckpunktIstVonP1,  potentiellNeuesPolygon);
             }

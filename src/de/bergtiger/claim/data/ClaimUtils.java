@@ -918,7 +918,7 @@ public class ClaimUtils {
 				if ((Math.abs(kante1.dot(kante2)) != kante1.length() * kante2.length()) || kante2.length() == 0.0) {
 					polygonOhneRedundantePunkte.add(punkt);
 				} else {
-					Bukkit.broadcastMessage("Punkt ist redundant (liegt auf Strecke der Nachbarpunkte." +
+					System.out.println("Punkt ist redundant (liegt auf Strecke der Nachbarpunkte." +
 							"punkt: (" + punkt.getX() + "," + punkt.getZ() + "); " +
 							"letzterPunkt: (" + letzterPunkt.getX() + "," + letzterPunkt.getZ() + "); " +
 							"nächsterPunkt: (" + nächsterPunkt.getX() + "," + nächsterPunkt.getZ() + "); " +
