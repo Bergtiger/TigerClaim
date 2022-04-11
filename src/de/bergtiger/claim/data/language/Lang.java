@@ -141,8 +141,9 @@ public enum Lang implements Cons {
 	PLUGIN_CHECK		("&aCheck&e: &6" + VALUE),
 	PLUGIN_PATTERN_ID	("&aRegionPattern&e: &6" + VALUE),
 	PLUGIN_PATTERN_TIME	("&aTimePattern&e: &6" + VALUE),
-	PLUGIN_HEIGHT_MIN	(String.format("&aMin height&e: &6%s", VALUE)),
-	PLUGIN_HEIGHT_MAX	(String.format("&aMax height&e: &6%s", VALUE)),
+	PLUGIN_HEIGHT_MIN	("&aMin height&e: &6" + VALUE),
+	PLUGIN_HEIGHT_MAX	("&aMax height&e: &6" + VALUE),
+	PLUGIN_PRIORITY_MAX	("&aMax priority&e: &6" + VALUE),
 	PLUGIN_FLAGS		("&aFlags"),
 	PLUGIN_FLAG_LIST	("  &6" + FLAG + "&e: &f" + VALUE),
 	PLUGIN_PAGE_LENGTH	("&aPage length&e: &6" + VALUE),
@@ -157,6 +158,7 @@ public enum Lang implements Cons {
 	PLUGIN_HOVER_PATTERN_TIME	("&aSet a new time pattern"),
 	PLUGIN_HOVER_HEIGHT_MIN		("&aSet a new min height for expand vert"),
 	PLUGIN_HOVER_HEIGHT_MAX		("&aSet a new max height for expand vert"),
+	PLUGIN_HOVER_PRIORITY_MAX	("&aSet a new max priority for player regions"),
 	PLUGIN_HOVER_FLAGS			("&aSet a flag"),
 	PLUGIN_HOVER_PAGE_LENGTH	("&aSet page length for claim_list command");
 	

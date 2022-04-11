@@ -32,10 +32,12 @@ public class CmdSet {
 			CMD_PATTERN		= "pattern",
 			CMD_EXPAND_VERT	= "expandvert",
 			CMD_OVERLAPPING	= "overlapping",
-			CMD_CHECK		= "check",
+			CMD_CHECK		= "check_needed",
 			CMD_PAGE_LENGTH	= "pagelength",
-			CMD_HEIGHT_MIN	= "min",
-			CMD_HEIGHT_MAX	= "max";
+			CMD_HEIGHT_MIN	= "min_height",
+			CMD_HEIGHT_MAX	= "max_height",
+			CMD_PRIORITY_MAX = "max_priority";
+
 
 	public static void setConfig(CommandSender cs, String[] args) {
 		Bukkit.getScheduler().runTaskAsynchronously(Claims.inst(), () -> new CmdSet().serConfigValue(cs, args));
@@ -127,6 +129,11 @@ public class CmdSet {
 						setValue(REGION_MAX_HEIGHT, Integer.parseInt(args[2]));
 						cs.spigot().sendMessage(Lang.build(Lang.SET_SAVED.replace(Lang.TYPE, CMD_HEIGHT_MAX).replace(Lang.VALUE,
 								getValue(REGION_MAX_HEIGHT).toString())));
+					}
+					case CMD_PRIORITY_MAX -> {
+						setValue(REGION_MAX_PRIORITY, Integer.parseInt(args[2]));
+						cs.spigot().sendMessage(Lang.build(Lang.SET_SAVED.replace(Lang.TYPE, CMD_PRIORITY_MAX).replace(Lang.VALUE,
+								getValue(REGION_MAX_PRIORITY).toString())));
 					}
 					case CMD_FLAG -> {
 						// claim set flag [flag][value]

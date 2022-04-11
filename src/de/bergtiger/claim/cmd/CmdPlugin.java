@@ -116,6 +116,14 @@ public class CmdPlugin {
 					build(PLUGIN_HOVER_HEIGHT_MAX),
 					String.format(cmd, CmdSet.CMD_HEIGHT_MAX)));
 			components.add(newLine());
+			// priority
+			components.add(build(
+					PLUGIN_PRIORITY_MAX.replace(VALUE, Integer.toString(getInt(REGION_MAX_PRIORITY))),
+					null,
+					build(PLUGIN_HOVER_PRIORITY_MAX),
+					String.format(cmd, CmdSet.CMD_PRIORITY_MAX)));
+			components.add(newLine());
+
 			// Flags
 			components.add(build(
 					PLUGIN_FLAGS,

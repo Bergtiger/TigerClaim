@@ -60,7 +60,9 @@ public class Config {
 		REGION_GAP_Y		= CONFIG + ".Region.GapY",
 		// height
 		REGION_MIN_HEIGHT	= CONFIG + ".Region.Height.Min",
-		REGION_MAX_HEIGHT	= CONFIG + ".Region.Height.Max";
+		REGION_MAX_HEIGHT	= CONFIG + ".Region.Height.Max",
+		// priority
+		REGION_MAX_PRIORITY = CONFIG + ".Region.MaxPriority";
 
 	/**
 	 * Check if key exists
