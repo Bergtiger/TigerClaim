@@ -53,6 +53,7 @@ public class Config {
 		REGION_PATTERN		= CONFIG + ".Region.Pattern", 
 		REGION_EXPAND_VERT	= CONFIG + ".Region.ExpandVert",
 		REGION_OVERLAPPING	= CONFIG + ".Region.Overlapping",
+		REGION_OWN_OVERLAPPING = CONFIG + ".Region.OwnOverlapping",
 		REGION_CHECK		= CONFIG + ".Region.Check",
 		REGION_RADIUS		= CONFIG + ".Region.Radius", 
 		REGION_FLAGS		= CONFIG + ".Region.Flags",
@@ -63,6 +64,7 @@ public class Config {
 		REGION_MAX_HEIGHT	= CONFIG + ".Region.Height.Max",
 		// priority
 		REGION_MAX_PRIORITY = CONFIG + ".Region.MaxPriority";
+
 
 	/**
 	 * Check if key exists
@@ -223,6 +225,9 @@ public class Config {
 		// overlap
 		if (!cfg.contains(REGION_OVERLAPPING))
 			cfg.addDefault(REGION_OVERLAPPING, false);
+		// own region overlap
+		if (!cfg.contains(REGION_OWN_OVERLAPPING))
+			cfg.addDefault(REGION_OWN_OVERLAPPING, true);
 		// check
 		if (!cfg.contains(REGION_CHECK))
 			cfg.addDefault(REGION_CHECK, false);

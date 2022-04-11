@@ -14,6 +14,7 @@ import de.bergtiger.claim.bdo.*;
 import de.bergtiger.claim.cmd.CmdClaim;
 import de.bergtiger.claim.cmd.CmdExpand;
 import de.bergtiger.claim.data.ClaimUtils;
+import de.bergtiger.claim.data.configuration.Config;
 import de.bergtiger.claim.events.*;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -256,9 +257,16 @@ public class ConfirmationListener implements Listener {
 			// add all regions to candidates
 			List<ProtectedRegion> candidates = Lists.newArrayList();
 			regions.getRegions().forEach((k, r) -> {
-				candidates.add(r);
-				if (r.getOwners().contains(tc.getPlayer().getUniqueId()))
+				if (r.getOwners().contains(tc.getPlayer().getUniqueId())) {
+					//region gehört Spieler
 					tc.addPlayerRegionCount();
+					if (!tc.getOwnOverlappingAllowed()) {
+						// Regionen von selben Spieler dürfen sich nicht überlappen
+						candidates.add(r);
+					}
+				} else {
+					candidates.add(r);
+				}
 			});
 			// Get Limit
 			Integer limit = null, length = Perm.CLAIM_LIMIT.get().split("\\.").length;
@@ -287,7 +295,7 @@ public class ConfirmationListener implements Listener {
 				List<ProtectedRegion> overlapping = null;
 				// isOverlapping false -> not allowed to overlap
 				// isOverlapping true -> allowed to overlap
-				if (!tc.isOverlapping())
+				if (!tc.getOverlappingAllowed())
 					overlapping = tc.getRegionWithGab().getIntersectingRegions(candidates);
 				// if overlapping is empty -> save region
 				if (overlapping == null || overlapping.isEmpty()) {
@@ -360,9 +368,16 @@ public class ConfirmationListener implements Listener {
 			// add all regions to candidates
 			List<ProtectedRegion> candidates = Lists.newArrayList();
 			regions.getRegions().forEach((k, r) -> {
-				candidates.add(r);
-				if (r.getOwners().contains(cq.getRegion().getPlayer().getUniqueId()))
+				if (r.getOwners().contains(cq.getRegion().getPlayer().getUniqueId())) {
+					//region gehört Spieler
 					cq.getRegion().addPlayerRegionCount();
+					if (!cq.getRegion().getOwnOverlappingAllowed()) {
+						// Regionen von selben Spieler dürfen sich nicht überlappen
+						candidates.add(r);
+					}
+				} else {
+					candidates.add(r);
+				}
 			});
 			// Get Limit
 			Integer limit = null, length = Perm.CLAIM_LIMIT.get().split("\\.").length;
@@ -390,8 +405,9 @@ public class ConfirmationListener implements Listener {
 			List<ProtectedRegion> overlapping = null;
 			// isOverlapping false -> not allowed to overlap
 			// isOverlapping true -> allowed to overlap
-			if (!cq.getRegion().isOverlapping())
+			if (!cq.getRegion().getOverlappingAllowed()) {
 				overlapping = cq.getRegion().getRegionWithGab().getIntersectingRegions(candidates);
+			}
 
 			// call RegionCheckEvent
 			RegionCheckEvent event;
@@ -432,7 +448,10 @@ public class ConfirmationListener implements Listener {
 			// add all regions to candidates
 			List<ProtectedRegion> candidates = Lists.newArrayList();
 			regions.getRegions().forEach((k, r) -> {
-				candidates.add(r);
+				if (!r.getOwners().contains(player.getUniqueId()) || !Config.getBoolean(Config.REGION_OWN_OVERLAPPING)) {
+					//region gehört Spieler, aber darf sich nicht überlappen oder gehört anderem Spieler
+					candidates.add(r);
+				}
 			});
 			ProtectedRegion oldRegion = esq.getRegion();
 			Polygonal2DRegion newRegion = new Polygonal2DRegion(BukkitAdapter.adapt(esq.getWorld()) , esq.getEckpunkteDerNeuenRegion(), oldRegion.getMinimumPoint().getY(), oldRegion.getMaximumPoint().getY());
@@ -441,7 +460,7 @@ public class ConfirmationListener implements Listener {
 			List<ProtectedRegion> overlapping = null;
 			// isOverlapping false -> not allowed to overlap
 			// isOverlapping true -> allowed to overlap
-			if (!tc.isOverlapping()) {
+			if (!tc.getOverlappingAllowed()) {
 				overlapping = tc.getRegionWithGab().getIntersectingRegions(candidates);
 				overlapping.remove(oldRegion);
 			}
@@ -498,7 +517,10 @@ public class ConfirmationListener implements Listener {
 			// add all regions to candidates
 			List<ProtectedRegion> candidates = Lists.newArrayList();
 			regions.getRegions().forEach((k, r) -> {
-				candidates.add(r);
+				if (!r.getOwners().contains(player.getUniqueId()) || !Config.getBoolean(Config.REGION_OWN_OVERLAPPING)) {
+					//region gehört Spieler, aber darf sich nicht überlappen oder gehört anderem Spieler
+					candidates.add(r);
+				}
 			});
 			ProtectedCuboidRegion oldRegion = (ProtectedCuboidRegion) edq.getRegion();
 			CuboidRegion newRegion = newDirectionalExpandedRegion((ProtectedCuboidRegion) edq.getRegion(), edq.getWorld(), edq.getDirection(), edq.getExtendLength());
@@ -507,7 +529,7 @@ public class ConfirmationListener implements Listener {
 			List<ProtectedRegion> overlapping = null;
 			// isOverlapping false -> not allowed to overlap
 			// isOverlapping true -> allowed to overlap
-			if (!tc.isOverlapping()) {
+			if (!tc.getOverlappingAllowed()) {
 				overlapping = tc.getRegionWithGab().getIntersectingRegions(candidates);
 				overlapping.remove(oldRegion);
 			}
@@ -559,7 +581,10 @@ public class ConfirmationListener implements Listener {
 			// add all regions to candidates
 			List<ProtectedRegion> candidates = Lists.newArrayList();
 			regions.getRegions().forEach((k, r) -> {
-				candidates.add(r);
+				if (!r.getOwners().contains(player.getUniqueId()) || !Config.getBoolean(Config.REGION_OWN_OVERLAPPING)) {
+					//region gehört Spieler, aber darf sich nicht überlappen oder gehört anderem Spieler
+					candidates.add(r);
+				}
 			});
 			ProtectedRegion oldRegion = esq.getRegion();
 			Polygonal2DRegion newRegion = new Polygonal2DRegion(BukkitAdapter.adapt(esq.getWorld()) , esq.getEckpunkteDerNeuenRegion(), oldRegion.getMinimumPoint().getY(), oldRegion.getMaximumPoint().getY());
@@ -568,7 +593,7 @@ public class ConfirmationListener implements Listener {
 			List<ProtectedRegion> overlapping = null;
 			// isOverlapping false -> not allowed to overlap
 			// isOverlapping true -> allowed to overlap
-			if (!tc.isOverlapping()) {
+			if (!tc.getOverlappingAllowed()) {
 				overlapping = tc.getRegionWithGab().getIntersectingRegions(candidates);
 				overlapping.remove(oldRegion);
 			}
@@ -616,7 +641,10 @@ public class ConfirmationListener implements Listener {
 			// add all regions to candidates
 			List<ProtectedRegion> candidates = Lists.newArrayList();
 			regions.getRegions().forEach((k, r) -> {
-				candidates.add(r);
+				if (!r.getOwners().contains(player.getUniqueId()) || !Config.getBoolean(Config.REGION_OWN_OVERLAPPING)) {
+					//region gehört Spieler, aber darf sich nicht überlappen oder gehört anderem Spieler
+					candidates.add(r);
+				}
 			});
 			ProtectedCuboidRegion oldRegion = (ProtectedCuboidRegion) edq.getRegion();
 			CuboidRegion newRegion = newDirectionalExpandedRegion((ProtectedCuboidRegion) edq.getRegion(), edq.getWorld(), edq.getDirection(), edq.getExtendLength());
@@ -625,7 +653,7 @@ public class ConfirmationListener implements Listener {
 			List<ProtectedRegion> overlapping = null;
 			// isOverlapping false -> not allowed to overlap
 			// isOverlapping true -> allowed to overlap
-			if (!tc.isOverlapping()) {
+			if (!tc.getOverlappingAllowed()) {
 				overlapping = tc.getRegionWithGab().getIntersectingRegions(candidates);
 				overlapping.remove(oldRegion);
 			}
@@ -659,14 +687,6 @@ public class ConfirmationListener implements Listener {
 	}
 
 	private static CuboidRegion newDirectionalExpandedRegion (ProtectedCuboidRegion oldRegion, World world, BlockFace direction, int extendLength) {
-		// get RegionManager for world
-		RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
-		RegionManager regions = container.get(BukkitAdapter.adapt(world));
-		// add all regions to candidates
-		List<ProtectedRegion> candidates = Lists.newArrayList();
-		regions.getRegions().forEach((k, r) -> {
-			candidates.add(r);
-		});
 		CuboidRegion newRegion = null;
 		switch (direction) {
 			case NORTH -> newRegion = new CuboidRegion(

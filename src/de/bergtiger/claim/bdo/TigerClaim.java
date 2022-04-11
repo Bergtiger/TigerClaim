@@ -24,7 +24,8 @@ public abstract class TigerClaim {
 	private final World world;
 	private HashMap<Flag<?>, Object> flags;
 	private final Boolean expandVert;
-	private final Boolean overlapping;
+	private final Boolean overlappingAllowed;
+	private final Boolean ownOverlappingAllowed;
 	private final String pattern;
 	private String timePattern;
 	private final Integer gapXZ;
@@ -77,10 +78,11 @@ public abstract class TigerClaim {
 		// Expand Vertical
 		expandVert = Config.getBoolean(Config.REGION_EXPAND_VERT);
 		// Overlapping
-		overlapping = Config.getBoolean(Config.REGION_OVERLAPPING);
+		overlappingAllowed = Config.getBoolean(Config.REGION_OVERLAPPING);
+		ownOverlappingAllowed = Config.getBoolean(Config.REGION_OWN_OVERLAPPING);
 	}
 	
-	public TigerClaim(Player player, World world, HashMap<Flag<?>, Object> flags, String time, String pattern, Integer gapXZ, Integer gapY, Boolean expandVert, Boolean overlapping) {
+	public TigerClaim(Player player, World world, HashMap<Flag<?>, Object> flags, String time, String pattern, Integer gapXZ, Integer gapY, Boolean expandVert, Boolean overlappingAllowed, Boolean ownOverlappingAllowed) {
 		this.player = player;
 		this.world = world;
 		this.flags = flags;
@@ -89,7 +91,8 @@ public abstract class TigerClaim {
 		this.gapXZ = gapXZ;
 		this.gapY = gapY;
 		this.expandVert = expandVert;
-		this.overlapping = overlapping;
+		this.overlappingAllowed = overlappingAllowed;
+		this.ownOverlappingAllowed = ownOverlappingAllowed;
 	}
 
 	/**
@@ -196,10 +199,18 @@ public abstract class TigerClaim {
 	 * Region is allowed to overlap other regions.
 	 * @return false if not allowed overlapping
 	 */
-	public boolean isOverlapping() {
-		return overlapping;
+	public boolean getOverlappingAllowed() {
+		return overlappingAllowed;
 	}
-	
+
+	/**
+	 * The region may overlap other regions whose owner is the same.
+	 * @return false if not allowed own overlapping
+	 */
+	public Boolean getOwnOverlappingAllowed() {
+		return ownOverlappingAllowed;
+	}
+
 	/**
 	 * Build Region.
 	 * @return ProtectedRegion

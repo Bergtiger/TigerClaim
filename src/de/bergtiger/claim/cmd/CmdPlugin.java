@@ -78,6 +78,15 @@ public class CmdPlugin {
 							+ (hasValue(Config.REGION_OVERLAPPING)
 									? Boolean.toString(!getBoolean(REGION_OVERLAPPING)) : "")));
 			components.add(newLine());
+			// own Region Overlapping
+			components.add(build(
+					PLUGIN_OWN_REGION_OVERLAPPING.replace(VALUE, Boolean.toString(getBoolean(REGION_OWN_OVERLAPPING))),
+					null,
+					build(PLUGIN_HOVER_OWN_REGION_OVERLAPPING),
+					"/claim set " + CmdSet.CMD_OWN_OVERLAPPING + " "
+							+ (hasValue(REGION_OWN_OVERLAPPING)
+							? Boolean.toString(!getBoolean(REGION_OWN_OVERLAPPING)) : "")));
+			components.add(newLine());
 			// Check
 			components.add(build(
 					PLUGIN_CHECK.replace(VALUE, Boolean.toString(getBoolean(REGION_CHECK))),
@@ -123,7 +132,6 @@ public class CmdPlugin {
 					build(PLUGIN_HOVER_PRIORITY_MAX),
 					String.format(cmd, CmdSet.CMD_PRIORITY_MAX)));
 			components.add(newLine());
-
 			// Flags
 			components.add(build(
 					PLUGIN_FLAGS,
