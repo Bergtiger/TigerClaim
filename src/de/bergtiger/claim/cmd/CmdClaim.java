@@ -1,5 +1,6 @@
 package de.bergtiger.claim.cmd;
 
+import de.bergtiger.claim.data.ClaimUtils;
 import de.bergtiger.claim.events.PreClaimConfirmationEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -40,6 +41,14 @@ public class CmdClaim {
 								tc = new TigerClaimCuboid(p, p.getWorld(), (CuboidRegion) s);
 							} else {
 								// Polygon
+								if (ClaimUtils.polygonHatEckpunkteMehrfach(((Polygonal2DRegion) s).getPoints())) {
+									p.spigot().sendMessage(Lang.build("Deine Polygonmarkierung hat Eckpunkte mehrfach, was nicht vorkommen darf."));
+									return;
+								}
+								if (ClaimUtils.polygonÜberschneidetSichSelbst(((Polygonal2DRegion) s).getPoints())) {
+									p.spigot().sendMessage(Lang.build("Deine Polygonmarkierung überschneidet sich selbst, was nicht vorkommen darf."));
+									return;
+								}
 								tc = new TigerClaimPolygon(p, p.getWorld(), (Polygonal2DRegion) s);								
 							}
 						} else {

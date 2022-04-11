@@ -1002,4 +1002,9 @@ public class ClaimUtils {
 		}
 		return false;
 	}
+
+	public static boolean polygonÜberschneidetSichSelbst (List<BlockVector2> polygonEckpunkte) {
+		if (verläuftPolygonImUhrzeigersinn(eckpunkteExaktAusEckpunkteGanz(polygonEckpunkte)) == null) return true;
+		return false;
+	}
 }
