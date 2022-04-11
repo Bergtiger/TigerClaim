@@ -24,24 +24,25 @@ public class CmdHeight {
                     RegionManager regions = container.get(BukkitAdapter.adapt(p.getWorld()));
                     boolean regionAngegeben = false;
                     int argumentenVerschiebung = 0;
-                    if (args.length >= 2) {
+                    if (args.length >= 3) {
                         String regionName = args[1];
                         if (regions.hasRegion(regionName)) {
-                                if (region.getOwners().contains(p.getUniqueId()) || Perm.hasPermission(cs, Perm.CLAIM_ADMIN)) {
-                                    if (args.length < 4) {
-                                        // Nicht genügend Argumente angegeben
-                                        p.spigot().sendMessage(Lang.build("Um die Minimal- und Maximalhöhe der angegebenen Region zu verändern, " +
-                                                "gib bitte noch zuerst die Minimal- und danach die Maximalhöhe an."));
-                                        return;
-                                    }
-                                    region = regions.getRegion(regionName);
-                                    regionAngegeben = true;
-                                    argumentenVerschiebung = 1;
-                                } else {
-                                    // no owner
-                                    p.spigot().sendMessage(Lang.build(Lang.NOPERMISSION));
+                            region = regions.getRegion(regionName);
+                            if (region.getOwners().contains(p.getUniqueId()) || Perm.hasPermission(cs, Perm.CLAIM_ADMIN)) {
+                                if (args.length < 4) {
+                                    // Nicht genügend Argumente angegeben
+                                    p.spigot().sendMessage(Lang.build("Um die Minimal- und Maximalhöhe der angegebenen Region zu verändern, " +
+                                            "gib bitte noch zuerst die Minimal- und danach die Maximalhöhe an."));
                                     return;
                                 }
+                                region = regions.getRegion(regionName);
+                                regionAngegeben = true;
+                                argumentenVerschiebung = 1;
+                            } else {
+                                // no owner
+                                p.spigot().sendMessage(Lang.build(Lang.NOPERMISSION));
+                                return;
+                            }
                         } else {
                             Integer newMinHeight = null;
                             try {
