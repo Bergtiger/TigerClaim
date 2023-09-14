@@ -1,5 +1,6 @@
 package de.bergtiger.claim.events;
 
+import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
@@ -17,6 +18,7 @@ public class PreRetractConfirmationEvent extends Event implements Cancellable {
     private final BlockFace direction;
     private final Integer extendLength;
     private String message;
+    private ProtectedRegion oldRegion;
 
     @Override
     public HandlerList getHandlers() {
@@ -37,7 +39,7 @@ public class PreRetractConfirmationEvent extends Event implements Cancellable {
     }
 
     public PreRetractConfirmationEvent(
-            Player player, boolean isDirectionalExtension, boolean regionStated, double oldArea, double newArea, BlockFace direction, Integer extendLength, String message) {
+            Player player, boolean isDirectionalExtension, boolean regionStated, double oldArea, double newArea, BlockFace direction, Integer extendLength, String message, ProtectedRegion oldRegion) {
         this.player = player;
         this.isDirectionalExtension = isDirectionalExtension;
         this.regionStated = regionStated;
@@ -46,6 +48,7 @@ public class PreRetractConfirmationEvent extends Event implements Cancellable {
         this.direction = direction;
         this.extendLength = extendLength;
         this.message = message;
+        this.oldRegion = oldRegion;
     }
 
     public Player getPlayer() {
@@ -82,5 +85,9 @@ public class PreRetractConfirmationEvent extends Event implements Cancellable {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public ProtectedRegion getOldRegion() {
+        return oldRegion;
     }
 }

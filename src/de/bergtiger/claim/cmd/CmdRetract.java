@@ -369,7 +369,7 @@ public class CmdRetract {
             }
         }
         PreRetractConfirmationEvent event = new PreRetractConfirmationEvent(
-                player, isDirectionalExtension, regionStated, alteFläche, neueFläche, direction, extendLength, message);
+                player, isDirectionalExtension, regionStated, alteFläche, neueFläche, direction, extendLength, message, oldRegion);
         Bukkit.getPluginManager().callEvent(event);
         if (!event.isCancelled()) {
             if (isDirectionalExtension) {
