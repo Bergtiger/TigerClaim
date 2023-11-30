@@ -341,7 +341,7 @@ public class CmdExpand {
                                 if (ClaimUtils.polygon1LiegtInPolygon2(
                                         alteRechtecksRegionEckpunkte,
                                         ClaimUtils.eckpunkteExaktAusEckpunkteGanz(markierungsBlockPolygon)
-                                        )) {
+                                )) {
                                     //Neue Region soll komplett der Markierung entsprechen
                                     ergebnisPolygon = markierungsBlockPolygon;
                                 }
@@ -672,7 +672,7 @@ public class CmdExpand {
         }
     }
 
-    private static UnitePolygonsResult uniteTwoPolygons (List<BlockVector2> alteRegionsBlockPolygon, List<BlockVector2> markierungsBlockPolygon) {
+    public static UnitePolygonsResult uniteTwoPolygons (List<BlockVector2> alteRegionsBlockPolygon, List<BlockVector2> markierungsBlockPolygon) {
         if (ClaimUtils.polygonHatEckpunkteMehrfach(alteRegionsBlockPolygon)) {
             return new UnitePolygonsResult(null,UnitePolygonsResultType.OLD_REGION_HAS_POINT_MULTIPLE, null);
         }
@@ -712,29 +712,34 @@ public class CmdExpand {
         }
         ArrayList<Vector2> bereitsÜberprüfteStartpunkte = new ArrayList<>();
         //Für jeden geeigneten Startpunkt:
-        ArrayList<ArrayList<Vector2>> potentielleNeuePolygone = new ArrayList<>();
+        ArrayList<ArrayList<Vector2>> potentielleVereintePolygone = new ArrayList<>();
         int i = 1;
+        boolean markierungLiegtOffensichtlichKomplettInRegion = true;
         for (Vector2 startpunkt : markierungsPolygon) {
             //... der nicht im zweiten Polygon liegt...
             if (!ClaimUtils.liegtPunktInPolygon(startpunkt, alteRegionsPolygon, true)) {
+                markierungLiegtOffensichtlichKomplettInRegion = false;
                 //... und nicht bereits überprüft wurde (zu einem potentiellen neuem Polygon gehört)...
                 if (!bereitsÜberprüfteStartpunkte.contains(startpunkt)) {
                     //... wird ein potentielles neues Polygon gefunden
                     System.out.println("Potentielles Polygon " + i + "; startpunkt: (" + startpunkt.getX() + "," + startpunkt.getZ() + ")"); i++;
-                    ArrayList<Vector2> potentiellNeuesPolygon = potentiellNeuesPolygonBildung(
+                    ArrayList<Vector2> potentiellVereintesPolygon = potentiellesVereintesPolygonBildung(
                             startpunkt, markierungsPolygon, alteRegionsPolygon, //Bleibt unverändert
                             startpunkt, true, new ArrayList<>()); //Wird in Rekursion verändert
-                    potentielleNeuePolygone.add(potentiellNeuesPolygon);
-                    bereitsÜberprüfteStartpunkte.addAll(potentiellNeuesPolygon);
+                    potentielleVereintePolygone.add(potentiellVereintesPolygon);
+                    bereitsÜberprüfteStartpunkte.addAll(potentiellVereintesPolygon);
                 }
             }
         }
-        //Für alle potentiellen neuen Polygon ist noch nicht klar, ob sie das umgebende Polygon sind oder ein Polygon, welches von den zwei Ausgangspolygonen eingeschlossen wird
+        if (markierungLiegtOffensichtlichKomplettInRegion) {
+            return new UnitePolygonsResult(null, UnitePolygonsResultType.SELECTION_IS_INSIDE_OLD_REGION, null);
+        }
+        //Für alle potentiellen neuen Polygone ist noch nicht klar, ob sie das umgebende Polygon sind oder ein Polygon, welches von den zwei Ausgangspolygonen eingeschlossen wird
         //Deswegen ist das neue Polygon nun das mit der größten Fläche:
         ArrayList<Vector2> neuesPolygon = null;
         double größtePolygonfläche = 0.0;
         double lückenFläche = 0.0;
-        for (ArrayList<Vector2> potentiellesNeuesPolygon : potentielleNeuePolygone) {
+        for (ArrayList<Vector2> potentiellesNeuesPolygon : potentielleVereintePolygone) {
             double polygonfläche = ClaimUtils.scharfePolgonFläche(potentiellesNeuesPolygon);
             lückenFläche = lückenFläche + polygonfläche;
             if (polygonfläche > größtePolygonfläche) {
@@ -744,7 +749,8 @@ public class CmdExpand {
         }
         lückenFläche = lückenFläche - größtePolygonfläche;
         //Wenn die Flächen vom alten und neuen Polygon gleich sind, überschneiden sich die Polygone nicht:
-        if (ClaimUtils.scharfePolgonFläche(alteRegionsPolygon) == größtePolygonfläche) {
+        double scharfePolgonFläche = ClaimUtils.scharfePolgonFläche(alteRegionsPolygon);
+        if (scharfePolgonFläche == größtePolygonfläche) {
             if (ClaimUtils.polygon1LiegtInPolygon2(markierungsPolygon,alteRegionsPolygon)) {
                 // Markierung liegt komplett innerhalb Region
                 return new UnitePolygonsResult(null, UnitePolygonsResultType.SELECTION_IS_INSIDE_OLD_REGION, null);
@@ -767,14 +773,14 @@ public class CmdExpand {
         return new UnitePolygonsResult(neuesBlockPolygon, UnitePolygonsResultType.BOUNDING_POLYGON_FOUND, lückenFläche > 0.0);
     }
 
-    private static ArrayList<Vector2> potentiellNeuesPolygonBildung(
+    private static ArrayList<Vector2> potentiellesVereintesPolygonBildung(
             //Bleibt unverändert:
             Vector2 startpunkt, ArrayList<Vector2> polygon1punkte, ArrayList<Vector2> polygon2punkte,
             //Wird in Rekursion verändert:
             Vector2 punktAufPolygonKante, boolean eckpunktIstVonP1, ArrayList<Vector2> potentiellNeuesPolygon
     ) {
         if (potentiellNeuesPolygon.contains(startpunkt)) {
-            //Sobald man wieder beim Start angekommen ist, ist das neue Polygon komplett und wird zurück gegeben
+            //Sobald man wieder beim Start angekommen ist, ist das potentielle vereinigte Polygon komplett und wird zurück gegeben
             return potentiellNeuesPolygon;
         } else {
             IntersectionResult result;
@@ -797,7 +803,7 @@ public class CmdExpand {
                 Vector2 nächsteEckeVonSchnittpunktKante = result.getEcke2();
                 System.out.println(ChatColor.RED + "potentiellNeuesPolygon: Schnittpunkt: (" + ersterSchnittpunkt.getX() + "," + ersterSchnittpunkt.getZ() + ")");
                 potentiellNeuesPolygon.add(ersterSchnittpunkt);
-                return potentiellNeuesPolygonBildung(startpunkt, polygon1punkte, polygon2punkte,
+                return potentiellesVereintesPolygonBildung(startpunkt, polygon1punkte, polygon2punkte,
                         ersterSchnittpunkt, !eckpunktIstVonP1,  potentiellNeuesPolygon);
             } else {
                 //Polygon A schneidet sich zwischen punktAufPolygonKante und nächsterEckpunkt nicht mit Polygon B:
@@ -805,7 +811,7 @@ public class CmdExpand {
                 // danach wird rekursiv die nächste Kante in Polygon A betrachtet (Polygon wird also nicht gewechselt)
                 potentiellNeuesPolygon.add(nächsterEckpunkt);
                 System.out.println(ChatColor.RED + "potentiellNeuesPolygon: nächsterEckpunkt: (" + nächsterEckpunkt.getX() + "," + nächsterEckpunkt.getZ() + ")");
-                return potentiellNeuesPolygonBildung(startpunkt, polygon1punkte, polygon2punkte,
+                return potentiellesVereintesPolygonBildung(startpunkt, polygon1punkte, polygon2punkte,
                         nächsterEckpunkt, eckpunktIstVonP1,  potentiellNeuesPolygon);
             }
         }
