@@ -15,7 +15,6 @@ import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.*;
 import de.bergtiger.claim.bdo.*;
-import de.bergtiger.claim.data.ClaimUtils;
 import de.bergtiger.claim.data.IntersectionResult;
 import de.bergtiger.claim.data.UnitePolygonsResult;
 import de.bergtiger.claim.data.UnitePolygonsResultType;
@@ -33,6 +32,8 @@ import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static de.bergtiger.claim.data.ClaimUtils.*;
 
 public class CmdExpand {
     public static void expand(CommandSender cs, String[] args, boolean thisIsACheck, boolean priorityPermission) {
@@ -149,7 +150,7 @@ public class CmdExpand {
                 }
                 if (isDirectionalExtension) {
                     //Erweiterung in bestimmte Richtung (geht nur bei Cuboid-Regionen):
-                    double alteFläche = ClaimUtils.getArea(oldRegion);
+                    double alteFläche = getArea(oldRegion);
                     double breite = 0;
                     if (direction == BlockFace.NORTH || direction == BlockFace.SOUTH) {
                         breite = 1 + oldRegion.getMaximumPoint().getX() - oldRegion.getMinimumPoint().getX();
@@ -202,13 +203,13 @@ public class CmdExpand {
                             // Build new Region from old Region and World Edit Selection
                             List<BlockVector2> alteRegionsBlockPolygon;
                             if (oldRegion instanceof ProtectedCuboidRegion) {
-                                alteRegionsBlockPolygon = ClaimUtils.polygonAusKuboidRegion((ProtectedCuboidRegion) oldRegion);
+                                alteRegionsBlockPolygon = polygonAusKuboidRegion((ProtectedCuboidRegion) oldRegion);
                             } else {
                                 alteRegionsBlockPolygon = oldRegion.getPoints();
                             }
 
                             //Liegt Markierung in Region?:
-                            if(ClaimUtils.region1LiegtInRegion2(markierung,oldRegion)) {
+                            if(region1LiegtInRegion2(markierung,oldRegion)) {
                                 //Selbe Nachrichten weiter unten benötigt
                                 if (regionAngegeben) {
                                     player.spigot().sendMessage(Lang.build("Deine Markierung liegt komplett innerhalb der angegebenen Region. " +
@@ -224,7 +225,7 @@ public class CmdExpand {
                             if (markierung instanceof CuboidRegion) {
                                 // Wenn Rechtecks-Markierung nur ein Block breit ist, dann wird sie in jede Richtung um einen Block breiter gemacht, wo sie auf das alteRegionsBlockPolygon trifft:
                                 CuboidRegion rechteckMarkierung = (CuboidRegion) markierung.clone();
-                                ArrayList<Vector2> alteRegionsPolygon = ClaimUtils.eckpunkteExaktAusEckpunkteGanz(alteRegionsBlockPolygon);
+                                ArrayList<Vector2> alteRegionsPolygon = eckpunkteExaktAusEckpunkteGanz(alteRegionsBlockPolygon);
                                 boolean markierungNichtMitRegionVerbunden = false;
                                 System.out.println("markierung instanceof CuboidRegion");
                                 if (rechteckMarkierung.getMaximumPoint().getX() == rechteckMarkierung.getMinimumPoint().getX()) {
@@ -232,7 +233,7 @@ public class CmdExpand {
                                     int x = rechteckMarkierung.getMaximumPoint().getX();
                                     boolean ostErweiterung = false;
                                     for (int z = rechteckMarkierung.getMinimumPoint().getBlockZ(); z <= rechteckMarkierung.getMaximumPoint().getBlockZ(); z++) {
-                                        if (ClaimUtils.liegtPunktInPolygon(
+                                        if (liegtPunktInPolygon(
                                                 Vector2.at(x + 0.5 + 1.0, z + 0.5), alteRegionsPolygon, true
                                         )) {
                                             ostErweiterung = true;
@@ -240,7 +241,7 @@ public class CmdExpand {
                                     }
                                     boolean westErweiterung = false;
                                     for (int z = rechteckMarkierung.getMinimumPoint().getBlockZ(); z <= rechteckMarkierung.getMaximumPoint().getBlockZ(); z++) {
-                                        if (ClaimUtils.liegtPunktInPolygon(
+                                        if (liegtPunktInPolygon(
                                                 Vector2.at(x + 0.5 - 1.0, z + 0.5), alteRegionsPolygon, true
                                         )) {
                                             westErweiterung = true;
@@ -278,7 +279,7 @@ public class CmdExpand {
                                     int z = markierung.getMaximumPoint().getZ();
                                     boolean südErweiterung = false;
                                     for (int x = rechteckMarkierung.getMinimumPoint().getBlockX(); x <= rechteckMarkierung.getMaximumPoint().getBlockX(); x++) {
-                                        if (ClaimUtils.liegtPunktInPolygon(
+                                        if (liegtPunktInPolygon(
                                                 Vector2.at(x + 0.5, z + 0.5 + 1.0), alteRegionsPolygon, true
                                         )) {
                                             südErweiterung = true;
@@ -286,7 +287,7 @@ public class CmdExpand {
                                     }
                                     boolean nordErweiterung = false;
                                     for (int x = rechteckMarkierung.getMinimumPoint().getBlockX(); x <= rechteckMarkierung.getMaximumPoint().getBlockX(); x++) {
-                                        if (ClaimUtils.liegtPunktInPolygon(
+                                        if (liegtPunktInPolygon(
                                                 Vector2.at(x + 0.5, z + 0.5 - 1.0), alteRegionsPolygon, true
                                         )) {
                                             nordErweiterung = true;
@@ -318,7 +319,7 @@ public class CmdExpand {
                                     }
                                     System.out.println("schmal in z-Richtung - südErweiterung: " + südErweiterung + "; nordErweiterung: " + nordErweiterung);
                                 }
-                                markierungsBlockPolygon = ClaimUtils.polygonAusKuboidRegion(rechteckMarkierung);
+                                markierungsBlockPolygon = polygonAusKuboidRegion(rechteckMarkierung);
                                 if (markierungNichtMitRegionVerbunden) {
                                     if (regionAngegeben) { //Selbe Nachrichten weiter unten benötigt
                                         player.spigot().sendMessage(Lang.build("Die Fläche, die du markiert hast, überschneidet oder berührt die angegebene Region nicht."));
@@ -336,11 +337,11 @@ public class CmdExpand {
                             if (oldRegion instanceof ProtectedCuboidRegion) {
                                 // Wenn oldRegion nur ein Block breit ist, dann wird sie in jede Richtung um einen Block breiter gemacht, wo sie auf das Polygon markierungsBlockPolygon trifft:
                                 CuboidRegion alteRechtecksRegion = new CuboidRegion(oldRegion.getMinimumPoint(), oldRegion.getMaximumPoint());
-                                ArrayList<Vector2> alteRechtecksRegionEckpunkte = ClaimUtils.exakteEckpunkteEinerKuboidRegion(alteRechtecksRegion);
+                                ArrayList<Vector2> alteRechtecksRegionEckpunkte = exakteEckpunkteEinerKuboidRegion(alteRechtecksRegion);
                                 //Fehlermeldung:
-                                if (ClaimUtils.polygon1LiegtInPolygon2(
+                                if (polygon1LiegtInPolygon2(
                                         alteRechtecksRegionEckpunkte,
-                                        ClaimUtils.eckpunkteExaktAusEckpunkteGanz(markierungsBlockPolygon)
+                                        eckpunkteExaktAusEckpunkteGanz(markierungsBlockPolygon)
                                 )) {
                                     //Neue Region soll komplett der Markierung entsprechen
                                     ergebnisPolygon = markierungsBlockPolygon;
@@ -352,16 +353,16 @@ public class CmdExpand {
                                     int x = alteRechtecksRegion.getMaximumPoint().getX();
                                     boolean ostErweiterung = false;
                                     for (int z = alteRechtecksRegion.getMinimumPoint().getBlockZ(); z <= alteRechtecksRegion.getMaximumPoint().getBlockZ(); z++) {
-                                        if (ClaimUtils.liegtPunktInPolygon(
-                                                Vector2.at(x + 0.5 + 1.0, z + 0.5), ClaimUtils.eckpunkteExaktAusEckpunkteGanz(markierungsBlockPolygon), true
+                                        if (liegtPunktInPolygon(
+                                                Vector2.at(x + 0.5 + 1.0, z + 0.5), eckpunkteExaktAusEckpunkteGanz(markierungsBlockPolygon), true
                                         )) {
                                             ostErweiterung = true;
                                         }
                                     }
                                     boolean westErweiterung = false;
                                     for (int z = alteRechtecksRegion.getMinimumPoint().getBlockZ(); z <= alteRechtecksRegion.getMaximumPoint().getBlockZ(); z++) {
-                                        if (ClaimUtils.liegtPunktInPolygon(
-                                                Vector2.at(x + 0.5 - 1.0, z + 0.5), ClaimUtils.eckpunkteExaktAusEckpunkteGanz(markierungsBlockPolygon), true
+                                        if (liegtPunktInPolygon(
+                                                Vector2.at(x + 0.5 - 1.0, z + 0.5), eckpunkteExaktAusEckpunkteGanz(markierungsBlockPolygon), true
                                         )) {
                                             westErweiterung = true;
                                         }
@@ -398,16 +399,16 @@ public class CmdExpand {
                                     int z = markierung.getMaximumPoint().getZ();
                                     boolean südErweiterung = false;
                                     for (int x = alteRechtecksRegion.getMinimumPoint().getBlockX(); x <= alteRechtecksRegion.getMaximumPoint().getBlockX(); x++) {
-                                        if (ClaimUtils.liegtPunktInPolygon(
-                                                Vector2.at(x + 0.5, z + 0.5 + 1.0), ClaimUtils.eckpunkteExaktAusEckpunkteGanz(markierungsBlockPolygon), true
+                                        if (liegtPunktInPolygon(
+                                                Vector2.at(x + 0.5, z + 0.5 + 1.0), eckpunkteExaktAusEckpunkteGanz(markierungsBlockPolygon), true
                                         )) {
                                             südErweiterung = true;
                                         }
                                     }
                                     boolean nordErweiterung = false;
                                     for (int x = alteRechtecksRegion.getMinimumPoint().getBlockX(); x <= alteRechtecksRegion.getMaximumPoint().getBlockX(); x++) {
-                                        if (ClaimUtils.liegtPunktInPolygon(
-                                                Vector2.at(x + 0.5, z + 0.5 - 1.0), ClaimUtils.eckpunkteExaktAusEckpunkteGanz(markierungsBlockPolygon), true
+                                        if (liegtPunktInPolygon(
+                                                Vector2.at(x + 0.5, z + 0.5 - 1.0), eckpunkteExaktAusEckpunkteGanz(markierungsBlockPolygon), true
                                         )) {
                                             nordErweiterung = true;
                                         }
@@ -438,7 +439,7 @@ public class CmdExpand {
                                     }
                                     System.out.println("schmal in z-Richtung - südErweiterung: " + südErweiterung + "; nordErweiterung: " + nordErweiterung);
                                 }
-                                alteRegionsBlockPolygon = ClaimUtils.polygonAusKuboidRegion(alteRechtecksRegion);
+                                alteRegionsBlockPolygon = polygonAusKuboidRegion(alteRechtecksRegion);
                                 if (markierungNichtMitRegionVerbunden) {
                                     if (regionAngegeben) { //Selbe Nachrichten weiter unten benötigt
                                         player.spigot().sendMessage(Lang.build("Die Fläche, die du markiert hast, überschneidet oder berührt die angegebene Region nicht."));
@@ -529,8 +530,8 @@ public class CmdExpand {
                                 System.out.println(ChatColor.DARK_RED + "Test2 - Eckpunkte: " + vector2);
                             }
                             // inform Player
-                            double alteFläche = ClaimUtils.getArea(oldRegion);
-                            double neueFläche = ClaimUtils.flächeEinesPixelPolygons(ClaimUtils.scharfePolgonFläche(newRegion.getPoints()),newRegion.getPoints());
+                            double alteFläche = getArea(oldRegion);
+                            double neueFläche = flächeEinesPixelPolygons(scharfePolgonFläche(newRegion.getPoints()),newRegion.getPoints());
                             if (thisIsACheck) {
                                 String message;
                                 if (regionAngegeben) {
@@ -539,11 +540,11 @@ public class CmdExpand {
                                     message = "Möchtest du überprüfen ob die Erweiterung der Region, in der du stehst, mit deiner Markierung verfügbar ist?";
                                 }
                                 PreExpandCheckConfirmationEvent event = new PreExpandCheckConfirmationEvent(
-                                        player, false, regionAngegeben, ClaimUtils.getArea(oldRegion), ClaimUtils.getArea(newRegion),
+                                        player, false, regionAngegeben, getArea(oldRegion), getArea(newRegion),
                                         null, null, message);
                                 Bukkit.getPluginManager().callEvent(event);
                                 if (!event.isCancelled()) {
-                                    Polygonal2DRegion markierungAlsPolygon = ClaimUtils.markierungAlsPolygon(oldRegion, markierung);
+                                    Polygonal2DRegion markierungAlsPolygon = markierungAlsPolygon(oldRegion, markierung);
                                     ConfirmationListener.inst().addConfirmation(new ExpandSelectionalQueue(
                                             oldRegion, player.getWorld(), player, ergebnisPolygon, regionAngegeben, true,
                                             markierungAlsPolygon, containsGapsFromOldRegionAndSelection));
@@ -558,7 +559,7 @@ public class CmdExpand {
                                     }
                                 }
                             } else {
-                                Polygonal2DRegion markierungAlsPolygon = ClaimUtils.markierungAlsPolygon(oldRegion, markierung);
+                                Polygonal2DRegion markierungAlsPolygon = markierungAlsPolygon(oldRegion, markierung);
                                 CmdExpand.expandQuestion(player, player.getWorld(), oldRegion, regionAngegeben, alteFläche, neueFläche, false,
                                         markierungAlsPolygon, containsGapsFromOldRegionAndSelection,
                                         null, null, ergebnisPolygon);
@@ -673,10 +674,10 @@ public class CmdExpand {
     }
 
     public static UnitePolygonsResult uniteTwoPolygons (List<BlockVector2> alteRegionsBlockPolygon, List<BlockVector2> markierungsBlockPolygon) {
-        if (ClaimUtils.polygonHatEckpunkteMehrfach(alteRegionsBlockPolygon)) {
+        if (polygonHatEckpunkteMehrfach(alteRegionsBlockPolygon)) {
             return new UnitePolygonsResult(null,UnitePolygonsResultType.OLD_REGION_HAS_POINT_MULTIPLE, null);
         }
-        if (ClaimUtils.polygonHatEckpunkteMehrfach(markierungsBlockPolygon)) {
+        if (polygonHatEckpunkteMehrfach(markierungsBlockPolygon)) {
             return new UnitePolygonsResult(null,UnitePolygonsResultType.SELECTION_HAS_POINT_MULTIPLE, null);
         }
         ArrayList<Vector2> alteRegionsPolygon = new ArrayList<>();
@@ -688,8 +689,8 @@ public class CmdExpand {
             markierungsPolygon.add(Vector2.at( blockVector2.getX() + 0.5,blockVector2.getZ() + 0.5));
         }
         // Die Richtung ist entgegen des Uhrzeigersinns:
-        Boolean region1ImUhrzeigerSinn = ClaimUtils.verläuftPolygonImUhrzeigersinn(alteRegionsPolygon);
-        Boolean region2ImUhrzeigerSinn = ClaimUtils.verläuftPolygonImUhrzeigersinn(markierungsPolygon);
+        Boolean region1ImUhrzeigerSinn = verläuftPolygonImUhrzeigersinn(alteRegionsPolygon);
+        Boolean region2ImUhrzeigerSinn = verläuftPolygonImUhrzeigersinn(markierungsPolygon);
         if (region2ImUhrzeigerSinn == null && region1ImUhrzeigerSinn == null) {
             return new UnitePolygonsResult(null, UnitePolygonsResultType.BOTH_POLYGONS_INTERSECT_THEMSELVES, null);
         }
@@ -700,15 +701,20 @@ public class CmdExpand {
             return new UnitePolygonsResult(null, UnitePolygonsResultType.SELECTION_INTERSECTS_ITSELF, null);
         }
         if (region2ImUhrzeigerSinn) {
-            markierungsPolygon = ClaimUtils.punktListeInvertiert(markierungsPolygon);
+            markierungsPolygon = punktListeInvertiert(markierungsPolygon);
         }
         if (region1ImUhrzeigerSinn) {
-            alteRegionsPolygon = ClaimUtils.punktListeInvertiert(alteRegionsPolygon);
+            alteRegionsPolygon = punktListeInvertiert(alteRegionsPolygon);
         }
-        if (ClaimUtils.sindPolygoneGleich(
-                ClaimUtils.eckpunkteGanzAusEckpunkteExakt(markierungsPolygon), ClaimUtils.eckpunkteGanzAusEckpunkteExakt(alteRegionsPolygon))
+        if (sindPolygoneGleich(
+                eckpunkteGanzAusEckpunkteExakt(markierungsPolygon), eckpunkteGanzAusEckpunkteExakt(alteRegionsPolygon))
         ) {
             return new UnitePolygonsResult(null, UnitePolygonsResultType.POLYGONS_ARE_EQUAL, null);
+        }
+        if (polygon1LiegtInPolygon2(alteRegionsPolygon, markierungsPolygon)) {
+            // Markierung liegt komplett innerhalb Region
+            List<BlockVector2> ergebnisPolygon = polygonOhneRedundantePunkte(eckpunkteGanzAusEckpunkteExakt(markierungsPolygon));
+            return new UnitePolygonsResult(ergebnisPolygon, UnitePolygonsResultType.BOUNDING_POLYGON_FOUND, false);
         }
         ArrayList<Vector2> bereitsÜberprüfteStartpunkte = new ArrayList<>();
         //Für jeden geeigneten Startpunkt:
@@ -717,7 +723,7 @@ public class CmdExpand {
         boolean markierungLiegtOffensichtlichKomplettInRegion = true;
         for (Vector2 startpunkt : markierungsPolygon) {
             //... der nicht im zweiten Polygon liegt...
-            if (!ClaimUtils.liegtPunktInPolygon(startpunkt, alteRegionsPolygon, true)) {
+            if (!liegtPunktInPolygon(startpunkt, alteRegionsPolygon, true)) {
                 markierungLiegtOffensichtlichKomplettInRegion = false;
                 //... und nicht bereits überprüft wurde (zu einem potentiellen neuem Polygon gehört)...
                 if (!bereitsÜberprüfteStartpunkte.contains(startpunkt)) {
@@ -740,7 +746,7 @@ public class CmdExpand {
         double größtePolygonfläche = 0.0;
         double lückenFläche = 0.0;
         for (ArrayList<Vector2> potentiellesNeuesPolygon : potentielleVereintePolygone) {
-            double polygonfläche = ClaimUtils.scharfePolgonFläche(potentiellesNeuesPolygon);
+            double polygonfläche = scharfePolgonFläche(potentiellesNeuesPolygon);
             lückenFläche = lückenFläche + polygonfläche;
             if (polygonfläche > größtePolygonfläche) {
                 größtePolygonfläche = polygonfläche;
@@ -749,9 +755,9 @@ public class CmdExpand {
         }
         lückenFläche = lückenFläche - größtePolygonfläche;
         //Wenn die Flächen vom alten und neuen Polygon gleich sind, überschneiden sich die Polygone nicht:
-        double scharfePolgonFläche = ClaimUtils.scharfePolgonFläche(alteRegionsPolygon);
+        double scharfePolgonFläche = scharfePolgonFläche(alteRegionsPolygon);
         if (scharfePolgonFläche == größtePolygonfläche) {
-            if (ClaimUtils.polygon1LiegtInPolygon2(markierungsPolygon,alteRegionsPolygon)) {
+            if (polygon1LiegtInPolygon2(markierungsPolygon,alteRegionsPolygon)) {
                 // Markierung liegt komplett innerhalb Region
                 return new UnitePolygonsResult(null, UnitePolygonsResultType.SELECTION_IS_INSIDE_OLD_REGION, null);
             } else {
@@ -760,14 +766,14 @@ public class CmdExpand {
             }
         }
         if (neuesPolygon != null) {
-            for (BlockVector2 vector2 : ClaimUtils.eckpunkteGanzAusEckpunkteExakt(neuesPolygon)) {
+            for (BlockVector2 vector2 : eckpunkteGanzAusEckpunkteExakt(neuesPolygon)) {
                 System.out.println(ChatColor.RED + "Test1 - Eckpunkte: " + vector2);
             }
         } else {
             System.out.println(ChatColor.RED + "Test1 - Eckpunkte: null");
         }
-        List<BlockVector2> neuesBlockPolygon = ClaimUtils.polygonOhneRedundantePunkte(ClaimUtils.eckpunkteGanzAusEckpunkteExakt(neuesPolygon));
-        if (ClaimUtils.polygonHatEckpunkteMehrfach(neuesBlockPolygon)) {
+        List<BlockVector2> neuesBlockPolygon = polygonOhneRedundantePunkte(eckpunkteGanzAusEckpunkteExakt(neuesPolygon));
+        if (polygonHatEckpunkteMehrfach(neuesBlockPolygon)) {
             return new UnitePolygonsResult(null, UnitePolygonsResultType.RESULT_POLYGON_HAS_POINT_MULTIPLE, null);
         }
         return new UnitePolygonsResult(neuesBlockPolygon, UnitePolygonsResultType.BOUNDING_POLYGON_FOUND, lückenFläche > 0.0);
@@ -787,12 +793,12 @@ public class CmdExpand {
             Vector2 nächsterEckpunkt;
             if (eckpunktIstVonP1) {
                 //Polygon A = Polygon 1, Polygon B = Polygon 2
-                nächsterEckpunkt = ClaimUtils.nächsterEckpunkt(punktAufPolygonKante, polygon1punkte);
-                result = ClaimUtils.ersterSchnittpunktMitPolygonAufStrecke(punktAufPolygonKante, nächsterEckpunkt, polygon2punkte, false);
+                nächsterEckpunkt = nächsterEckpunkt(punktAufPolygonKante, polygon1punkte);
+                result = ersterSchnittpunktMitPolygonAufStrecke(punktAufPolygonKante, nächsterEckpunkt, polygon2punkte, false);
             } else {
                 //Polygon A = Polygon 2, Polygon B = Polygon 1
-                nächsterEckpunkt = ClaimUtils.nächsterEckpunkt(punktAufPolygonKante, polygon2punkte);
-                result = ClaimUtils.ersterSchnittpunktMitPolygonAufStrecke(punktAufPolygonKante, nächsterEckpunkt, polygon1punkte, false);
+                nächsterEckpunkt = nächsterEckpunkt(punktAufPolygonKante, polygon2punkte);
+                result = ersterSchnittpunktMitPolygonAufStrecke(punktAufPolygonKante, nächsterEckpunkt, polygon1punkte, false);
             }
             if (result != null && !result.getSchnittpunkt().equals(punktAufPolygonKante)) {
                 //Polygon A schneidet sich zwischen punktAufPolygonKante und nächsterEckpunkt mit Polygon B:

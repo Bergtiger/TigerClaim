@@ -12,8 +12,6 @@ import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import de.bergtiger.claim.data.language.Lang;
 import de.bergtiger.claim.data.logger.TigerLogger;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 
 import java.util.ArrayList;
 import java.util.List;
