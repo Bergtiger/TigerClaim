@@ -783,25 +783,55 @@ public class CmdExpand {
             //Bleibt unverändert:
             Vector2 startpunkt, ArrayList<Vector2> polygon1punkte, ArrayList<Vector2> polygon2punkte,
             //Wird in Rekursion verändert:
-            Vector2 punktAufPolygonKante, boolean eckpunktIstVonP1, ArrayList<Vector2> potentiellNeuesPolygon
+            Vector2 aktuellerPunkt, boolean aktuellerPunktIstVonP1, ArrayList<Vector2> potentiellNeuesPolygon
     ) {
+        if (potentiellNeuesPolygon.size() == 6) {
+            double a = 1;
+        }
         if (potentiellNeuesPolygon.contains(startpunkt)) {
             //Sobald man wieder beim Start angekommen ist, ist das potentielle vereinigte Polygon komplett und wird zurück gegeben
             return potentiellNeuesPolygon;
         } else {
+            //Zuerst nächsten Eckpunkt bestimmen und dann ggf. den nächsten Schnittpunkt auf der Strecke zwischen dem alten und neuen Eckpunkt
             IntersectionResult result;
+
             Vector2 nächsterEckpunkt;
-            if (eckpunktIstVonP1) {
+            boolean aktuellerPunktLiegtAufBeidenPolygonen = liegtPunktAufPolygonKante(polygon1punkte, aktuellerPunkt) &&
+                    liegtPunktAufPolygonKante(polygon2punkte, aktuellerPunkt);
+            boolean nunPolygon1Verwenden;
+            if (aktuellerPunktLiegtAufBeidenPolygonen) {
+                Vector2 vorherigerEckpunkt = vorherigerEckpunkt(aktuellerPunkt, potentiellNeuesPolygon);
+                //aktueller Punkt liegt Auf beiden Polygonen
+                //Welcher nächster Eckpunkt liegt weiter außen?:
+                Vector2 nächsterEckpunktBeiPolygon1 = nächsterEckpunkt(aktuellerPunkt, polygon1punkte);
+                Vector2 nächsterEckpunktBeiPolygon2 = nächsterEckpunkt(aktuellerPunkt, polygon2punkte);
+                Boolean polygon1EckpunktLiegtWeiterAußenBzwRechts =
+                        liegtStreckeAWeiterRechtsAlsStreckeB(vorherigerEckpunkt, aktuellerPunkt, nächsterEckpunktBeiPolygon1, nächsterEckpunktBeiPolygon2);
+                if (polygon1EckpunktLiegtWeiterAußenBzwRechts == null) {
+                    nunPolygon1Verwenden = aktuellerPunktIstVonP1;
+                } else {
+                    nunPolygon1Verwenden = polygon1EckpunktLiegtWeiterAußenBzwRechts;
+                }
+            } else {
+                nunPolygon1Verwenden = aktuellerPunktIstVonP1;
+            }
+            if (nunPolygon1Verwenden) {
                 //Polygon A = Polygon 1, Polygon B = Polygon 2
-                nächsterEckpunkt = nächsterEckpunkt(punktAufPolygonKante, polygon1punkte);
-                result = ersterSchnittpunktMitPolygonAufStrecke(punktAufPolygonKante, nächsterEckpunkt, polygon2punkte, false);
+                nächsterEckpunkt = nächsterEckpunkt(aktuellerPunkt, polygon1punkte);
+                result = ersterSchnittpunktMitPolygonAufStrecke(aktuellerPunkt, nächsterEckpunkt, polygon2punkte, false);
             } else {
                 //Polygon A = Polygon 2, Polygon B = Polygon 1
-                nächsterEckpunkt = nächsterEckpunkt(punktAufPolygonKante, polygon2punkte);
-                result = ersterSchnittpunktMitPolygonAufStrecke(punktAufPolygonKante, nächsterEckpunkt, polygon1punkte, false);
+                nächsterEckpunkt = nächsterEckpunkt(aktuellerPunkt, polygon2punkte);
+                result = ersterSchnittpunktMitPolygonAufStrecke(aktuellerPunkt, nächsterEckpunkt, polygon1punkte, false);
             }
-            if (result != null && !result.getSchnittpunkt().equals(punktAufPolygonKante)) {
-                //Polygon A schneidet sich zwischen punktAufPolygonKante und nächsterEckpunkt mit Polygon B:
+
+            //Wenn im letzten Schritt das Polygon bei einer übereinanderliegenden Kante gewechselt wurde
+            Vector2 nächsterSchnittpunkt = null;
+            if (result != null) {
+                nächsterSchnittpunkt = result.getSchnittpunkt();
+            }
+            if (result != null && !nächsterSchnittpunkt.equals(aktuellerPunkt)) {
+                //Polygon A schneidet sich zwischen aktuellerPunkt und nächsterEckpunkt mit Polygon B:
                 // der erste Schnittpunkt wird als Eckpunkt des neuen Polygons hinzugefügt, das Polygon wird zu Polygon B gewechselt
                 // und der nächste Punkt auf Polygon B wird zum neuen Polygon hinzugefügt
                 // danach wird rekursiv die nächste Kante in Polygon B betrachtet
@@ -809,17 +839,20 @@ public class CmdExpand {
                 Vector2 nächsteEckeVonSchnittpunktKante = result.getEcke2();
                 System.out.println(ChatColor.RED + "potentiellNeuesPolygon: Schnittpunkt: (" + ersterSchnittpunkt.getX() + "," + ersterSchnittpunkt.getZ() + ")");
                 potentiellNeuesPolygon.add(ersterSchnittpunkt);
+                //Wenn letzter Wechsel des Polygons auf gemeinsamer Kante stattfand, soll nicht direkt wieder gewechselt werden
                 return potentiellesVereintesPolygonBildung(startpunkt, polygon1punkte, polygon2punkte,
-                        ersterSchnittpunkt, !eckpunktIstVonP1,  potentiellNeuesPolygon);
+                        ersterSchnittpunkt, !aktuellerPunktIstVonP1, potentiellNeuesPolygon);
+                //eventuell muss aktuellerPunktIstAlterEckpunkt hier verallgemeinert werden
             } else {
-                //Polygon A schneidet sich zwischen punktAufPolygonKante und nächsterEckpunkt nicht mit Polygon B:
+                //Polygon A schneidet sich zwischen aktuellerPunkt und nächsterEckpunkt nicht mit Polygon B:
                 // und der nächste Punkt auf Polygon A wird zum neuen Polygon hinzugefügt
                 // danach wird rekursiv die nächste Kante in Polygon A betrachtet (Polygon wird also nicht gewechselt)
                 potentiellNeuesPolygon.add(nächsterEckpunkt);
                 System.out.println(ChatColor.RED + "potentiellNeuesPolygon: nächsterEckpunkt: (" + nächsterEckpunkt.getX() + "," + nächsterEckpunkt.getZ() + ")");
                 return potentiellesVereintesPolygonBildung(startpunkt, polygon1punkte, polygon2punkte,
-                        nächsterEckpunkt, eckpunktIstVonP1,  potentiellNeuesPolygon);
+                        nächsterEckpunkt, aktuellerPunktIstVonP1,  potentiellNeuesPolygon);
             }
         }
     }
+
 }

@@ -149,6 +149,7 @@ class CmdExpandTest {
         sollErgebnisPolygon.add(BlockVector2.at(2, 0));
         assertThat(ergebnisPolygon).containsExactlyInAnyOrderElementsOf(sollErgebnisPolygon);
         assertThat(result.containsGapsFromOldRegionAndSelection).isFalse();
+        assertThat(result.getResultType()).isEqualTo(UnitePolygonsResultType.BOUNDING_POLYGON_FOUND);
     }
 
     @Test
@@ -181,10 +182,11 @@ class CmdExpandTest {
         sollErgebnisPolygon.add(BlockVector2.at(8, 0));
         assertThat(ergebnisPolygon).containsExactlyInAnyOrderElementsOf(sollErgebnisPolygon);
         assertThat(result.containsGapsFromOldRegionAndSelection).isTrue();
+        assertThat(result.getResultType()).isEqualTo(UnitePolygonsResultType.BOUNDING_POLYGON_FOUND);
     }
 
     @Test
-    @DisplayName("alteRegionsBlockPolygon liegt in markierungsBlockPolygon und sie haben drei übereinanderliegende Kanten, freie Kante liegt südlich (Bug #9)")
+    @DisplayName("alteRegionsBlockPolygon liegt in markierungsBlockPolygon und sie haben drei übereinanderliegende Kanten, freie Kante liegt südlich (Bug #9 - Teil 1)")
     void test8() {
         //Arrange
         ArrayList<BlockVector2> alteRegionsBlockPolygon = new ArrayList<>();
@@ -208,6 +210,7 @@ class CmdExpandTest {
         sollErgebnisPolygon.add(BlockVector2.at(2, 0));
         assertThat(ergebnisPolygon).containsExactlyInAnyOrderElementsOf(sollErgebnisPolygon);
         assertThat(result.containsGapsFromOldRegionAndSelection).isFalse();
+        assertThat(result.getResultType()).isEqualTo(UnitePolygonsResultType.BOUNDING_POLYGON_FOUND);
     }
 
     @Test
@@ -235,5 +238,100 @@ class CmdExpandTest {
         sollErgebnisPolygon.add(BlockVector2.at(3, 0));
         assertThat(ergebnisPolygon).containsExactlyInAnyOrderElementsOf(sollErgebnisPolygon);
         assertThat(result.containsGapsFromOldRegionAndSelection).isFalse();
+        assertThat(result.getResultType()).isEqualTo(UnitePolygonsResultType.BOUNDING_POLYGON_FOUND);
+    }
+
+    @Test
+    @DisplayName("Polygone haben eine übereinanderliegende Kante und liegen teilweise übereinander (Bug #9 - Teil 2)")
+    void test10() {
+        //Arrange
+        ArrayList<BlockVector2> alteRegionsBlockPolygon = new ArrayList<>();
+        alteRegionsBlockPolygon.add(BlockVector2.at(0, 0));
+        alteRegionsBlockPolygon.add(BlockVector2.at(0, 2));
+        alteRegionsBlockPolygon.add(BlockVector2.at(2, 2));
+        alteRegionsBlockPolygon.add(BlockVector2.at(2, 0));
+        ArrayList<BlockVector2> markierungsBlockPolygon = new ArrayList<>();
+        markierungsBlockPolygon.add(BlockVector2.at(0, 1));
+        markierungsBlockPolygon.add(BlockVector2.at(3, 1));
+        markierungsBlockPolygon.add(BlockVector2.at(3, 3));
+        markierungsBlockPolygon.add(BlockVector2.at(0, 3));
+        //Act
+        UnitePolygonsResult result = CmdExpand.uniteTwoPolygons(alteRegionsBlockPolygon, markierungsBlockPolygon);
+        List<BlockVector2> ergebnisPolygon = result.getPolygon();
+        //Assert
+        ArrayList<BlockVector2> sollErgebnisPolygon = new ArrayList<>();
+        sollErgebnisPolygon.add(BlockVector2.at(0, 0));
+        sollErgebnisPolygon.add(BlockVector2.at(2, 0));
+        sollErgebnisPolygon.add(BlockVector2.at(2, 1));
+        sollErgebnisPolygon.add(BlockVector2.at(3, 1));
+        sollErgebnisPolygon.add(BlockVector2.at(3, 3));
+        sollErgebnisPolygon.add(BlockVector2.at(0, 3));
+        assertThat(ergebnisPolygon).containsExactlyInAnyOrderElementsOf(sollErgebnisPolygon);
+        assertThat(result.containsGapsFromOldRegionAndSelection).isFalse();
+        assertThat(result.getResultType()).isEqualTo(UnitePolygonsResultType.BOUNDING_POLYGON_FOUND);
+    }
+
+    @Test
+    @DisplayName("Polygone haben eine übereinanderliegende Kante und liegen nicht übereinander")
+    void test11() {
+        //Arrange
+        ArrayList<BlockVector2> alteRegionsBlockPolygon = new ArrayList<>();
+        alteRegionsBlockPolygon.add(BlockVector2.at(0, 0));
+        alteRegionsBlockPolygon.add(BlockVector2.at(0, 2));
+        alteRegionsBlockPolygon.add(BlockVector2.at(2, 2));
+        alteRegionsBlockPolygon.add(BlockVector2.at(2, 0));
+        ArrayList<BlockVector2> markierungsBlockPolygon = new ArrayList<>();
+        markierungsBlockPolygon.add(BlockVector2.at(2, 1));
+        markierungsBlockPolygon.add(BlockVector2.at(2, 3));
+        markierungsBlockPolygon.add(BlockVector2.at(4, 3));
+        markierungsBlockPolygon.add(BlockVector2.at(4, 1));
+        //Act
+        UnitePolygonsResult result = CmdExpand.uniteTwoPolygons(alteRegionsBlockPolygon, markierungsBlockPolygon);
+        List<BlockVector2> ergebnisPolygon = result.getPolygon();
+        //Assert
+        ArrayList<BlockVector2> sollErgebnisPolygon = new ArrayList<>();
+        sollErgebnisPolygon.add(BlockVector2.at(0, 0));
+        sollErgebnisPolygon.add(BlockVector2.at(0, 2));
+        sollErgebnisPolygon.add(BlockVector2.at(2, 2));
+        sollErgebnisPolygon.add(BlockVector2.at(2, 3));
+        sollErgebnisPolygon.add(BlockVector2.at(4, 3));
+        sollErgebnisPolygon.add(BlockVector2.at(4, 1));
+        sollErgebnisPolygon.add(BlockVector2.at(2, 1));
+        sollErgebnisPolygon.add(BlockVector2.at(2, 0));
+        assertThat(ergebnisPolygon).containsExactlyInAnyOrderElementsOf(sollErgebnisPolygon);
+        assertThat(result.containsGapsFromOldRegionAndSelection).isFalse();
+        assertThat(result.getResultType()).isEqualTo(UnitePolygonsResultType.BOUNDING_POLYGON_FOUND);
+    }
+
+    @Test
+    @DisplayName("Polygone haben eine übereinanderliegende Kante und liegen teilweise übereinander (Bug #9 - Teil 2)")
+    void test12() {
+        //Arrange
+        ArrayList<BlockVector2> alteRegionsBlockPolygon = new ArrayList<>();
+        alteRegionsBlockPolygon.add(BlockVector2.at(0, 0));
+        alteRegionsBlockPolygon.add(BlockVector2.at(0, 2));
+        alteRegionsBlockPolygon.add(BlockVector2.at(3, 2));
+        alteRegionsBlockPolygon.add(BlockVector2.at(3, 0));
+        ArrayList<BlockVector2> markierungsBlockPolygon = new ArrayList<>();
+        markierungsBlockPolygon.add(BlockVector2.at(1, 0));
+        markierungsBlockPolygon.add(BlockVector2.at(1, 4));
+        markierungsBlockPolygon.add(BlockVector2.at(2, 4));
+        markierungsBlockPolygon.add(BlockVector2.at(2, 0));
+        //Act
+        UnitePolygonsResult result = CmdExpand.uniteTwoPolygons(alteRegionsBlockPolygon, markierungsBlockPolygon);
+        List<BlockVector2> ergebnisPolygon = result.getPolygon();
+        //Assert
+        ArrayList<BlockVector2> sollErgebnisPolygon = new ArrayList<>();
+        sollErgebnisPolygon.add(BlockVector2.at(0, 0));
+        sollErgebnisPolygon.add(BlockVector2.at(0, 2));
+        sollErgebnisPolygon.add(BlockVector2.at(1, 2));
+        sollErgebnisPolygon.add(BlockVector2.at(1, 4));
+        sollErgebnisPolygon.add(BlockVector2.at(2, 4));
+        sollErgebnisPolygon.add(BlockVector2.at(2, 2));
+        sollErgebnisPolygon.add(BlockVector2.at(3, 2));
+        sollErgebnisPolygon.add(BlockVector2.at(3, 0));
+        assertThat(ergebnisPolygon).containsExactlyInAnyOrderElementsOf(sollErgebnisPolygon);
+        assertThat(result.containsGapsFromOldRegionAndSelection).isFalse();
+        assertThat(result.getResultType()).isEqualTo(UnitePolygonsResultType.BOUNDING_POLYGON_FOUND);
     }
 }

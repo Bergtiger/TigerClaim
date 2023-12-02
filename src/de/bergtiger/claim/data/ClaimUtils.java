@@ -567,8 +567,8 @@ public class ClaimUtils {
 		Vector2 strecke1vector = strecke1punkt2.subtract(strecke1punkt1);
 		Vector2 strecke2vector = strecke2punkt2.subtract(strecke2punkt1);
 		System.out.println("schnittpunktVonZweiStrecken: ");
-		System.out.println("Strecke 1: (" + strecke1punkt1.getX() + "," + strecke1punkt1.getZ() + ") --> (" + strecke1punkt2.getX() + "," + strecke1punkt2.getZ());
-		System.out.println("Strecke 2: (" + strecke2punkt1.getX() + "," + strecke2punkt1.getZ() + ") --> (" + strecke2punkt2.getX() + "," + strecke2punkt2.getZ());
+		System.out.println("Strecke 1: (" + strecke1punkt1.getX() + "," + strecke1punkt1.getZ() + ") --> (" + strecke1punkt2.getX() + "," + strecke1punkt2.getZ() + ")");
+		System.out.println("Strecke 2: (" + strecke2punkt1.getX() + "," + strecke2punkt1.getZ() + ") --> (" + strecke2punkt2.getX() + "," + strecke2punkt2.getZ() + ")");
 		if (Math.abs(strecke1vector.dot(strecke2vector)) == strecke1vector.length() * strecke2vector.length()) {
 			System.out.println("(Strecken sind parallel)");
 			//(Strecken sind parallel)
@@ -684,17 +684,11 @@ public class ClaimUtils {
 
 	public static Vector2 nächsterEckpunkt (Vector2 punktAufPolygonKante, ArrayList<Vector2> polygon) {
 		//Zuerst überprüfe, ob punktAufPolygonKante ein Eckpunkt ist und gebe wenn ja, den nächsten Eckpunkt zurück
-		for (int i = 0; i < polygon.size(); i++) {
-			Vector2 ecke = polygon.get(i);
-			if (ecke.equals(punktAufPolygonKante)) {
-				if (i == polygon.size() - 1) {
-					return polygon.get(0);
-				} else {
-					return polygon.get(i+1);
-				}
-			}
+		Vector2 nächsterEckpunktWennEckpunktGegeben = nächsterEckpunktWennEckpunktGegeben(punktAufPolygonKante, polygon);
+		if (nächsterEckpunktWennEckpunktGegeben != null) {
+			return nächsterEckpunktWennEckpunktGegeben;
 		}
-		//punktAufPolygonKante ist kein Eckpunkt:
+		//punktAufPolygonKante ist kein Eckpunkt (sondern ein Schnittpunkt):
 		for (int i = 0; i < polygon.size(); i++) {
 			Vector2 möglicheVorherigeEcke = polygon.get(i);
 			Vector2 möglicheNächsteEcke;
@@ -706,6 +700,20 @@ public class ClaimUtils {
 			//Liegt punktAufPolygonKante auf der Strecke von möglicheVorherigeEcke zu möglicheNächsteEcke?:
 			if (liegtPunktCAufStreckeAB(punktAufPolygonKante, möglicheNächsteEcke, möglicheVorherigeEcke)) {
 				return möglicheNächsteEcke;
+			}
+		}
+		return null;
+	}
+
+	private static Vector2 nächsterEckpunktWennEckpunktGegeben(Vector2 eckpunkt, ArrayList<Vector2> polygon) {
+		for (int i = 0; i < polygon.size(); i++) {
+			Vector2 ecke = polygon.get(i);
+			if (ecke.equals(eckpunkt)) {
+				if (i == polygon.size() - 1) {
+					return polygon.get(0);
+				} else {
+					return polygon.get(i+1);
+				}
 			}
 		}
 		return null;
@@ -752,6 +760,40 @@ public class ClaimUtils {
 			}
 		}
 		return null;
+	}
+
+	//Haben Kanten unendlich viele Schnittpunkte?
+	public static boolean liegenKantenÜbereinander(Vector2 kante1punkt1, Vector2 kante1punkt2, Vector2 kante2punkt1, Vector2 kante2punkt2) {
+		return (liegtPunktCAufStreckeAB(kante1punkt1, kante2punkt1, kante2punkt2) && liegtPunktCAufStreckeAB(kante2punkt1, kante1punkt1, kante1punkt2)) ||
+				(liegtPunktCAufStreckeAB(kante1punkt1, kante2punkt1, kante2punkt2) && liegtPunktCAufStreckeAB(kante2punkt2, kante1punkt1, kante1punkt2)) ||
+				(liegtPunktCAufStreckeAB(kante1punkt2, kante2punkt1, kante2punkt2) && liegtPunktCAufStreckeAB(kante2punkt1, kante1punkt1, kante1punkt2)) ||
+				(liegtPunktCAufStreckeAB(kante1punkt2, kante2punkt1, kante2punkt2) && liegtPunktCAufStreckeAB(kante2punkt2, kante1punkt1, kante1punkt2));
+		/*
+		return (A && C) ||
+				(A && D) ||
+				(B && C) ||
+				(B && D);
+		 */
+	}
+
+	// Die Richtung ist entgegen des Uhrzeigersinns beim Polygonbilden, also ist in Bildungsrichtung rechts außen
+	public static Boolean liegtStreckeAWeiterRechtsAlsStreckeB (Vector2 start, Vector2 verzweigung, Vector2 zielA, Vector2 zielB) {
+		Vector2 bezugsVektor = verzweigung.subtract(start);
+		Vector2 streckeA = zielA.subtract(verzweigung);
+		Vector2 streckeB = zielB.subtract(verzweigung);
+		double winkelZwischenStartstreckeUndStreckeA = winkelZwischenZweiVector2InDegrees(bezugsVektor, streckeA);
+		double winkelZwischenStartstreckeUndStreckeB = winkelZwischenZweiVector2InDegrees(bezugsVektor, streckeB);
+		if (winkelZwischenStartstreckeUndStreckeA == winkelZwischenStartstreckeUndStreckeB) {
+			return null;
+		}
+		return winkelZwischenStartstreckeUndStreckeA < winkelZwischenStartstreckeUndStreckeB;
+	}
+
+	public static double winkelZwischenZweiVector2InDegrees(Vector2 v1, Vector2 v2) {
+		// Berechne die y-Komponente des Kreuzprodukts im 3D-Raum (y-Komponente eines 3D-Vektors)
+		double crossProductYComponent = v1.getZ() * v2.getX() - v1.getX() * v2.getZ();
+		// Verwende atan2 mit der y-Komponente des Kreuzprodukts und dem Skalarprodukt
+		return Math.toDegrees(Math.atan2(crossProductYComponent, v1.dot(v2)));
 	}
 
 	public static IntersectionResult ersterSchnittpunktMitPolygonAufStrecke (Vector2 startpunkt, Vector2 zielpunkt, ArrayList<Vector2> polygon, boolean schnittPunktDarfNichtStartpunktSein) {
@@ -1003,6 +1045,16 @@ public class ClaimUtils {
 
 	public static boolean polygonÜberschneidetSichSelbst (List<BlockVector2> polygonEckpunkte) {
 		if (verläuftPolygonImUhrzeigersinn(eckpunkteExaktAusEckpunkteGanz(polygonEckpunkte)) == null) return true;
+		return false;
+	}
+
+	public static boolean liegtPunktAufPolygonKante(ArrayList<Vector2> polygon1punkte, Vector2 aktuellerPunkt) {
+		for (Vector2 eckpunkt1 : polygon1punkte) {
+			Vector2 eckpunkt2 = nächsterEckpunktWennEckpunktGegeben(eckpunkt1, polygon1punkte);
+			if (liegtPunktCAufStreckeAB(aktuellerPunkt, eckpunkt1, eckpunkt2)) {
+				return true;
+			}
+		}
 		return false;
 	}
 }
