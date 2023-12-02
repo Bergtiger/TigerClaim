@@ -785,9 +785,6 @@ public class CmdExpand {
             //Wird in Rekursion verändert:
             Vector2 aktuellerPunkt, boolean aktuellerPunktIstVonP1, ArrayList<Vector2> potentiellNeuesPolygon
     ) {
-        if (potentiellNeuesPolygon.size() == 6) {
-            double a = 1;
-        }
         if (potentiellNeuesPolygon.contains(startpunkt)) {
             //Sobald man wieder beim Start angekommen ist, ist das potentielle vereinigte Polygon komplett und wird zurück gegeben
             return potentiellNeuesPolygon;
@@ -841,7 +838,7 @@ public class CmdExpand {
                 potentiellNeuesPolygon.add(ersterSchnittpunkt);
                 //Wenn letzter Wechsel des Polygons auf gemeinsamer Kante stattfand, soll nicht direkt wieder gewechselt werden
                 return potentiellesVereintesPolygonBildung(startpunkt, polygon1punkte, polygon2punkte,
-                        ersterSchnittpunkt, !aktuellerPunktIstVonP1, potentiellNeuesPolygon);
+                        ersterSchnittpunkt, nunPolygon1Verwenden, potentiellNeuesPolygon);
                 //eventuell muss aktuellerPunktIstAlterEckpunkt hier verallgemeinert werden
             } else {
                 //Polygon A schneidet sich zwischen aktuellerPunkt und nächsterEckpunkt nicht mit Polygon B:
@@ -850,7 +847,7 @@ public class CmdExpand {
                 potentiellNeuesPolygon.add(nächsterEckpunkt);
                 System.out.println(ChatColor.RED + "potentiellNeuesPolygon: nächsterEckpunkt: (" + nächsterEckpunkt.getX() + "," + nächsterEckpunkt.getZ() + ")");
                 return potentiellesVereintesPolygonBildung(startpunkt, polygon1punkte, polygon2punkte,
-                        nächsterEckpunkt, aktuellerPunktIstVonP1,  potentiellNeuesPolygon);
+                        nächsterEckpunkt, nunPolygon1Verwenden,  potentiellNeuesPolygon);
             }
         }
     }
