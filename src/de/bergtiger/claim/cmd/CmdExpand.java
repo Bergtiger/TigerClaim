@@ -680,14 +680,8 @@ public class CmdExpand {
         if (polygonHatEckpunkteMehrfach(markierungsBlockPolygon)) {
             return new UnitePolygonsResult(null,UnitePolygonsResultType.SELECTION_HAS_POINT_MULTIPLE, null);
         }
-        ArrayList<Vector2> alteRegionsPolygon = new ArrayList<>();
-        for (BlockVector2 blockVector2 : alteRegionsBlockPolygon) {
-            alteRegionsPolygon.add(Vector2.at( blockVector2.getX() + 0.5,blockVector2.getZ() + 0.5));
-        }
-        ArrayList<Vector2> markierungsPolygon = new ArrayList<>();
-        for (BlockVector2 blockVector2 : markierungsBlockPolygon) {
-            markierungsPolygon.add(Vector2.at( blockVector2.getX() + 0.5,blockVector2.getZ() + 0.5));
-        }
+        ArrayList<Vector2> alteRegionsPolygon = vector2PolygonAusBlockVector2Polygon(alteRegionsBlockPolygon);
+        ArrayList<Vector2> markierungsPolygon = vector2PolygonAusBlockVector2Polygon(markierungsBlockPolygon);
         // Die Richtung ist entgegen des Uhrzeigersinns:
         Boolean region1ImUhrzeigerSinn = verläuftPolygonImUhrzeigersinn(alteRegionsPolygon);
         Boolean region2ImUhrzeigerSinn = verläuftPolygonImUhrzeigersinn(markierungsPolygon);
@@ -754,8 +748,8 @@ public class CmdExpand {
             }
         }
         lückenFläche = lückenFläche - größtePolygonfläche;
-        //Wenn die Flächen vom alten und neuen Polygon gleich sind, überschneiden sich die Polygone nicht:
-        double scharfePolgonFläche = scharfePolgonFläche(alteRegionsPolygon);
+        //Wenn die Flächen vom Markierung und neuem Polygon gleich sind, überschneiden sich die Polygone nicht:
+        double scharfePolgonFläche = scharfePolgonFläche(markierungsPolygon);
         if (scharfePolgonFläche == größtePolygonfläche) {
             if (polygon1LiegtInPolygon2(markierungsPolygon,alteRegionsPolygon)) {
                 // Markierung liegt komplett innerhalb Region
@@ -777,6 +771,14 @@ public class CmdExpand {
             return new UnitePolygonsResult(null, UnitePolygonsResultType.RESULT_POLYGON_HAS_POINT_MULTIPLE, null);
         }
         return new UnitePolygonsResult(neuesBlockPolygon, UnitePolygonsResultType.BOUNDING_POLYGON_FOUND, lückenFläche > 0.0);
+    }
+
+    private static ArrayList<Vector2> vector2PolygonAusBlockVector2Polygon(List<BlockVector2> markierungsBlockPolygon) {
+        ArrayList<Vector2> markierungsPolygon = new ArrayList<>();
+        for (BlockVector2 blockVector2 : markierungsBlockPolygon) {
+            markierungsPolygon.add(Vector2.at(blockVector2.getX() + 0.5, blockVector2.getZ() + 0.5));
+        }
+        return markierungsPolygon;
     }
 
     private static ArrayList<Vector2> potentiellesVereintesPolygonBildung(

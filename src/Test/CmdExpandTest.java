@@ -334,4 +334,109 @@ class CmdExpandTest {
         assertThat(result.containsGapsFromOldRegionAndSelection).isFalse();
         assertThat(result.getResultType()).isEqualTo(UnitePolygonsResultType.BOUNDING_POLYGON_FOUND);
     }
+
+    @Test
+    @DisplayName("kongruente Polygone liegen nebeneinander, bilden Rechteck (Bug #10)")
+    void test13() {
+        //Arrange
+        ArrayList<BlockVector2> alteRegionsBlockPolygon = new ArrayList<>();
+        alteRegionsBlockPolygon.add(BlockVector2.at(0, 0));
+        alteRegionsBlockPolygon.add(BlockVector2.at(0, 2));
+        alteRegionsBlockPolygon.add(BlockVector2.at(2, 2));
+        alteRegionsBlockPolygon.add(BlockVector2.at(2, 0));
+        ArrayList<BlockVector2> markierungsBlockPolygon = new ArrayList<>();
+        markierungsBlockPolygon.add(BlockVector2.at(0, 3));
+        markierungsBlockPolygon.add(BlockVector2.at(0, 5));
+        markierungsBlockPolygon.add(BlockVector2.at(2, 5));
+        markierungsBlockPolygon.add(BlockVector2.at(2, 3));
+        //Act
+        UnitePolygonsResult result = CmdExpand.uniteTwoPolygons(alteRegionsBlockPolygon, markierungsBlockPolygon);
+        List<BlockVector2> ergebnisPolygon = result.getPolygon();
+        //Assert
+        /*
+        ArrayList<BlockVector2> sollErgebnisPolygon = new ArrayList<>();
+        sollErgebnisPolygon.add(BlockVector2.at(0, 0));
+        sollErgebnisPolygon.add(BlockVector2.at(0, 5));
+        sollErgebnisPolygon.add(BlockVector2.at(2, 5));
+        sollErgebnisPolygon.add(BlockVector2.at(2, 0));
+        assertThat(ergebnisPolygon).containsExactlyInAnyOrderElementsOf(sollErgebnisPolygon);
+        assertThat(result.containsGapsFromOldRegionAndSelection).isFalse();
+        assertThat(result.getResultType()).isEqualTo(UnitePolygonsResultType.BOUNDING_POLYGON_FOUND);
+         */
+        assertThat(result.getResultType()).isEqualTo(UnitePolygonsResultType.POLYGONS_DONT_INTERSECT_EACH_OTHER);
+        //TODO: Provisorisch, soll es nicht möglich sein. Später einmal soll die Polygonvereinigung auch mit nebeneinanderliegenden Polygonen funktionieren.
+        // Das Soll-Ergebnis dafür ist auskommentiert
+    }
+
+    @Test
+    @DisplayName("kongruente Polygone liegen nebeneinander, sind versetzt (Bug #10)")
+    void test14() {
+        //Arrange
+        ArrayList<BlockVector2> alteRegionsBlockPolygon = new ArrayList<>();
+        alteRegionsBlockPolygon.add(BlockVector2.at(0, 0));
+        alteRegionsBlockPolygon.add(BlockVector2.at(0, 2));
+        alteRegionsBlockPolygon.add(BlockVector2.at(2, 2));
+        alteRegionsBlockPolygon.add(BlockVector2.at(2, 0));
+        ArrayList<BlockVector2> markierungsBlockPolygon = new ArrayList<>();
+        markierungsBlockPolygon.add(BlockVector2.at(1, 3));
+        markierungsBlockPolygon.add(BlockVector2.at(1, 5));
+        markierungsBlockPolygon.add(BlockVector2.at(3, 5));
+        markierungsBlockPolygon.add(BlockVector2.at(3, 3));
+        //Act
+        UnitePolygonsResult result = CmdExpand.uniteTwoPolygons(alteRegionsBlockPolygon, markierungsBlockPolygon);
+        List<BlockVector2> ergebnisPolygon = result.getPolygon();
+        //Assert
+        /*
+        ArrayList<BlockVector2> sollErgebnisPolygon = new ArrayList<>();
+        sollErgebnisPolygon.add(BlockVector2.at(0, 0));
+        sollErgebnisPolygon.add(BlockVector2.at(0, 2));
+        sollErgebnisPolygon.add(BlockVector2.at(1, 2));
+        sollErgebnisPolygon.add(BlockVector2.at(1, 5));
+        sollErgebnisPolygon.add(BlockVector2.at(3, 5));
+        sollErgebnisPolygon.add(BlockVector2.at(3, 3));
+        sollErgebnisPolygon.add(BlockVector2.at(2, 3));
+        sollErgebnisPolygon.add(BlockVector2.at(2, 0));
+        assertThat(ergebnisPolygon).containsExactlyInAnyOrderElementsOf(sollErgebnisPolygon);
+        assertThat(result.containsGapsFromOldRegionAndSelection).isFalse();
+        assertThat(result.getResultType()).isEqualTo(UnitePolygonsResultType.BOUNDING_POLYGON_FOUND);
+        */
+        assertThat(result.getResultType()).isEqualTo(UnitePolygonsResultType.POLYGONS_DONT_INTERSECT_EACH_OTHER);
+        //TODO: Provisorisch, soll es nicht möglich sein. Später einmal soll die Polygonvereinigung auch mit nebeneinanderliegenden Polygonen funktionieren.
+        // Das Soll-Ergebnis dafür ist auskommentiert
+    }
+
+    @Test
+    @DisplayName("Polygone liegen nebeneinander, bei einem ist die angrenzende Kante länger als beim anderen (Bug #10)")
+    void test15() {
+        //Arrange
+        ArrayList<BlockVector2> alteRegionsBlockPolygon = new ArrayList<>();
+        alteRegionsBlockPolygon.add(BlockVector2.at(0, 0));
+        alteRegionsBlockPolygon.add(BlockVector2.at(0, 2));
+        alteRegionsBlockPolygon.add(BlockVector2.at(2, 2));
+        alteRegionsBlockPolygon.add(BlockVector2.at(2, 0));
+        ArrayList<BlockVector2> markierungsBlockPolygon = new ArrayList<>();
+        markierungsBlockPolygon.add(BlockVector2.at(0, 3));
+        markierungsBlockPolygon.add(BlockVector2.at(0, 5));
+        markierungsBlockPolygon.add(BlockVector2.at(3, 5));
+        markierungsBlockPolygon.add(BlockVector2.at(3, 3));
+        //Act
+        UnitePolygonsResult result = CmdExpand.uniteTwoPolygons(alteRegionsBlockPolygon, markierungsBlockPolygon);
+        List<BlockVector2> ergebnisPolygon = result.getPolygon();
+        //Assert
+        /*
+        ArrayList<BlockVector2> sollErgebnisPolygon = new ArrayList<>();
+        sollErgebnisPolygon.add(BlockVector2.at(0, 0));
+        sollErgebnisPolygon.add(BlockVector2.at(0, 5));
+        sollErgebnisPolygon.add(BlockVector2.at(3, 5));
+        sollErgebnisPolygon.add(BlockVector2.at(3, 3));
+        sollErgebnisPolygon.add(BlockVector2.at(2, 3));
+        sollErgebnisPolygon.add(BlockVector2.at(2, 0));
+        assertThat(ergebnisPolygon).containsExactlyInAnyOrderElementsOf(sollErgebnisPolygon);
+        assertThat(result.containsGapsFromOldRegionAndSelection).isFalse();
+        assertThat(result.getResultType()).isEqualTo(UnitePolygonsResultType.BOUNDING_POLYGON_FOUND);
+        */
+        assertThat(result.getResultType()).isEqualTo(UnitePolygonsResultType.POLYGONS_DONT_INTERSECT_EACH_OTHER);
+        //TODO: Provisorisch, soll es nicht möglich sein. Später einmal soll die Polygonvereinigung auch mit nebeneinanderliegenden Polygonen funktionieren.
+        // Das Soll-Ergebnis dafür ist auskommentiert
+    }
 }
